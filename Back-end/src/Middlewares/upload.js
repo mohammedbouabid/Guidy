@@ -4,9 +4,14 @@ import cloudinary from "../Config/cloudinary.js";
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "user_profiles",
-    allowed_formats: ["jpg", "png", "jpeg"],
+  params: async (req, file) => {
+    return {
+      folder: "user_profiles",
+      allowed_formats: ["jpg", "png", "jpeg"],
+      public_id: `${Date.now()}_${req.user.id}`,
+      resource_type: "image",
+      overwrite: true,
+    };
   },
 });
 

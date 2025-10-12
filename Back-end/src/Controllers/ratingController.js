@@ -1,6 +1,7 @@
+import mongoose from "mongoose";
 import Rating from "../Models/Rating.js";
 import Pack from "../Models/Pack.js";
-import mongoose from "mongoose";
+import Booking from "../Models/Booking.js";
 
 // Create New Rating
 export const addRating = async (req, res, next) => {
@@ -17,6 +18,32 @@ export const addRating = async (req, res, next) => {
       throw error;
     }
 
+    // Check if the user already booked this pack
+    const booking = await Booking.findOne({
+      clientID: userId,
+      packID: packID,
+      isCancelled: false,
+      isCompleted: true,
+    });
+
+    if (!booking) {
+      const error = new Error("you can only rate a pack you have booked");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    // Prevent rating the same pack multiple times
+    const alreadyRated = await Rating.findOne({
+      clientID: userId,
+      packID,
+    });
+
+    if (alreadyRated) {
+      const error = new Error("you already rated this pack");
+      error.statusCode = 400;
+      throw error;
+    }
+
     const rating = await Rating.create({
       stars,
       comment,
@@ -26,8 +53,7 @@ export const addRating = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: "rating added successfully",
-      data: rating,
+      message: "rating added successfully"
     });
   } catch (err) {
     next(err);
@@ -80,8 +106,7 @@ export const updateRating = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "rating updated successfully",
-      data: rating,
+      message: "rating updated successfully"
     });
   } catch (err) {
     next(err);
@@ -92,6 +117,23 @@ export const updateRating = async (req, res, next) => {
 export const deleteRating = async (req, res, next) => {
   try {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error = new Error("rating not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    const ratingToDelete = await Rating.findById(id);
+
+    // Check if the logged in client is the rating owner
+    if (userRole === "client" && ratingToDelete.clientID.toString() !== userId) {
+      const error = new Error("you are not allowed to delete this rating");
+      error.statusCode = 403;
+      throw error;
+    }
 
     const rating = await Rating.findByIdAndDelete(id);
 
@@ -130,6 +172,7 @@ export const getAllRatings = async (req, res, next) => {
     const ratings = await Rating.find()
       .populate("packID", "title")
       .populate("clientID", "name email")
+      .select("stars comment createdAt")
       .skip(skip)
       .limit(limit)
       .sort(sortOption);
@@ -140,12 +183,14 @@ export const getAllRatings = async (req, res, next) => {
       throw error;
     }
 
+    const total = await Rating.countDocuments();
+
     res.status(200).json({
       success: true,
-      count: ratings.length,
-      page : pageNum,
-      limit : limitNum,
-      data: ratings,
+      totalRatings: total,
+      page: pageNum,
+      limit: limitNum,
+      ratings: ratings,
     });
   } catch (err) {
     next(err);
@@ -170,23 +215,40 @@ export const getRatingsByPack = async (req, res, next) => {
     }
     const { packId } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(packId)) {
+      const error = new Error("pack not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const pack = await Pack.findById(packId);
+
+    if (!pack) {
+      const error = new Error("pack not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
     const ratings = await Rating.find({ packID: packId })
       .populate("clientID", "name email")
+      .select("stars comment createdAt")
       .skip(skip)
       .limit(limit)
       .sort(sortOption);
 
-    if (!ratings) {
+    if (ratings.length === 0) {
       const error = new Error("no rating yet for this pack");
       error.statusCode = 404;
       throw error;
     }
 
+    const total = await Rating.countDocuments({ packID: packId });
+
     res.status(200).json({
       success: true,
-      count: ratings.length,
-      page : pageNum,
-      limit : limitNum,
+      totalRatings: total,
+      page: pageNum,
+      limit: limitNum,
       ratings: ratings,
     });
   } catch (err) {
