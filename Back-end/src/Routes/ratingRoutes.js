@@ -9,10 +9,13 @@ import { requireProfileCompletion } from "../Middlewares/requireProfileFields.js
 const router = express.Router();
 
 router.post('/rating', verifyToken, authorizeRoles(["client"]), requireProfileCompletion, addRatingValidation, validate, addRating)
+
 router.put('/rating/:id', verifyToken, authorizeRoles(["client"]), updateRatingValidation, validate, updateRating)
-router.delete('/rating/:id', verifyToken, authorizeRoles(["admin"]), deleteRating)
+
+router.delete('/rating/:id', verifyToken, authorizeRoles(["admin", "client"]), deleteRating)
+
 router.get('/rating/:packId', verifyToken, authorizeRoles(["admin", "client","guide"]), getRatingsByPack)
-router.get('/rating', verifyToken, authorizeRoles(["admin"]), getAllRatings)
+router.get('/rating', verifyToken, authorizeRoles(["admin", "client", "guide"]), getAllRatings)
 
 export default router;
 
