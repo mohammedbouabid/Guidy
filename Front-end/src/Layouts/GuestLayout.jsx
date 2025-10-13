@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
 import { Outlet } from "react-router-dom";
 
 const GuestLayout = () => {
@@ -8,8 +10,8 @@ const GuestLayout = () => {
   return (
     <div className="h-screen bg-fuchsia-700">
       <div  className="bg-orange-400">
-
-navbare Componenet     
+            <Navbar/>
+            <HeroSection/>
       </div>
 <Outlet />
     </div>
