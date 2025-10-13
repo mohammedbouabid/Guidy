@@ -1,20 +1,23 @@
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Navigate, Outlet } from "react-router-dom";
 
 
-const ProtectedRoutes = (/*{ allowedRoles }*/) => {
-//   const { token, user, isAuthenticated } = useSelector((state) => state.auth);
+const ProtectedRoutes = ({ children, allowedRoles }) => {
+  const { user, token } = useSelector((state) => state.Auth);
+  const location = useLocation();
 
-//   if (!isAuthenticated || !token || !user) {
-//     return <Navigate to="/login" replace />;
-//   }
-
-  // Si tu veux ajouter des rôles plus tard :
-  // if (allowedRoles && !allowedRoles.includes(user.role)) {
-  //   return <Navigate to="/" replace />;
+  // if (!token) {
+  //   // Rediriger vers login si non authentifié
+  //   return <Navigate to="/login" state={{ from: location }} replace />;
   // }
 
-  return <Outlet />;
+  if (!allowedRoles.includes("clients")) {
+    // Rediriger vers la page d'accueil si le rôle n'est pas autorisé
+    return <Navigate to="/" replace />;
+    console.log("acces dined")
+  }
+
+  return children;
 };
 
 export default ProtectedRoutes;
