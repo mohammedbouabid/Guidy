@@ -1,12 +1,13 @@
 import Booking from '../Models/Booking.js';
 import Pack from '../Models/Pack.js';
-import User from '../Models/userModel.js';
+import User from '../Models/userModel.js'
 import mongoose from 'mongoose';
+
 
 export const createBooking = async (req, res) => {
   try {
     const { packID, isVip = false, spotsBooked = 1 } = req.body;
-    const userID = req.user?.id;
+    const userID = req.user?.id
 
     if (!userID || !packID || spotsBooked < 1) {
       return res.status(400).json({ message: 'userID, packID, and valid spotsBooked are required.' });
@@ -55,16 +56,7 @@ export const createBooking = async (req, res) => {
     const newBooking = new Booking({ userID, packID, isVip, spotsBooked });
     await newBooking.save();
 
-    res.status(201).json({
-      message: 'Booking created.',
-      booking: {
-        id: newBooking._id,
-        packID: newBooking.packID,
-        isVip: newBooking.isVip,
-        spotsBooked: newBooking.spotsBooked,
-        createdAt: newBooking.createdAt
-      }
-    });
+    res.status(201).json({ message: 'Booking created.', booking: newBooking });
   } catch (error) {
     console.error('Booking error:', error);
     res.status(500).json({ message: 'Server error.' });
@@ -78,31 +70,22 @@ export const getBookingById = async (req, res) => {
       return res.status(400).json({ message: 'Invalid booking ID.' });
     }
 
-    const booking = await Booking.findById(id)
-      .populate('userID', 'name email')
-      .populate('packID', 'title location date maxClients');
-
+    const booking = await Booking.findById(id).populate('userID packID');
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found.' });
     }
 
-    res.status(200).json({
-      id: booking._id,
-      user: booking.userID,
-      pack: booking.packID,
-      isVip: booking.isVip,
-      spotsBooked: booking.spotsBooked,
-      isCancelled: booking.isCancelled
-    });
+    res.status(200).json(booking);
   } catch (error) {
     console.error('Get booking error:', error);
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
 
+
 export const getBookingsByUser = async (req, res) => {
   try {
-    const userID = req.user?.id;
+    const  userID  = req.user?.id;
     if (!mongoose.Types.ObjectId.isValid(userID)) {
       return res.status(400).json({ message: 'Invalid user ID.' });
     }
@@ -112,27 +95,20 @@ export const getBookingsByUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const bookings = await Booking.find({ userID }).populate('packID', 'title location date');
-
-    res.status(200).json(
-      bookings.map(b => ({
-        id: b._id,
-        pack: b.packID,
-        isVip: b.isVip,
-        spotsBooked: b.spotsBooked,
-        isCancelled: b.isCancelled
-      }))
-    );
+    const bookings = await Booking.find({ userID }).populate('packID');
+    res.status(200).json(bookings);
   } catch (error) {
     console.error('Get bookings by user error:', error);
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
 
+
 export const getBookingsByGuide = async (req, res) => {
   try {
     const guideID = req.user?.id;
 
+    // Validate guideID format
     if (!mongoose.Types.ObjectId.isValid(guideID)) {
       return res.status(400).json({
         success: false,
@@ -142,6 +118,7 @@ export const getBookingsByGuide = async (req, res) => {
       });
     }
 
+    // Check if guide exists and is active
     const guide = await User.findOne({ _id: guideID, role: 'guide', isDeleted: false });
     if (!guide) {
       return res.status(404).json({
@@ -152,12 +129,14 @@ export const getBookingsByGuide = async (req, res) => {
       });
     }
 
+
     const packs = await Pack.find({ guideId: guideID });
     const packIDs = packs.map(pack => pack._id);
 
+    // Find all bookings for those packs
     const bookings = await Booking.find({ packID: { $in: packIDs } })
-      .populate('userID', 'name email')
-      .populate('packID', 'title location date');
+      .populate('userID')
+      .populate('packID');
 
     res.status(200).json({
       success: true,
@@ -165,14 +144,7 @@ export const getBookingsByGuide = async (req, res) => {
         ? 'No bookings found for this guide.'
         : 'Bookings retrieved successfully.',
       count: bookings.length,
-      data: bookings.map(b => ({
-        id: b._id,
-        user: b.userID,
-        pack: b.packID,
-        isVip: b.isVip,
-        spotsBooked: b.spotsBooked,
-        isCancelled: b.isCancelled
-      }))
+      data: bookings
     });
   } catch (error) {
     console.error('Get bookings by guide error:', error);
@@ -190,21 +162,24 @@ export const cancelBooking = async (req, res) => {
     const { bookingID } = req.params;
     const userID = req.user?.id;
 
+    // Retrieve the booking and ensure userID is populated
     const booking = await Booking.findById(bookingID).populate('userID');
 
+    // Check if the booking exists and is not cancelled
     if (!booking || booking.isCancelled) {
       return res.status(404).json({ message: 'Booking not found or already cancelled.' });
     }
-
+    // Check if userID exists and compare
     const bookingUserId = booking.userID?._id ? booking.userID._id.toString() : booking.userID.toString();
     if (bookingUserId !== userID) {
       return res.status(403).json({ message: 'You can only cancel your own bookings.' });
     }
-
+    console.log('Booking:', booking);
+    // Proceed to cancel the booking
     booking.isCancelled = true;
     await booking.save();
 
-    res.status(200).json({ message: 'Booking cancelled successfully.', bookingID });
+    res.status(200).json({ message: 'Booking cancelled successfully.' });
   } catch (error) {
     console.error('Cancel error:', error);
     res.status(500).json({ message: 'Server error.' });
@@ -220,21 +195,14 @@ export const getAllBookings = async (req, res) => {
     }
 
     const bookings = await Booking.find()
-      .populate('userID', 'name email role')
-      .populate('packID', 'title location date');
+      .populate('userID', 'name email role')     // show user info
+      .populate('packID', 'title location date') // show pack info
 
     res.status(200).json({
       success: true,
       message: 'All bookings retrieved successfully.',
       count: bookings.length,
-      data: bookings.map(b => ({
-        id: b._id,
-        user: b.userID,
-        pack: b.packID,
-        isVip: b.isVip,
-        spotsBooked: b.spotsBooked,
-        isCancelled: b.isCancelled
-      }))
+      data: bookings
     });
   } catch (error) {
     console.error('Get all bookings error:', error);
