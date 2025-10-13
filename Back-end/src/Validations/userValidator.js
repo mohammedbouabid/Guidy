@@ -17,6 +17,15 @@ export const createUserValidation = [
     .withMessage("please provide a valid email")
     .escape(),
 
+  body("phone")
+    .if((value, { req }) => req.body?.role === "client")
+    .trim()
+    .notEmpty()
+    .withMessage("phone number is required")
+    .isMobilePhone("any")
+    .withMessage("please add a valid phone number")
+    .escape(),
+
   body("password")
     .trim()
     .notEmpty()
@@ -31,21 +40,6 @@ export const createUserValidation = [
     .withMessage("role is required")
     .isIn(["client", "guide", "admin"])
     .withMessage("role must be client, guide or admin")
-    .escape(),
-
-  body("phone")
-    .trim()
-    .notEmpty()
-    .withMessage("phone number is required")
-    .isMobilePhone("any")
-    .withMessage("please add a valid phone number")
-    .escape(),
-
-  body("cin")
-    .if((value, { req }) => req.body.role === "guide")
-    .trim()
-    .notEmpty()
-    .withMessage("cin is required")
     .escape(),
 ];
 
@@ -88,12 +82,29 @@ export const updateUserValidation = [
   body("cin")
     .optional()
     .trim()
-    .if(body("role").equals("guide"))
+    .if((value, { req }) => req.user?.role === "guide")
     .escape(),
+
+      // Profile image validation (optional)
+  body("profileImage").custom((value, { req }) => {
+    if (!req.file) return true; // Image is optional
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      throw new Error("invalid image type. Only JPG, PNG, and WEBP are allowed");
+    }
+
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (req.file.size > maxSize) {
+      throw new Error("image too large. Maximum size is 2MB");
+    }
+
+    return true;
+  }),
 ];
 
 export const deleteManyUsersValidation = [
-  body("ids")
+  body("id")
     .notEmpty().withMessage("IDs are required")
     .isArray().withMessage("IDs must be an array")
 ];

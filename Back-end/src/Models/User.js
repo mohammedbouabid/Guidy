@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "password is required"],
-      minlength: [6, "password should be at least 6 characters"]
+      minlength: [6, "password should be at least 6 characters"],
     },
     role: {
       type: String,
@@ -29,30 +29,32 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, "phone number is required"],
+      unique: true,
       trim: true,
     },
     cin: {
       type: String,
-      required: function () {
-        return this.role === "guide";
-      },
+      unique: true,
+    },
+    profileImage: {
+      type: String, // Cloud URL
+      default: "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
     },
     refreshToken: {
       type: String,
       default: null,
     },
-    isDeleted: { 
-      type: Boolean, 
-      default: false 
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
-    deletedAt: { 
-      type: Date, 
-      default: null
+    deletedAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("users", userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

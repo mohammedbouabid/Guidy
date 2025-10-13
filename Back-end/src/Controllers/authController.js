@@ -1,25 +1,76 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../Models/userModel.js";
+import User from "../Models/User.js";
 
 // Sign Up User
 const signUp = async (req, res, next) => {
   try {
-    const newUser = { ...req.body };
-    newUser.email = newUser.email.toLowerCase();
-    newUser.name = newUser.name.toLowerCase();
+    const { name, email, password, role } = req.body;
+    const validEmail = email.toLowerCase();
+    const validName = name.toLowerCase();
+    const validRole = role.toLowerCase();
 
-    const existingUser = await User.findOne({ email: newUser.email });
+    console.log(email);
+
+    const existingUser = await User.findOne({ email: validEmail });
     if (existingUser) {
       const error = new Error("email already exists");
       error.statusCode = 400;
       throw error;
     }
 
-    newUser.password = await bcrypt.hash(newUser.password, 10);
-    const user = await User.create(newUser);
+    const hashedPwd = await bcrypt.hash(password, 10);
 
-    next();
+    const newUser = {
+      name: validName,
+      email: validEmail,
+      password: hashedPwd,
+      role: validRole,
+    };
+    await User.create(newUser);
+
+    res.status(200).json({
+      success: true,
+      message : `${newUser.role} successfuly signed up`
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Update Profile
+const updateProfile = async (req, res, next) => {
+  try {
+    const { phone, cin } = req.body;
+
+    const updates = {};
+
+    if (phone) {
+      const existingPhone = await User.findOne({ phone });
+      if (existingPhone) {
+        const error = new Error("phone already exists");
+        error.statusCode = 400;
+        throw error;
+      }
+      updates.phone = phone;
+    }
+
+    if (cin && req.user?.role === "guide") {
+      const existingCin = await User.findOne({ cin });
+      if (existingCin) {
+        const error = new Error("cin already exists");
+        error.statusCode = 400;
+        throw error;
+      }
+      updates.cin = cin;
+    }
+
+    const user = await User.findByIdAndUpdate(req.user.id, updates, {
+      new: true,
+      runValidators: true
+    })
+
+    res.status(200).json({ success: true, message: `${user.role} successfuly updated` });
   } catch (err) {
     next(err);
   }
@@ -81,11 +132,9 @@ const login = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const { password: pw, refreshToken, ...userData } = user.toObject();
-
     res.status(200).json({
       success: true,
-      user: userData,
+      message: `${user.role} successfuly logged in`,
     });
   } catch (error) {
     next(error);
@@ -106,7 +155,7 @@ const refreshAccessToken = async (req, res, next) => {
 
     const user = await User.findById(decoded.id);
 
-    if (!user || user.refreshToken !== refreshToken){
+    if (!user || user.refreshToken !== refreshToken) {
       const error = new Error("no refresh token provided");
       error.statusCode = 403;
       throw error;
@@ -172,4 +221,4 @@ const logout = async (req, res, next) => {
   }
 };
 
-export { signUp, login, logout, refreshAccessToken };
+export { signUp, login, logout, refreshAccessToken, updateProfile };

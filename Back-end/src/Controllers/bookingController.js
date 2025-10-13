@@ -1,11 +1,12 @@
 import Booking from '../Models/Booking.js';
 import Pack from '../Models/Pack.js';
-import User from '../Models/userModel.js'
+import User from '../Models/User.js';
 import mongoose from 'mongoose';
 
 
 export const createBooking = async (req, res) => {
   try {
+
     const { packID, isVip = false, spotsBooked = 1 } = req.body;
     const userID = req.user?.id
 
@@ -26,6 +27,7 @@ export const createBooking = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found or has been deleted.' });
     }
+    
 
     const existingBookings = await Booking.find({ packID, isCancelled: false });
 

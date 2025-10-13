@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import User from "../Models/userModel.js";
+import User from "../Models/User.js";
 
 // Add New User
 const addUser = async (req, res, next) => {
@@ -17,57 +17,76 @@ const addUser = async (req, res, next) => {
     }
 
     newUser.password = await bcrypt.hash(newUser.password, 10);
-    const user = await User.create(newUser);
+    await User.create(newUser);
 
-    const { password, refreshToken, ...userData } = user.toObject();
-
-    res.status(201).json({ success: true, user: userData });
+    res.status(201).json({ success: true, message: `${newUser.role} successfuly created` });
   } catch (err) {
     next(err);
   }
 };
 
-// Update User by ID
+// Update User by His Id
 const updateUser = async (req, res, next) => {
   try {
-    const { id } = req.params;
     const update = { ...req.body };
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      const error = new Error("user not found");
-      error.statusCode = 404;
-      throw error;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (req.file) {
+      const profileImage = req.file.path;
+      update.profileImage = profileImage;
     }
-    const user = await User.findById(id);
-    if (!user) {
-      const error = new Error("user not found");
+
+    const user = await User.findById(userId);
+
+    if (
+      ["client", "guide"].includes(userRole) &&
+      user._id.toString() !== userId
+    ) {
+      const error = new Error("not allowed to update other " + user.role);
       error.statusCode = 404;
       throw error;
     }
 
     if (update.email) {
       update.email = update.email.toLowerCase();
+      const existingUser = await User.findOne({ email: update.email });
+      if (existingUser) {
+        const error = new Error("email already exists");
+        error.statusCode = 400;
+        throw error;
+      }
     }
 
     if (update.name) {
       update.name = update.name.toLowerCase();
     }
 
-    delete update.refreshToken;
+    if (update.phone) {
+      const existingPhone = await User.findOne({ phone: update.phone });
+      if (existingPhone) {
+        const error = new Error("phone already exists");
+        error.statusCode = 400;
+        throw error;
+      }
+    }
 
     if (update.password) {
       update.password = await bcrypt.hash(update.password, 10);
-    } else {
-      delete update.password;
     }
+    
+    delete update.refreshToken;
+    delete update.cin;
+    delete update.role;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
+    await User.findByIdAndUpdate(
+      req.user.id,
       { $set: update },
       { new: true, runValidators: true }
-    ).select("-password -refreshToken");
+    )
 
-    res.status(200).json({ success: true, user: updatedUser });
+    res.status(200).json({ success: true, user: `${userRole} updated successfuly` });
   } catch (error) {
     next(error);
   }
@@ -91,6 +110,23 @@ const deleteUserById = async (req, res, next) => {
       throw error;
     }
 
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    if (
+      ["client", "guide"].includes(userRole) &&
+      user._id.toString() !== userId
+    ) {
+      const error = new Error("not allowed to delete other " + user.role);
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if( user.role === "admin" ) {
+      const error = new Error("admin can't be deleted");
+      error.statusCode = 400;
+      throw error;
+    }
+
     if (user.isDeleted) {
       const error = new Error("user already deleted");
       error.statusCode = 400;
@@ -101,11 +137,15 @@ const deleteUserById = async (req, res, next) => {
     user.deletedAt = new Date();
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "user soft-deleted successfully",
-      user,
-    });
+    // Check if the logged-in client delete himself
+    if (user._id.toString() === userId) {
+      next();
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "user soft-deleted successfully"
+      });
+    }
   } catch (err) {
     next(err);
   }
@@ -114,32 +154,32 @@ const deleteUserById = async (req, res, next) => {
 // Delete multiple users by IDs
 const deleteManyUsers = async (req, res, next) => {
   try {
-    let { ids } = req.body;
+    let { id } = req.body;
 
-    if (!ids) {
+    if (!id) {
       const error = new Error("please provide users ID's to delete");
       error.statusCode = 400;
       throw error;
     }
 
-    if (!ids.every((id) => mongoose.Types.ObjectId.isValid(id))) {
+    if (!id.every((id) => mongoose.Types.ObjectId.isValid(id))) {
       const error = new Error("one or more user not found");
       error.statusCode = 400;
       throw error;
     }
     // Find users that actually exist
-    const existingUsers = await User.find({ _id: { $in: ids } });
+    const existingUsers = await User.find({ _id: { $in: id } });
 
-    if (existingUsers.length !== ids.length) {
+    if (existingUsers.length !== id.length) {
       const error = new Error("one or more user not found");
       error.statusCode = 400;
       throw error;
     }
 
-    if (!Array.isArray(ids)) ids = [ids];
+    if (!Array.isArray(id)) id = [id];
 
     const result = await User.updateMany(
-      { _id: { $in: ids }, isDeleted: false },
+      { _id: { $in: id }, isDeleted: false },
       { $set: { isDeleted: true, deletedAt: new Date() } }
     );
 
@@ -195,7 +235,7 @@ const getAllUsers = async (req, res, next) => {
     }
 
     const users = await User.find(query)
-      .select("-password -refreshToken")
+      .select("name email profileImage")
       .skip(skip)
       .limit(limitNum)
       .sort(sortOption);
@@ -206,9 +246,13 @@ const getAllUsers = async (req, res, next) => {
       throw error;
     }
 
+    const count = await User.countDocuments({ role: { $in: ["client", "guide"] }, isDeleted: false });
+
     res.status(200).json({
       success: true,
-      count: users.length,
+      count: count,
+      page: pageNum,
+      limit: limitNum,
       users,
     });
   } catch (err) {
@@ -230,7 +274,32 @@ const getUserById = async (req, res, next) => {
     const user = await User.findOne({
       _id: id,
       isDeleted: false,
-    }).select("-password -refreshToken");
+    }).select("name email profileImage");
+
+    if (!user) {
+      const error = new Error("user not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get user
+const getUser = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+
+    const user = await User.findOne({
+      _id: userId,
+      isDeleted: false,
+    }).select("name email profileImage");
 
     if (!user) {
       const error = new Error("user not found");
@@ -254,4 +323,5 @@ export {
   deleteManyUsers,
   getAllUsers,
   getUserById,
+  getUser
 };
