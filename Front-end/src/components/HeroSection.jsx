@@ -1,5 +1,6 @@
 import React from "react";
-import Calendar05 from "./calendar-05";
+import { DateRangePicker } from "./ui/DateRangePicker";
+import { TourTypeSelect } from "./TourTypeSelect";
 
 const HeroSection = () => {
   return (
@@ -30,13 +31,9 @@ const HeroSection = () => {
             placeholder="Search destinations"
             className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
           />
-          
-          <select className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b]">
-            <option>All tour types</option>
-            <option>Adventure</option>
-            <option>Relaxation</option>
-            <option>Cultural</option>
-          </select>
+          <DateRangePicker />
+          <TourTypeSelect/>
+
           <button className="bg-[#eb662b] text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-[#d9551f] transition-colors">
             Search
           </button>
