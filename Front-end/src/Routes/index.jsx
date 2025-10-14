@@ -5,7 +5,7 @@ import GuideLayout from "../Layouts/GuideLayout";
 import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
-import LnadingPage from "../pages/Home/LandingPage";
+import LandingPage from "../pages/Home/LandingPage";
 import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
@@ -16,7 +16,7 @@ const router = createBrowserRouter([
     // Routes publiques
     element: <GuestLayout />,
     children: [
-      { path: "/", element: <LnadingPage /> },
+      { path: "/", element: <LandingPage /> },
       { path: "/test", element: <TestRoute /> },
       // { path: "/login", element: <LoginPage /> },
       // { path: "/register", element: <RegisterPage /> },
