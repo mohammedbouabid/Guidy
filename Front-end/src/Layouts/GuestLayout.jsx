@@ -8,8 +8,8 @@ const GuestLayout = () => {
 //   if (token && user) return <Navigate to="/" />;
 
   return (
-    <div className="h-screen bg-fuchsia-700">
-      <div  className="bg-orange-400">
+    <div className="h-screen">
+      <div  className="bg-white">
             <Navbar/>
             <HeroSection/>
       </div>
