@@ -10,7 +10,7 @@ import bookingRoutes from "./Routes/bookingRoutes.js";
 import ratingRoutes from "./Routes/ratingRoutes.js";
 import { errorHandler } from "./Middlewares/errorHandler.js";
 import { notFound } from "./Middlewares/notFound.js";
-
+import cors from "cors"
 
 dotenv.config();
 
@@ -24,7 +24,10 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 // app.use("/static");
-
+app.use(cors({
+  origin: "http://localhost:5173", // your frontend URL
+  credentials: true
+}))
 // Route test
 app.get("/", (req, res) => {
   res.send(`Serveur lancé sur le port ${port}`);
