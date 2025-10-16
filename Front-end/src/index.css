@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -109,6 +110,9 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+@theme {
+  --color-primary: #EB662B; 
+}
 
 @layer base {
   * {
@@ -117,4 +121,33 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Swiper custom styles */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #626262 !important;
+  background: #E2EAF8;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.swiper-navigation-icon{
+  width: 20px !important;
+  height: 20px !important;
+  font-weight: 800;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 30px !important;
+  font-weight: bold;
+}
+
+.swiper-pagination-bullet-active {
+  background: #EB662B !important;
 }
