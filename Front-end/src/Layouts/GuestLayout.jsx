@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import { Outlet } from "react-router-dom";
 import WhyChooseUs from "@/components/Features";
+import PopularTours from "@/components/PopularTours";
 
 const GuestLayout = () => {
   // const { user, token } = useSelector((state) => state.auth);
@@ -14,8 +15,9 @@ const GuestLayout = () => {
             <Navbar/>
             <HeroSection/>
             <WhyChooseUs/>
+            <PopularTours/>
 
- 
+navbare Componenet   
       </div>
 <Outlet />
     </div>
