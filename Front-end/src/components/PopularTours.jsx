@@ -8,7 +8,7 @@ export default function PopularTours() {
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/packs/public") // adjust if your backend route differs
+        const res = await fetch("http://localhost:3000/api/packs/popular") // adjust if your backend route differs
         if (!res.ok) {
           throw new Error("Network response was not ok")
         }
