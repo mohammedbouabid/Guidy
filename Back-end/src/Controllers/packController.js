@@ -47,10 +47,10 @@ export const getPacksFiltered = async (req, res) => {
 
     // id/guideId (admin/client can pass guideId; guide already restricted)
     if (id) {
-      try { filter._id = new mongoose.Types.ObjectId(id); } catch {}
+      try { filter._id = new mongoose.Types.ObjectId(id); } catch { }
     }
     if (guideId && req.user?.role?.toLowerCase() !== "guide") {
-      try { filter.guideId = new mongoose.Types.ObjectId(guideId); } catch {}
+      try { filter.guideId = new mongoose.Types.ObjectId(guideId); } catch { }
     }
 
     // title contains (case-insensitive)
@@ -69,12 +69,12 @@ export const getPacksFiltered = async (req, res) => {
     if (startDateFrom || startDateTo) {
       filter.startDate = {};
       if (startDateFrom) filter.startDate.$gte = new Date(startDateFrom);
-      if (startDateTo)   filter.startDate.$lte = new Date(startDateTo);
+      if (startDateTo) filter.startDate.$lte = new Date(startDateTo);
     }
     if (endDateFrom || endDateTo) {
       filter.endDate = {};
       if (endDateFrom) filter.endDate.$gte = new Date(endDateFrom);
-      if (endDateTo)   filter.endDate.$lte = new Date(endDateTo);
+      if (endDateTo) filter.endDate.$lte = new Date(endDateTo);
     }
 
     // locations (exact, case-insensitive)
@@ -100,14 +100,14 @@ export const getPacksFiltered = async (req, res) => {
     }
 
     // pagination + sort
-    const page  = parseInt(req.query.page)  || 1;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const sortParam  = req.query.sort || ""; // e.g. "price" or "-price"
+    const sortParam = req.query.sort || ""; // e.g. "price" or "-price"
     // build options without sort by default
-const options = { page, limit };
-if (sortParam) options.sort = sortParam;  // only attach when non-empty
+    const options = { page, limit };
+    if (sortParam) options.sort = sortParam;  // only attach when non-empty
 
-const packs = await Pack.paginate(filter, options);
+    const packs = await Pack.paginate(filter, options);
     return res.status(200).json(packs);
   } catch (error) {
     return res.status(500).json({ message: "Error filtering packs", error: error.message });
@@ -279,9 +279,24 @@ const deletePack = async (req, res) => {
     res.status(500).json({ message: 'Error deleting pack', error: error.message });
   }
 };
+const getPopularPacks = async (req, res) => {
+  try {
+    const packs = await Pack.find(
+      { profileImg: { $exists: true, $ne: "" } } // only packs with valid images
+    )
+      .sort({ avgRating: -1 }) // highest rating first
+      .limit(8); // limit to 8 for homepage
+
+    res.json({ docs: packs });
+  } catch (err) {
+    console.error("Error in getPopularPacks:", err);
+    res.status(500).json({ message: "Error fetching popular packs" });
+  }
+};
 
 export {
   getAllPacks,
+  getPopularPacks,
   createPack,
   getPackById,
   updatePack,

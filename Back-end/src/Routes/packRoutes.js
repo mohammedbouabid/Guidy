@@ -5,6 +5,7 @@ import {
   createPack,
   updatePack,
   getAllPacks,
+  getPopularPacks,
   getPackById,
   deletePack,
 } from "../Controllers/packController.js";
@@ -17,23 +18,13 @@ import Pack from "../Models/Pack.js";
 
 const router = express.Router();
 
-// in your /public route
-router.get("/public", async (req, res) => {
-  try {
-    const packs = await Pack.find()
-      .sort({ profileImg: -1 }) // packs with profileImg not null/empty come first
-      .limit(8)
-
-    res.json({ docs: packs })
-  } catch (err) {
-    console.error("Error in /public route:", err)
-    res.status(500).json({ message: "Error fetching packs" })
-  }
-})
+// --- Public routes ---
+router.get("/", getAllPacks);
+router.get("/popular", getPopularPacks); // 👈 new endpoint
+router.get("/:id", getPackById);
 
 
 router.use(verifyToken);
-
 // Use the new upload middleware
 router.post(
   "/",
@@ -41,7 +32,7 @@ router.post(
   uploadPackImage.single("profileImg"),
   createPack
 );
-router.get("/filter", getPacksFiltered); // ← add this line BEFORE "/:id"
+ // ← add this line BEFORE "/:id"
 
 router.put(
   "/:id",
@@ -50,8 +41,7 @@ router.put(
   updatePack
 );
 
-router.get("/", getAllPacks);
-router.get("/:id", getPackById);
+
 router.delete("/:id", authorizeRoles(["guide", "admin"]), deletePack);
 // in your routes file
 
