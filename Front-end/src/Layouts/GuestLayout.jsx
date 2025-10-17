@@ -15,10 +15,7 @@ const GuestLayout = () => {
             <HeroSection/>
             <WhyChooseUs/>
 
-<<<<<<< HEAD
-=======
-navbare Componenet   
->>>>>>> db7d1276e70cf4c7e4285a1aae9ce5b7387867e6
+ 
       </div>
 <Outlet />
     </div>
