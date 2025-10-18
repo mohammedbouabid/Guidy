@@ -26,20 +26,28 @@ export const createGuidePlace = async (req, res) => {
   }
 };
 
-//  Récupérer tous les lieux
+// Récupérer tous les lieux avec les informations du guide
 export const getAllGuidePlaces = async (req, res) => {
   try {
-    const places = await GuidePlace.find();
+    const places = await GuidePlace.find()
+      .populate({
+        path: 'guideID',
+        select: 'firstName lastName email profileImage role' // Sélectionnez les champs dont vous avez besoin
+      });
     res.json(places);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
 
-//  Récupérer un lieu par ID
+// Récupérer un lieu par ID avec les informations du guide
 export const getGuidePlaceById = async (req, res) => {
   try {
-    const place = await GuidePlace.findById(req.params.id);
+    const place = await GuidePlace.findById(req.params.id)
+      .populate({
+        path: 'guideID',
+        select: 'firstName lastName email profileImage role'
+      });
     if (!place) return res.status(404).json({ message: "Lieu non trouvé ❌" });
     res.json(place);
   } catch (error) {

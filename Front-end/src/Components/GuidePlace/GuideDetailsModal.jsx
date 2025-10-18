@@ -2,10 +2,7 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, EffectFade } from 'swiper/modules';
 import { X, MapPin, Calendar, User, Building, Globe } from 'lucide-react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
+
 
 function GuideDetailsModal({ place, onClose, isOpen }) {
   if (!isOpen) return null;
@@ -23,7 +20,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 p-2 rounded-full bg-white/90 hover:bg-white transition-colors shadow-md"
+          className="absolute right-4  cursor-pointer top-4 z-10 p-2 rounded-full hover:bg-gray-100 duration-300   transition-colors "
         >
           <X className="w-5 h-5 text-gray-600" />
         </button>
@@ -66,7 +63,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
                   <MapPin className="w-5 h-5 text-[#EB662B]" />
                   <div>
                     <p className="text-sm font-medium">Location</p>
-                    <p className="text-gray-500">{place.location}</p>
+                    <p className="text-gray-500">{place.location}Morroco hay Adil </p>
                   </div>
                 </div>
 
@@ -74,7 +71,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
                   <Building className="w-5 h-5 text-[#EB662B]" />
                   <div>
                     <p className="text-sm font-medium">City</p>
-                    <p className="text-gray-500">{place.city}</p>
+                    <p className="text-gray-500">{place.city}Casablanca</p>
                   </div>
                 </div>
 
@@ -82,7 +79,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
                   <Globe className="w-5 h-5 text-[#EB662B]" />
                   <div>
                     <p className="text-sm font-medium">Country</p>
-                    <p className="text-gray-500">{place.country}</p>
+                    <p className="text-gray-500">{place.country}Morocco</p>
                   </div>
                 </div>
 
@@ -90,9 +87,9 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
                   <User className="w-5 h-5 text-[#EB662B]" />
                   <div>
                     <p className="text-sm font-medium">Guide</p>
-                    <p className="text-gray-500">{place.guideName || 'Guide Name'}</p>
+                    <p className="text-gray-500">{ place.guideID.email || 'Guide Name'}</p>
                   </div>
-                </div>
+                </div>  
 
                 <div className="flex items-center space-x-3 text-gray-600">
                   <Calendar className="w-5 h-5 text-[#EB662B]" />

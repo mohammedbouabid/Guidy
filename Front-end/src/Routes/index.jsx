@@ -8,9 +8,9 @@ import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
 import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
-import PacksGuid from "../pages/Guide/PacksGuid";
 import AllUsers from "../pages/admin/AllUsers";
 import GuidePlaces from "@/pages/Guide/GuidePlaces";
+import { PacksGuid } from "@/pages/Guide/PacksGuid";
 
 const router = createBrowserRouter([
   {

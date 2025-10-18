@@ -12,24 +12,26 @@ import { uploadImages } from "../Middlewares/uploadImages.js";
 import { createGuidePlaceSchema, updateGuidePlaceSchema } from "../Validations/guideValidator.js"; 
 import { authorizeRoles } from "../Middlewares/authorizeRole.js";  
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
-import upload from "../Middlewares/uploadsMultiple.js";
+import upload, { handleUploadErrors } from "../Middlewares/uploadsMultiple.js";
 const router = express.Router();  
 
 router.post(
   "/",
   verifyToken,
   authorizeRoles(["guide"]),
-  upload.array("images", 10), // Accepte jusqu'à 10 images
+  upload.array("images", 10),
+  handleUploadErrors,
   validate(createGuidePlaceSchema),
   createGuidePlace
 );
-router.get("/",verifyToken, authorizeRoles(["guide","admin"]), getAllGuidePlaces);
+router.get("/", getAllGuidePlaces);
 router.get("/:id", verifyToken, authorizeRoles(["guide","admin"]),getGuidePlaceById);
 router.put(
   "/:id",
   verifyToken,
   authorizeRoles(["guide"]),
-  upload.array("images", 10), // Accepte jusqu'à 10 images
+  upload.array("images", 10),
+  handleUploadErrors,
   validate(updateGuidePlaceSchema),
   updateGuidePlace
 );
