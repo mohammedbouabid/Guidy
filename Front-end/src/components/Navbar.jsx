@@ -2,7 +2,7 @@ import React from "react";
 
 const Navbar = () => {
   return (
-    <nav className="w-full bg-white ">
+    <nav className="w-full bg-white sticky top-0 z-50 bg-white shadow ">
       {/* Container */}
       <div className="max-w-7xl mx-auto px-25 py-0.5">
         <div className="flex h-16 items-center justify-between">
