@@ -9,17 +9,8 @@ const bookingSchema = new Schema({
   },
   packID: {
     type: Schema.Types.ObjectId,
-    ref: 'Pack',
+    ref: 'TripPack',
     required: true
-  },
-  isVip: {   
-    type: Boolean,
-    default: false
-  },
-  spotsBooked: {
-    type: Number,
-    default: 1,
-    min: 1
   },
   isCancelled: {
     type: Boolean,

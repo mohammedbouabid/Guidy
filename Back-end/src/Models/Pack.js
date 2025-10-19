@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { dateValidator, checkEndDate } from "../utils/jwt.js";
+import { dateValidator, checkEndDate } from "../Validations/packValidator.js";
 
 const packSchema = mongoose.Schema({
     guideId: {
@@ -10,19 +10,14 @@ const packSchema = mongoose.Schema({
     },
     guidesPlacesId: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Guideplace',
+        ref: 'Guide',
         required: true
     }],
-      profileImg: {
-    type: String, // store image URL or file path
-    required: true // make it mandatory when creating a pack
-  },
     title: {
         type: String,
         required: true
     },
     description: {
-        
         type: String,
         required: true
     },
@@ -35,7 +30,7 @@ const packSchema = mongoose.Schema({
         required: true,
         validate: {
             validator: dateValidator,
-            message: props => `${props.value} lwe be at least 15 days in the future.`
+            message: props => `${props.value} must be at least 15 days in the future.`
         }
     },
     endDate: {
@@ -56,22 +51,18 @@ const packSchema = mongoose.Schema({
     },
     endLocation: {
         type: String,
-        required: true
+        required: true,
+        default: function() { return this.startLocation; }
     },
     avgRating: {
         type: Number,
+        default: 0
     },
     maxClients: {
         type: Number,
-        required:true
+        default: 0
     }
 });
 
-
-
-
 packSchema.plugin(mongoosePaginate);
-
-
 export default mongoose.model('Pack', packSchema);
-

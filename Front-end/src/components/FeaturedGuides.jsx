@@ -45,7 +45,7 @@ const FeaturedGuides = () => {
 
   return (
     <section className="w-full py-8 px-25">
-      <div className="max-w-[1320px] mx-auto">
+      <div className="max-w-[1320px] mx-auto px-25">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="[font-family:'Inter',Helvetica] font-bold text-[#05073c] text-[29.9px] leading-[45px]">
