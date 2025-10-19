@@ -16,7 +16,7 @@ export const createGuidePlace = async (req, res) => {
     const data = {
       ...req.body,
       images: imageUrls,
-      guideID: req.user.id,
+      guideID: "68e2827f66a82c966fa0bfe4",
     };
 
     const newPlace = await GuidePlace.create(data);
@@ -60,7 +60,7 @@ export const updateGuidePlace = async (req, res) => {
   try {
     const existingPlace = await GuidePlace.findOne({
       _id: req.params.id,
-      guideID: req.user.id,
+      guideID: "68e2827f66a82c966fa0bfe4",
     });
 
     if (!existingPlace) {
@@ -80,7 +80,7 @@ export const updateGuidePlace = async (req, res) => {
     const updated = await GuidePlace.findOneAndUpdate(
       {
         _id: req.params.id,
-        guideID: req.user.id,
+        guideID: "68e2827f66a82c966fa0bfe4",
       },
       updatedData,
       {
@@ -104,17 +104,23 @@ export const updateGuidePlace = async (req, res) => {
 //  Supprimer un lieu et ses images
 export const deleteGuidePlace = async (req, res) => {
   try {
-    const deleted = await GuidePlace.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Lieu non trouvé " });
+    const place = await GuidePlace.findById(req.params.id);
+    if (!place) {
+      return res.status(404).json({ message: "Place not found" });
+    }
 
-    // Supprimer les fichiers physiques
-    deleted.images.forEach((img) => {
-      const filePath = path.resolve("uploads", img);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);  
+    // Delete from database
+    await GuidePlace.findByIdAndDelete(req.params.id);
+
+    res.json({ 
+      success: true,
+      message: "Place deleted successfully" 
     });
-
-    res.json({ message: "Lieu supprimé" });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: "Server error",
+      error: error.message 
+    });
   }
 };

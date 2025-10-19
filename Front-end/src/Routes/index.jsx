@@ -10,7 +10,9 @@ import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import AllUsers from "../pages/admin/AllUsers";
 import GuidePlaces from "@/pages/Guide/GuidePlaces";
-import { PacksGuid } from "@/pages/Guide/PacksGuid";
+import PacksGuid from "@/pages/Guide/PacksGuid";
+import AddGuidePlaceForm from "../pages/Guide/AddGuidePlaceForm";
+import UpdateGuidePlaceForm from "../pages/Guide/UpdateGuidePlaceForm";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +50,8 @@ const router = createBrowserRouter([
     children: [
       { path: "PacksGuide", element: <PacksGuid /> },
       { path: "places", element: <GuidePlaces /> },
+      { path: "places/add", element: <AddGuidePlaceForm /> },
+      { path: "places/edit/:id", element: <UpdateGuidePlaceForm /> },
       // { path: "packs", element: <GuidePacks /> },
       // { path: "profile", element: <GuideProfile /> },
     ],

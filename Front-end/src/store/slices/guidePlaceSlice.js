@@ -32,12 +32,12 @@ export const updateGuidePlace = createAsyncThunk(
   'guidePlace/update',
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/guide-places/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await api.put(`/guide-places/${id}`, formData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update place'
+      );
     }
   }
 );
@@ -47,9 +47,9 @@ export const deleteGuidePlace = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       await api.delete(`/guide-places/${id}`);
-      return id;
+      return id; // Return the id for filtering in the reducer
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete place');
     }
   }
 );
@@ -99,7 +99,6 @@ const guidePlaceSlice = createSlice({
       })
       .addCase(createGuidePlace.fulfilled, (state, action) => {
         state.loading = false;
-        state.places.push(action.payload);
         state.success = true;
       })
       .addCase(createGuidePlace.rejected, (state, action) => {
@@ -114,9 +113,9 @@ const guidePlaceSlice = createSlice({
       })
       .addCase(updateGuidePlace.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.places.findIndex(place => place._id === action.payload._id);
+        const index = state.places.findIndex(p => p._id === action.payload.data._id);
         if (index !== -1) {
-          state.places[index] = action.payload;
+          state.places[index] = action.payload.data;
         }
         state.success = true;
       })

@@ -1,6 +1,11 @@
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination, EffectFade, Autoplay } from 'swiper/modules';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 import { X, MapPin, Calendar, User, Building, Globe } from 'lucide-react';
 
 
@@ -15,8 +20,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
         onClick={onClose}
       />
       
-      {/* Modal Content */}
-      <div className="relative bg-white rounded-2xl w-[90%] max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100">
+      <div className="relative bg-white rounded-2xl w-[90%] max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Close Button */}
         <button 
           onClick={onClose}
@@ -29,13 +33,21 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
           {/* Images Section */}
           <div className="lg:w-1/2">
             <Swiper
-              modules={[Navigation, Pagination, EffectFade]}
-              navigation
-              pagination={{ clickable: true }}
+              modules={[Navigation, Pagination, EffectFade, Autoplay]}
+              navigation={true}
+              pagination={{ 
+                clickable: true,
+                dynamicBullets: true
+              }}
               effect="fade"
-              className="h-[300px] lg:h-full"
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              loop={true}
+              className="h-[300px] lg:h-full swiper-container"
             >
-              {place.images.map((image, index) => (
+              {Array.isArray(place.images) && place.images.map((image, index) => (
                 <SwiperSlide key={index}>
                   <img
                     src={image}
@@ -59,11 +71,19 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
 
               {/* Info Grid */}
               <div className="grid gap-4">
-                <div className="flex items-center space-x-3 text-gray-600">
-                  <MapPin className="w-5 h-5 text-[#EB662B]" />
-                  <div>
+                {/* Location with line */}
+                <div className="flex items-start space-x-3 text-gray-600">
+                  <MapPin className="w-5 h-5 text-[#EB662B] mt-1 flex-shrink-0" />
+                  <div className="flex-1">
                     <p className="text-sm font-medium">Location</p>
-                    <p className="text-gray-500">{place.location}Morroco hay Adil </p>
+                    <a 
+                      href={`https://maps.google.com/?q=${encodeURIComponent(place.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-500 hover:text-[#EB662B] transition-colors line-clamp-2 border-b border-dashed border-gray-300 pb-1 break-words"
+                    >
+                      {place.location}
+                    </a>
                   </div>
                 </div>
 

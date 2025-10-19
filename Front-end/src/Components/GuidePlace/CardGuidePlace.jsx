@@ -1,13 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import { EllipsisVertical, Trash2, Eye, Edit } from "lucide-react";
+import { EllipsisVertical, Trash2, Eye, Edit, Image, CheckCircle } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import GuideDetailsModal from './GuideDetailsModal';
+import { useDispatch } from 'react-redux';
+import { deleteGuidePlace } from '../../store/slices/guidePlaceSlice';
+import { toast } from 'sonner';
+import { useNavigate } from "react-router-dom";
 
 function CardGuidePlace({ place }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const menuRef = useRef(null);
@@ -23,26 +29,73 @@ function CardGuidePlace({ place }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Add safety check for place object
+  if (!place) return null;
+
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteGuidePlace(place._id)).unwrap();
+      
+      // Show deletion toast with red theme
+   toast((
+      <div className="flex items-center w-full bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
+        <div className="p-2 bg-red-600/20 rounded-full mr-3">
+          <Trash2 className="w-5 h-5" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold">Guide Place Deleted</p>
+          <p className="text-red-100 text-sm">The place has been permanently removed</p>
+        </div>
+      </div>
+    ), {
+      duration: 3000,
+      position: "bottom-right",
+      style: {
+        background: 'transparent',
+        border: 'none',
+        padding: '0',
+        boxShadow: 'none',
+      },
+    });
+  } catch (error) {
+    toast.error("Failed to delete place", {
+      duration: 4000,
+      position: "bottom-right",
+    });
+    }
+  };
+
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 relative group">
-      {/* Swiper Container */}
-      <div className="relative mb-4 h-[250px] rounded-xl overflow-hidden bg-gray-100">
-        <Swiper
-          modules={[Navigation, Pagination]}
-          navigation
-          pagination={{ clickable: true }}
-          className="h-full w-full object-cover"
-        >
-          {place.images.map((image, index) => (
-            <SwiperSlide key={index}>
-              <img
-                src={image}
-                alt={`${place.name} - Image ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+    <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 relative group" >
+      {/* Image Container */}
+      <div className="relative mb-4 h-[280px] rounded-xl overflow-hidden bg-gray-100">
+        {/* Add safety check for images array */}
+        {Array.isArray(place.images) && place.images.length > 0 ? (
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay]}
+            navigation={true}
+            pagination={{ 
+              clickable: true,
+              dynamicBullets: true
+            }}
+            
+            className="h-full w-full"
+          >
+            {place.images.map((image, index) => (
+              <SwiperSlide key={index}>
+                <img
+                  src={image}
+                  alt={`${place.name} - ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <Image className="w-12 h-12 text-gray-400" />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2 flex flex-col items-start">
@@ -64,26 +117,26 @@ function CardGuidePlace({ place }) {
             {showActions && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10  border">
                 <button
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 cursor-pointer hover:bg-gray-100 flex items-center gap-2"
                   onClick={() => setShowDetails(true)}
                 >
                   <Eye className="w-4 h-4" />
                   View Details
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                  onClick={() => console.log("Edit")}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700  cursor-pointer hover:bg-gray-100 flex items-center gap-2"
+                  onClick={() => navigate(`/guide/places/edit/${place._id}`)}
                 >
                   <Edit className="w-4 h-4" />
                   Edit Place
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
-                  onClick={() => console.log("Delete")}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
+      onClick={handleDelete}
+      className="flex items-center w-full gap-2 px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer  rounded-md transition-colors"
+    >
+      <Trash2 className="w-4 h-4" />
+      Delete
+    </button>
               </div>
             )}
           </div>

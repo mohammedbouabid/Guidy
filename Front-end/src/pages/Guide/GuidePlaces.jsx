@@ -1,17 +1,29 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
 import CardGuidePlace from "../../Components/GuidePlace/CardGuidePlace";
 import { fetchGuidePlaces } from "../../store/slices/guidePlaceSlice";
 import { Loader2 } from "lucide-react";
 
 export default function GuidePlaces() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { places, loading, error } = useSelector((state) => state.guidePlace);
 
   useEffect(() => {
     dispatch(fetchGuidePlaces());
-    
   }, [dispatch]);
+
+  // Refresh the list when navigating back from add form
+  useEffect(() => {
+    if (location.state?.refresh) {
+      dispatch(fetchGuidePlaces());
+    }
+  }, [location, dispatch]);
+
+
+ 
 
   if (loading) {
     return (
@@ -33,28 +45,24 @@ export default function GuidePlaces() {
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">Guide Places</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Guide Places</h1>
           <button
-            className="bg-[#EB662B]  cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-[#d55a26] transition-colors"
-            onClick={() => {
-              /* Add your create logic here */
-            }}
+            onClick={() => navigate('/guide/places/add')}
+            className="bg-[#EB662B] text-white px-4 py-2 rounded-lg hover:bg-[#d55a26] transition-colors"
           >
             Add New Place
           </button>
         </div>
 
-        {places.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-500">
-              No places found. Create your first place!
-            </p>
-          </div>
-        ) : (
+        {Array.isArray(places) && places.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {places.map((place) => (
               <CardGuidePlace key={place._id} place={place} />
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-gray-500">No places found. Create your first place!</p>
           </div>
         )}
       </div>
