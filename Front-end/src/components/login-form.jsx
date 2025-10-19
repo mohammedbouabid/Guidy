@@ -16,6 +16,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Link } from "react-router-dom"
 
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("")
@@ -25,7 +26,7 @@ export function LoginForm({ className, ...props }) {
     e.preventDefault()
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
+      const res = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // 👈 important for cookies
@@ -57,7 +58,7 @@ export function LoginForm({ className, ...props }) {
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
           <CardDescription>
-            Login with your Apple or Google account
+            Login with your Google account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,23 +66,7 @@ export function LoginForm({ className, ...props }) {
             <FieldGroup>
               <Field>
                 <Button variant="outline" type="button">
-                  {/* Apple button left as-is */}
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04..."
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login with Apple
-                </Button>
-                <Button variant="outline" type="button">
                   {/* Google button left as-is */}
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84..."
-                      fill="currentColor"
-                    />
-                  </svg>
                   Login with Google
                 </Button>
               </Field>
@@ -126,9 +111,11 @@ export function LoginForm({ className, ...props }) {
                 >
                   Login
                 </Button>
-                <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
-                </FieldDescription>
+                <Link to='/register'>
+                  <FieldDescription className="text-center">
+                    Don&apos;t have an account? <a href="#">Sign up</a>
+                  </FieldDescription>
+                </Link>
               </Field>
             </FieldGroup>
           </form>

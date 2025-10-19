@@ -38,9 +38,11 @@ const Navbar = () => {
             <a href="#" className="text-sm text-gray-700 hover:text-[#eb662b]">
               USD
             </a>
+            <Link to="/register">
             <a href="#" className="text-sm text-gray-700 hover:text-[#eb662b]">
               Sign up
             </a>
+            </Link>
             <Link to="/login">
               <button
                 className="text-white text-sm px-5 py-2 rounded-3xl transition-colors hover:opacity-90 hover:cursor-pointer"

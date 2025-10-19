@@ -11,6 +11,7 @@ import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
 import AllUsers from "../pages/admin/AllUsers";
 import Login from "@/pages/Home/Login";
+import SignUpPage from "@/pages/Home/RegisterPage";
 
 
 const router = createBrowserRouter([
@@ -20,8 +21,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <LandingPage /> },
       { path: "/test", element: <TestRoute /> },
-      { path: "/login", element: <Login /> }
-      // { path: "/register", element: <RegisterPage /> },
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <SignUpPage /> }
     ],
   },
   {
