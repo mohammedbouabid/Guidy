@@ -76,16 +76,16 @@ const Navbar = ({ user, onLogout }) => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/profile">Profile</Link>
+                    <Link to="/profile" className="cursor-pointer px-4 py-2 hover:bg-orange-500 hover:text-white transition-colors duration-200">Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/settings">Settings</Link>
+                    <Link to="/settings" className="cursor-pointer px-4 py-2 hover:bg-orange-500 hover:text-white transition-colors duration-200">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/billing">Billing</Link>
+                    <Link to="/billing" className="cursor-pointer px-4 py-2 hover:bg-orange-500 hover:text-white transition-colors duration-200">Billing</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onLogout}>Log out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onLogout} className="cursor-pointer px-4 py-2 text-red-600 hover:text-white hover:bg-red-600 transition-colors duration-200" >Log out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
