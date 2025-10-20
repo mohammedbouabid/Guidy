@@ -11,7 +11,7 @@ const ProtectedRoutes = ({ children, allowedRoles }) => {
   //   return <Navigate to="/login" state={{ from: location }} replace />;
   // }
 
-  if (!allowedRoles.includes("clients")) {
+  if (!allowedRoles.includes("guide")) {
     // Rediriger vers la page d'accueil si le rôle n'est pas autorisé
     return <Navigate to="/" replace />;
     console.log("acces dined")

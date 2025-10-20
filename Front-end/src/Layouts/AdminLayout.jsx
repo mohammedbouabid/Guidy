@@ -1,15 +1,16 @@
 import { Outlet } from "react-router-dom";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 const AdminLayout = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-gray-800 text-white">
-        <nav>Admin Navigation</nav>
-      </div>
-      <main className="p-4">
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
         <Outlet />
       </main>
-    </div>
+    </SidebarProvider>
   );
 };
 
