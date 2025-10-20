@@ -1,4 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { useNavigate, Link } from "react-router-dom"
+import { LoginUser, clearError } from "@/store/slices/AuthSlice"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,41 +19,30 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Link } from "react-router-dom"
 
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { loading, error } = useSelector((state) => state.Auth)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const formData = { email, password }
 
     try {
-      const res = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // 👈 important for cookies
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        console.error("Login failed:", data.message)
-        return
-      }
-
-      // ✅ Success
-      console.log("✅ Login successful")
-      console.log("Access Token:", data.accessToken || "set in cookie")
-      console.log("Message:", data.message)
-
-      // Redirect to home
-      window.location.href = "/"
+      const result = await dispatch(LoginUser(formData)).unwrap()
+      console.log("Logged in user:", result.user)
+      navigate("/")
     } catch (err) {
-      console.error("❌ Error logging in:", err.message)
+      console.error("Login failed:", err)
     }
   }
+
+  useEffect(() => {
+    if (error) dispatch(clearError())
+  }, [email, password])
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -62,11 +54,15 @@ export function LoginForm({ className, ...props }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="text-sm text-red-500 text-center mb-4">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <Button variant="outline" type="button">
-                  {/* Google button left as-is */}
                   Login with Google
                 </Button>
               </Field>
@@ -106,14 +102,15 @@ export function LoginForm({ className, ...props }) {
               <Field>
                 <Button
                   type="submit"
+                  disabled={loading}
                   className="w-full text-white hover:opacity-90 cursor-pointer"
                   style={{ backgroundColor: "#EB662B" }}
                 >
-                  Login
+                  {loading ? "Logging in..." : "Login"}
                 </Button>
-                <Link to='/register'>
+                <Link to="/register">
                   <FieldDescription className="text-center">
-                    Don&apos;t have an account? <a href="#">Sign up</a>
+                    Don&apos;t have an account? <a href="#" className="text-[#EB662B] hover:underline">Sign up</a>
                   </FieldDescription>
                 </Link>
               </Field>

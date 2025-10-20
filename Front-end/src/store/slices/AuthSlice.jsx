@@ -1,39 +1,56 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import axios from "axios"
 
-export const LoginUser=createAsyncThunk(
+// 🔐 Login thunk — sends credentials, expects user info in response
+export const LoginUser = createAsyncThunk(
   "Auth/LoginUser",
-    async(formData,{rejectWithValue})=>{
-        try{
-            const response=await axios.post('http://127.0.0.1:8000/api/login',formData)
-      localStorage.setItem("token", response.data.token);
-            return response.data
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/login", formData, {
+        withCredentials: true, // 👈 sends cookies
+      })
 
-        }catch(err){
-            return rejectWithValue(err.response?.data.errors || 'error inconnue')
-        }
+      // expects: { success, message, user }
+      return response.data
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.errors || "Erreur inconnue")
     }
+  }
 )
-
 
 const AuthSlice = createSlice({
   name: "auth",
   initialState: {
+    user: null,
     loading: false,
+    error: null,
     initialLoading: true,
-    testMessage: "Hello from Redux Store!" // Nouveau state ajouté
   },
   reducers: {
-    // Ajout d'un reducer pour modifier le message
-    updateTestMessage: (state, action) => {
-      state.testMessage = action.payload;
-    }
+    logout: (state) => {
+      state.user = null
+      state.error = null
+    },
+    clearError: (state) => {
+      state.error = null
+    },
   },
   extraReducers: (builder) => {
     builder
-      
+      .addCase(LoginUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(LoginUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.user = action.payload.user
+      })
+      .addCase(LoginUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
   },
-});
+})
 
-export const { updateTestMessage } = AuthSlice.actions; // Export du nouveau reducer
-export default AuthSlice.reducer;
+export const { logout, clearError } = AuthSlice.actions
+export default AuthSlice.reducer

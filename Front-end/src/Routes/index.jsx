@@ -6,7 +6,6 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
 import AllUsers from "../pages/admin/AllUsers";
@@ -20,7 +19,6 @@ const router = createBrowserRouter([
     element: <GuestLayout />,
     children: [
       { path: "/", element: <LandingPage /> },
-      { path: "/test", element: <TestRoute /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <SignUpPage /> }
     ],
