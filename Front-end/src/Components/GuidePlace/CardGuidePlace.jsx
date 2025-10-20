@@ -1,14 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
-import { EllipsisVertical, Trash2, Eye, Edit, Image, CheckCircle } from "lucide-react";
+import {
+  EllipsisVertical,
+  Trash2,
+  Eye,
+  Edit,
+  Image,
+  CheckCircle,
+} from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import GuideDetailsModal from './GuideDetailsModal';
-import { useDispatch } from 'react-redux';
-import { deleteGuidePlace } from '../../store/slices/guidePlaceSlice';
-import { toast } from 'sonner';
+import GuideDetailsModal from "./GuideDetailsModal";
+import { useDispatch } from "react-redux";
+import { deleteGuidePlace } from "../../store/slices/guidePlaceSlice";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 function CardGuidePlace({ place }) {
@@ -35,38 +42,41 @@ function CardGuidePlace({ place }) {
   const handleDelete = async () => {
     try {
       await dispatch(deleteGuidePlace(place._id)).unwrap();
-      
+
       // Show deletion toast with red theme
-   toast((
-      <div className="flex items-center w-full bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
-        <div className="p-2 bg-red-600/20 rounded-full mr-3">
-          <Trash2 className="w-5 h-5" />
-        </div>
-        <div className="flex-1">
-          <p className="font-semibold">Guide Place Deleted</p>
-          <p className="text-red-100 text-sm">The place has been permanently removed</p>
-        </div>
-      </div>
-    ), {
-      duration: 3000,
-      position: "bottom-right",
-      style: {
-        background: 'transparent',
-        border: 'none',
-        padding: '0',
-        boxShadow: 'none',
-      },
-    });
-  } catch (error) {
-    toast.error("Failed to delete place", {
-      duration: 4000,
-      position: "bottom-right",
-    });
+      toast(
+        <div className="flex items-center w-full bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
+          <div className="p-2 bg-red-600/20 rounded-full mr-3">
+            <Trash2 className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold">Guide Place Deleted</p>
+            <p className="text-red-100 text-sm">
+              The place has been permanently removed
+            </p>
+          </div>
+        </div>,
+        {
+          duration: 3000,
+          position: "bottom-right",
+          style: {
+            background: "transparent",
+            border: "none",
+            padding: "0",
+            boxShadow: "none",
+          },
+        }
+      );
+    } catch (error) {
+      toast.error("Failed to delete place", {
+        duration: 4000,
+        position: "bottom-right",
+      });
     }
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 relative group" >
+    <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 relative group">
       {/* Image Container */}
       <div className="relative mb-4 h-[280px] rounded-xl overflow-hidden bg-gray-100">
         {/* Add safety check for images array */}
@@ -74,11 +84,10 @@ function CardGuidePlace({ place }) {
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
             navigation={true}
-            pagination={{ 
+            pagination={{
               clickable: true,
-              dynamicBullets: true
+              dynamicBullets: true,
             }}
-            
             className="h-full w-full"
           >
             {place.images.map((image, index) => (
@@ -131,12 +140,12 @@ function CardGuidePlace({ place }) {
                   Edit Place
                 </button>
                 <button
-      onClick={handleDelete}
-      className="flex items-center w-full gap-2 px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer  rounded-md transition-colors"
-    >
-      <Trash2 className="w-4 h-4" />
-      Delete
-    </button>
+                  onClick={handleDelete}
+                  className="flex items-center w-full gap-2 px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer  rounded-md transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
               </div>
             )}
           </div>
@@ -166,13 +175,12 @@ function CardGuidePlace({ place }) {
       </div> */}
 
         {/* Edit Button */}
-      
       </div>
 
       {/* Guide Information */}
       <div className="flex items-center gap-3 mt-4 pt-3 border-t">
-        <img 
-          src={place.guideID.profileImage || '/default-avatar.png'} 
+        <img
+          src={place.guideID.profileImage || "/default-avatar.png"}
           alt={`${place.guideID.firstName} ${place.guideID.lastName}`}
           className="w-10 h-10 rounded-full object-cover"
         />
@@ -185,7 +193,7 @@ function CardGuidePlace({ place }) {
       </div>
 
       {/* Modal */}
-      <GuideDetailsModal 
+      <GuideDetailsModal
         place={place}
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}

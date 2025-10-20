@@ -1,163 +1,136 @@
-import { Button } from "@/Components/ui/button";
-import { Card, CardContent } from "@/Components/ui/card";
-import { ChevronLeft, ChevronRight, Heart, Star } from "lucide-react";
 import React from "react";
+import { Edit, Trash2 } from "lucide-react";
 
 const products = [
   {
     id: 1,
-    title: "Morocco Adventure Tour",
-    price: "$450.00",
-    rating: 5,
-    reviews: 131,
-    images: [
-      "https://imgs.search.brave.com/PtcKaW6xkgaQ5UU4nY7zCFPp90BWShuy3AGahvlJuEk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by90/cmF2ZWwtY29uY2Vw/dC13aXRoLWxhbmRt/YXJrc18yMy0yMTQ5/MTUzMjU2LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA",
-      "https://imgs.search.brave.com/bSHWWNN-OrOBOZ3Bza4eY39z4gPXxIyNEyFmGZA3NiI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by90b3VyaXNtLWRh/eS1zdWl0Y2FzZS1j/b2xsYWdlcy1kZXNp/Z25fMjMtMjE1MTcy/MTc1NS5qcGc_c2Vt/dD1haXNfaHlicmlk/Jnc9NzQwJnE9ODA",
-      "https://imgs.search.brave.com/dWyDS9NESEbTGKaXP0WfXqf7SYimQyninwP8d_8YE2Y/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzc4LzEzLzQ5/LzM2MF9GXzE3ODEz/NDk5OF83VkJEaFlr/b0xCY284aHFEWDlT/bVFCc1AwUFBoWk5C/Vy5qcGc",
-    ],
-    buttonText: "Edit Pack",
-    isFavorited: false,
+    name: "Apple Watch Series 4",
+    category: "Digital Product",
+    price: "$690.00",
+    piece: 63,
+    colors: ["#000000", "#f1f1f1", "#fca5a5"],
+    image: "https://m.media-amazon.com/images/I/71fp5ankbqL._AC_SX679_.jpg",
   },
   {
     id: 2,
-    title: "Sahara Desert Experience",
-    price: "$600.00",
-    rating: 5,
-    reviews: 64,
-    images: [
-      "https://imgs.search.brave.com/PtcKaW6xkgaQ5UU4nY7zCFPp90BWShuy3AGahvlJuEk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by90/cmF2ZWwtY29uY2Vw/dC13aXRoLWxhbmRt/YXJrc18yMy0yMTQ5/MTUzMjU2LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA",
-      "https://imgs.search.brave.com/bSHWWNN-OrOBOZ3Bza4eY39z4gPXxIyNEyFmGZA3NiI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by90b3VyaXNtLWRh/eS1zdWl0Y2FzZS1j/b2xsYWdlcy1kZXNp/Z25fMjMtMjE1MTcy/MTc1NS5qcGc_c2Vt/dD1haXNfaHlicmlk/Jnc9NzQwJnE9ODA",
-      "https://imgs.search.brave.com/dWyDS9NESEbTGKaXP0WfXqf7SYimQyninwP8d_8YE2Y/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzc4LzEzLzQ5/LzM2MF9GXzE3ODEz/NDk5OF83VkJEaFlr/b0xCY284aHFEWDlT/bVFCc1AwUFBoWk5C/Vy5qcGc",
-    ],
-    buttonText: "Edit Pack",
-    isFavorited: true,
+    name: "Microsoft Headsquare",
+    category: "Digital Product",
+    price: "$190.00",
+    piece: 13,
+    colors: ["#000000", "#fca5a5", "#60a5fa", "#facc15"],
+    image: "https://m.media-amazon.com/images/I/71fp5ankbqL._AC_SX679_.jpg",
   },
   {
     id: 3,
-    title: "Minimal Chair Tool",
-    price: "$24.59",
-    rating: 5,
-    reviews: 63,
-    images: [
-      "https://imgs.search.brave.com/PtcKaW6xkgaQ5UU4nY7zCFPp90BWShuy3AGahvlJuEk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by90/cmF2ZWwtY29uY2Vw/dC13aXRoLWxhbmRt/YXJrc18yMy0yMTQ5/MTUzMjU2LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA",
-      "https://imgs.search.brave.com/bSHWWNN-OrOBOZ3Bza4eY39z4gPXxIyNEyFmGZA3NiI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by90b3VyaXNtLWRh/eS1zdWl0Y2FzZS1j/b2xsYWdlcy1kZXNp/Z25fMjMtMjE1MTcy/MTc1NS5qcGc_c2Vt/dD1haXNfaHlicmlk/Jnc9NzQwJnE9ODA",
-      "https://imgs.search.brave.com/dWyDS9NESEbTGKaXP0WfXqf7SYimQyninwP8d_8YE2Y/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzc4LzEzLzQ5/LzM2MF9GXzE3ODEz/NDk5OF83VkJEaFlr/b0xCY284aHFEWDlT/bVFCc1AwUFBoWk5C/Vy5qcGc",
-    ],
-    buttonText: "Edit Product",
-    isFavorited: false,
+    name: "Women's Dress",
+    category: "Fashion",
+    price: "$640.00",
+    piece: 635,
+    colors: ["#bae6fd", "#93c5fd", "#1e3a8a", "#312e81"],
+    image: "https://m.media-amazon.com/images/I/71fp5ankbqL._AC_SX679_.jpg",
   },
   {
     id: 4,
-    title: "Amazfit Vip",
-    price: "$78.35",
-    rating: 5,
-    reviews: 154,
-    images: [
-      "https://imgs.search.brave.com/PtcKaW6xkgaQ5UU4nY7zCFPp90BWShuy3AGahvlJuEk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by90/cmF2ZWwtY29uY2Vw/dC13aXRoLWxhbmRt/YXJrc18yMy0yMTQ5/MTUzMjU2LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA",
-      "https://imgs.search.brave.com/bSHWWNN-OrOBOZ3Bza4eY39z4gPXxIyNEyFmGZA3NiI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by90b3VyaXNtLWRh/eS1zdWl0Y2FzZS1j/b2xsYWdlcy1kZXNp/Z25fMjMtMjE1MTcy/MTc1NS5qcGc_c2Vt/dD1haXNfaHlicmlk/Jnc9NzQwJnE9ODA",
-      "https://imgs.search.brave.com/dWyDS9NESEbTGKaXP0WfXqf7SYimQyninwP8d_8YE2Y/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzc4LzEzLzQ5/LzM2MF9GXzE3ODEz/NDk5OF83VkJEaFlr/b0xCY284aHFEWDlT/bVFCc1AwUFBoWk5C/Vy5qcGc",
-    ],
-    buttonText: "Add To Cart",
-    isFavorited: false,
+    name: "Samsung A50",
+    category: "Mobile",
+    price: "$400.00",
+    piece: 67,
+    colors: ["#000000", "#1e3a8a", "#be123c"],
+    image: "https://m.media-amazon.com/images/I/71fp5ankbqL._AC_SX679_.jpg",
   },
   {
     id: 5,
-    title: "Gumbo Mouse",
-    price: "$32.42",
-    rating: 5,
-    reviews: 35,
-    images: [
-      "https://imgs.search.brave.com/PtcKaW6xkgaQ5UU4nY7zCFPp90BWShuy3AGahvlJuEk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by90/cmF2ZWwtY29uY2Vw/dC13aXRoLWxhbmRt/YXJrc18yMy0yMTQ5/MTUzMjU2LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA",
-      "https://imgs.search.brave.com/bSHWWNN-OrOBOZ3Bza4eY39z4gPXxIyNEyFmGZA3NiI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by90b3VyaXNtLWRh/eS1zdWl0Y2FzZS1j/b2xsYWdlcy1kZXNp/Z25fMjMtMjE1MTcy/MTc1NS5qcGc_c2Vt/dD1haXNfaHlicmlk/Jnc9NzQwJnE9ODA",
-      "https://imgs.search.brave.com/dWyDS9NESEbTGKaXP0WfXqf7SYimQyninwP8d_8YE2Y/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzc4LzEzLzQ5/LzM2MF9GXzE3ODEz/NDk5OF83VkJEaFlr/b0xCY284aHFEWDlT/bVFCc1AwUFBoWk5C/Vy5qcGc",
-    ],
-    buttonText: "Add To Cart",
-    isFavorited: false,
-  },
-  {
-    id: 6,
-    title: "Camera Tripod",
-    price: "$50.00",
-    rating: 5,
-    reviews: 535,
-    images: [
-      "https://imgs.search.brave.com/PtcKaW6xkgaQ5UU4nY7zCFPp90BWShuy3AGahvlJuEk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by90/cmF2ZWwtY29uY2Vw/dC13aXRoLWxhbmRt/YXJrc18yMy0yMTQ5/MTUzMjU2LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA",
-      "https://imgs.search.brave.com/bSHWWNN-OrOBOZ3Bza4eY39z4gPXxIyNEyFmGZA3NiI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by90b3VyaXNtLWRh/eS1zdWl0Y2FzZS1j/b2xsYWdlcy1kZXNp/Z25fMjMtMjE1MTcy/MTc1NS5qcGc_c2Vt/dD1haXNfaHlicmlk/Jnc9NzQwJnE9ODA",
-      "https://imgs.search.brave.com/dWyDS9NESEbTGKaXP0WfXqf7SYimQyninwP8d_8YE2Y/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzc4LzEzLzQ5/LzM2MF9GXzE3ODEz/NDk5OF83VkJEaFlr/b0xCY284aHFEWDlT/bVFCc1AwUFBoWk5C/Vy5qcGc",
-    ],
-    buttonText: "Add To Cart",
-    isFavorited: false,
+    name: "Camera",
+    category: "Electronic",
+    price: "$420.00",
+    piece: 52,
+    colors: ["#000000", "#1e3a8a", "#be123c"],
+    image: "https://m.media-amazon.com/images/I/71fp5ankbqL._AC_SX679_.jpg",
   },
 ];
 
-export const PacksGuid = () => {
+const PacksGuid = () => {
   return (
-    <section className="w-full py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto px-4">
-        {products.map((product) => (
-          <Card
-            key={product.id}
-            className="bg-white rounded-[14px] shadow-[6px_6px_54px_#0000000d] overflow-hidden"
-          >
-            <CardContent className="p-0">
-              <div className="relative aspect-[4/3]">
-                <img
-                  className="w-full h-full object-cover"
-                  alt={product.title}
-                  src={product.images[0]} // Using first image as main
-                />
-                <button className="absolute top-1/2 -translate-y-1/2 left-4 w-10 h-10 flex items-center justify-center bg-white/80 rounded-full hover:bg-white transition-colors">
-                  <ChevronLeft className="w-6 h-6 text-gray-700" />
-                </button>
-                <button className="absolute top-1/2 -translate-y-1/2 right-4 w-10 h-10 flex items-center justify-center bg-white/80 rounded-full hover:bg-white transition-colors">
-                  <ChevronRight className="w-6 h-6 text-gray-700" />
-                </button>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 flex items-center justify-center p-8">
+      <div className="w-full max-w-6xl bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
+        <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-700">
+             Product List</h2>
+          <button className="bg-[#EB662B]  text-white px-4 py-2 rounded-md hover:bg-[#d55a25] transition cursor-pointer">
+            + Add Product
+          </button>
+        </div>
 
-              <div className="p-6 space-y-3">
-                <h3 className="font-bold text-[#202224] text-lg leading-5">
-                  {product.title}
-                </h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm text-gray-700">
+            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th className="px-6 py-3 text-left font-semibold">Image</th>
+                <th className="px-6 py-3 text-left font-semibold">
+                  Product Name
+                </th>
+                <th className="px-6 py-3 text-left font-semibold">Category</th>
+                <th className="px-6 py-3 text-left font-semibold">Price</th>
+                <th className="px-6 py-3 text-left font-semibold">Piece</th>
+                <th className="px-6 py-3 text-center font-semibold">Action</th>
+              </tr>
+            </thead>
 
-                <div className="font-bold text-[#EB662B] text-base leading-5">
-                  {product.price}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, index) => (
-                      <Star
-                        key={index}
-                        className="w-4 h-4 fill-[#EB662B] text-[#EB662B]"
+            <tbody className="divide-y divide-gray-200">
+              {products.map((product) => (
+                <tr
+                  key={product.id}
+                  className="hover:bg-gray-50 transition duration-200"
+                >
+                  {/* Image */}
+                  <td className="px-6 py-4">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#EB662B]">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
                       />
-                    ))}
-                  </div>
-                  <span className="opacity-40 font-semibold text-black text-sm">
-                    ({product.reviews})
-                  </span>
-                </div>
+                    </div>
+                  </td>
 
-                <div className="flex items-center justify-between pt-2">
-                  <Button className="bg-[#e2eaf8] hover:bg-[#d2dae8] text-[#202224] font-bold text-sm rounded-xl h-auto py-2 px-6">
-                    {product.buttonText}
-                  </Button>
+                  {/* Product Name */}
+                  <td className="px-6 py-4 font-medium">{product.name}</td>
 
-                  <button className="w-10 h-10 flex items-center justify-center hover:text-[#EB662B] transition-colors">
-                    <Heart
-                      className={`w-6 h-6 ${
-                        product.isFavorited
-                          ? "fill-[#EB662B] text-[#EB662B]"
-                          : "text-gray-400"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  {/* Category */}
+                  <td className="px-6 py-4">
+                    <span className="px-3 py-1 rounded-full bg-orange-100 text-[#EB662B] text-xs font-medium">
+                      {product.category}
+                    </span>
+                  </td>
+
+                  {/* Price */}
+                  <td className="px-6 py-4 text-gray-800 font-semibold">
+                    {product.price}
+                  </td>
+
+                  {/* Piece */}
+                  <td className="px-6 py-4">{product.piece}</td>
+
+                  {/* Action buttons */}
+                  <td className="px-6 py-4 flex justify-center space-x-3">
+                    <button className="p-2 rounded-lg bg-gray-100 hover:bg-orange-100 transition cursor-pointer">
+                      <Edit size={18} className="text-green-600" />
+                    </button>
+                    <button className="p-2 rounded-lg bg-gray-100 hover:bg-red-100 transition cursor-pointer">
+                      <Trash2 size={18} className="text-red-500" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-4 text-sm text-gray-500 bg-gray-50 border-t text-center">
+          Showing {products.length} products
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

@@ -48,7 +48,7 @@ export default function GuidePlaces() {
           <h1 className="text-2xl font-semibold text-gray-800">Guide Places</h1>
           <button
             onClick={() => navigate('/guide/places/add')}
-            className="bg-[#EB662B] text-white px-4 py-2 rounded-lg hover:bg-[#d55a26] transition-colors"
+            className="bg-[#EB662B] cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-[#d55a26] transition-colors"
           >
             Add New Place
           </button>

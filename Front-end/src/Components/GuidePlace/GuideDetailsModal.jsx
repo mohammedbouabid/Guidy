@@ -91,7 +91,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
                   <Building className="w-5 h-5 text-[#EB662B]" />
                   <div>
                     <p className="text-sm font-medium">City</p>
-                    <p className="text-gray-500">{place.city}Casablanca</p>
+                    <p className="text-gray-500">{place.city}</p>
                   </div>
                 </div>
 
@@ -99,7 +99,7 @@ function GuideDetailsModal({ place, onClose, isOpen }) {
                   <Globe className="w-5 h-5 text-[#EB662B]" />
                   <div>
                     <p className="text-sm font-medium">Country</p>
-                    <p className="text-gray-500">{place.country}Morocco</p>
+                    <p className="text-gray-500">{place.country}</p>
                   </div>
                 </div>
 

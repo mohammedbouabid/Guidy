@@ -11,8 +11,8 @@ import AllPacks from "../pages/Home/AllPacks";
 import AllUsers from "../pages/admin/AllUsers";
 import GuidePlaces from "@/pages/Guide/GuidePlaces";
 import PacksGuid from "@/pages/Guide/PacksGuid";
-import AddGuidePlaceForm from "../pages/Guide/AddGuidePlaceForm";
-import UpdateGuidePlaceForm from "../pages/Guide/UpdateGuidePlaceForm";
+import AddGuidePlaceForm from "../Components/GuidePlace/AddGuidePlaceForm";
+import UpdateGuidePlaceForm from "../Components/GuidePlace/UpdateGuidePlaceForm";
 
 const router = createBrowserRouter([
   {

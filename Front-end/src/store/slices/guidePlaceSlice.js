@@ -32,7 +32,9 @@ export const updateGuidePlace = createAsyncThunk(
   'guidePlace/update',
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/guide-places/${id}`, formData);
+      const response = await api.put(`/guide-places/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }, // 🔥 important
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -41,6 +43,7 @@ export const updateGuidePlace = createAsyncThunk(
     }
   }
 );
+
 
 export const deleteGuidePlace = createAsyncThunk(
   'guidePlace/delete',

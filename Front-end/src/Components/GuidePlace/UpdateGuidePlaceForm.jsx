@@ -24,7 +24,7 @@ export default function UpdateGuidePlaceForm() {
     description: '',
     location: '',
     city: '',
-    country: '',
+    country: '',   
   });
   
   const [existingImages, setExistingImages] = useState([]);
@@ -118,42 +118,41 @@ export default function UpdateGuidePlaceForm() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setIsSubmitting(true);
-    const formDataToSend = new FormData();
-    
-    // Append form fields
-    Object.keys(formData).forEach(key => {
-      formDataToSend.append(key, formData[key]);
-    });
-    
-    // Append existing images
-    existingImages.forEach(image => {
-      formDataToSend.append('existingImages', image);
-    });
-    
-    // Append new images
-    newImages.forEach(image => {
-      formDataToSend.append('images', image);
-    });
+  if (!validateForm()) return;
 
-    try {
-      await dispatch(updateGuidePlace({ id, formData: formDataToSend })).unwrap();
-      toast.success('Place updated successfully!');
-      navigate('/guide/places');
-    } catch (error) {
-      toast.error(error?.message || 'Failed to update place');
-      setErrors(error?.errors || {});
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  setIsSubmitting(true);
+  const formDataToSend = new FormData();
+
+  // Ajouter les champs texte
+  Object.keys(formData).forEach(key => {
+    formDataToSend.append(key, formData[key]);
+  });
+
+  // 🔹 Ajouter les images existantes (celles gardées)
+  existingImages.forEach(image => {
+    formDataToSend.append('existingImages', image);
+  });
+
+  // 🔹 Ajouter les nouvelles images uploadées
+  newImages.forEach(image => {
+    formDataToSend.append('images', image);
+  });
+
+  try {
+    await dispatch(updateGuidePlace({ id, formData: formDataToSend })).unwrap();
+    toast.success('Place updated successfully!');
+    navigate('/guide/places');
+  } catch (error) {
+    toast.error(error?.message || 'Failed to update place');
+    setErrors(error?.errors || {});
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -198,7 +197,7 @@ export default function UpdateGuidePlaceForm() {
                     type="button"
                     onClick={() => removeNewImage(index)}
                     className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
-                  >
+                  >   
                     <X className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
@@ -315,7 +314,7 @@ export default function UpdateGuidePlaceForm() {
             <button
               type="button"
               onClick={() => navigate('/guide/places')}
-              className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-6 py-2.5 cursor-pointer text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               disabled={isSubmitting}
             >
               Cancel
@@ -323,7 +322,7 @@ export default function UpdateGuidePlaceForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 text-white bg-[#EB662B] rounded-lg hover:bg-[#d55a26] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
+              className="px-6 py-2.5 text-white  cursor-pointer bg-[#EB662B] rounded-lg hover:bg-[#d55a26] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
             >
               {isSubmitting ? (
                 <>
