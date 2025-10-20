@@ -1,26 +1,49 @@
+// src/Routes/packRoutes.js
 import express from "express";
-import { addUser, updateUser, deleteUserById, deleteManyUsers, getAllUsers, getUserById, getUser } from "../Controllers/userController.js";
-import { createUserValidation, updateUserValidation, deleteManyUsersValidation } from "../Validations/userValidator.js";
-import { validate } from "../Middlewares/userValidate.js";
-import { verifyToken } from "../Middlewares/verifyJwtToken.js";
-import { authorizeRoles} from '../Middlewares/authorizeRole.js';
-
 import {
-  logout
-} from "../Controllers/authController.js";
+  getAllPacks,
+  createPack,
+  getPackById,
+  updatePack,
+  deletePack,
+} from "../Controllers/packController.js";
+
+import { verifyToken } from "../Middlewares/verifyJwtToken.js";
+import { authorizeRoles } from "../Middlewares/authorizeRole.js";
+import { requireProfileCompletion } from "../Middlewares/requireProfileFields.js";
+import { packRulesMw } from "../Validations/packValidator.js";
+
+// 🆕 import the upload middleware
 import upload from "../Middlewares/upload.js";
 
 const router = express.Router();
 
-router.post("/user", verifyToken, authorizeRoles(["admin"]), createUserValidation, validate, addUser);
+// All routes protected
+router.use(verifyToken);
 
-router.put("/user/", verifyToken, authorizeRoles(["admin", "guide", "client"]), updateUserValidation, validate, upload.single("profileImage"), updateUser);
+// List + details
+router.get("/", getAllPacks);
+router.get("/:id", getPackById);
 
-router.delete("/user/:id", verifyToken, authorizeRoles(["admin", "client", "guide"]), deleteUserById, logout);
-router.delete("/user", verifyToken, authorizeRoles(["admin"]), deleteManyUsersValidation, validate, deleteManyUsers);
+// 🆕 Create: accept a single file named "profileImg"
+router.post(
+  "/",
+  authorizeRoles(["guide", "admin"]),
+  upload.single("profileImg"),           // <— Upload to Cloudinary here
+  packRulesMw("create"),
+  requireProfileCompletion,
+  createPack
+);
 
-router.get("/users", verifyToken, authorizeRoles(["admin"]), getAllUsers);
-router.get("/user/:id", verifyToken, authorizeRoles(["admin","guide", "client"]), getUserById);
-router.get("/user/", verifyToken, authorizeRoles(["admin","guide", "client"]), getUser);
+// 🆕 Update: optionally replace the image
+router.put(
+  "/:id",
+  authorizeRoles(["guide", "admin"]),
+  upload.single("profileImg"),           // <— If a new image is sent
+  packRulesMw("update"),
+  updatePack
+);
+
+router.delete("/:id", authorizeRoles(["guide", "admin"]), deletePack);
 
 export default router;

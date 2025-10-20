@@ -7,7 +7,7 @@ const guidePlaceSchema = new mongoose.Schema(
     description: { type: String, required: true, minlength: 10 },
     location: { type: String, required: true },
     images: {
-      type: [String], // tableau de noms de fichiers
+      type: [String], // URLs Cloudinary
       validate: {
         validator: (val) => val.length > 0,
         message: "Au moins une image est requise",
