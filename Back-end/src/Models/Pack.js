@@ -13,11 +13,16 @@ const packSchema = mongoose.Schema({
         ref: 'Guideplace',
         required: true
     }],
+      profileImg: {
+    type: String, // store image URL or file path
+    required: true // make it mandatory when creating a pack
+  },
     title: {
         type: String,
         required: true
     },
     description: {
+        
         type: String,
         required: true
     },
