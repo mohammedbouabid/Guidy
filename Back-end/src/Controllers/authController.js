@@ -14,7 +14,7 @@ const signUp = async (req, res, next) => {
 
     const existingUser = await User.findOne({ email: validEmail });
     if (existingUser) {
-      const error = new Error("email already exists");
+      const error = new Error("Email already exists");
       error.statusCode = 400;
       throw error;
     }
@@ -31,7 +31,7 @@ const signUp = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `${newUser.role} successfuly signed up`
+      message: `${newUser.role} Successfuly signed up`
     });
   } catch (err) {
     next(err);

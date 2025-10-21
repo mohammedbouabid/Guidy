@@ -2,15 +2,30 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 
+// -------------------- REGISTER --------------------
+export const RegisterUser = createAsyncThunk(
+  "auth/register",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("http://localhost:3000/api/signup", formData, {
+        withCredentials: true,
+      })
+      return res.data // backend should return { message: "Account created" }
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.errors || "Erreur inconnue")
+    }
+  }
+)
+
 // -------------------- LOGIN --------------------
 export const LoginUser = createAsyncThunk(
   "auth/login",
   async (formData, { rejectWithValue }) => {
     try {
       const res = await axios.post("http://localhost:3000/api/login", formData, {
-        withCredentials: true, // 👈 important for cookies
+        withCredentials: true,
       })
-      return res.data
+      return res.data // backend should return { user, tokens }
     } catch (err) {
       return rejectWithValue(err.response?.data?.errors || "Erreur inconnue")
     }
@@ -34,17 +49,38 @@ export const LogoutUser = createAsyncThunk(
 const AuthSlice = createSlice({
   name: "auth",
   initialState: {
-    user: JSON.parse(localStorage.getItem("user")) || null, // load from storage
+    user: JSON.parse(localStorage.getItem("user")) || null,
     loading: false,
     error: null,
+    success: null, // 👈 used for register success
   },
   reducers: {
     clearError: (state) => {
       state.error = null
     },
+    clearSuccess: (state) => {
+      state.success = null
+    },
   },
   extraReducers: (builder) => {
     builder
+      // REGISTER
+      .addCase(RegisterUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+        state.success = null
+      })
+      .addCase(RegisterUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.error = null
+        state.success = action.payload.message || "Account created successfully"
+        // ❌ do NOT set user or localStorage here
+      })
+      .addCase(RegisterUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+
       // LOGIN
       .addCase(LoginUser.pending, (state) => {
         state.loading = true
@@ -53,7 +89,7 @@ const AuthSlice = createSlice({
       .addCase(LoginUser.fulfilled, (state, action) => {
         state.loading = false
         state.user = action.payload.user
-        localStorage.setItem("user", JSON.stringify(action.payload.user)) // persist
+        localStorage.setItem("user", JSON.stringify(action.payload.user))
       })
       .addCase(LoginUser.rejected, (state, action) => {
         state.loading = false
@@ -61,16 +97,21 @@ const AuthSlice = createSlice({
       })
 
       // LOGOUT
+      .addCase(LogoutUser.pending, (state) => {
+        state.loading = true
+      })
       .addCase(LogoutUser.fulfilled, (state) => {
+        state.loading = false
         state.user = null
         state.error = null
-        localStorage.removeItem("user") // clear storage
+        localStorage.removeItem("user")
       })
       .addCase(LogoutUser.rejected, (state, action) => {
+        state.loading = false
         state.error = action.payload
       })
   },
 })
 
-export const { clearError } = AuthSlice.actions
+export const { clearError, clearSuccess } = AuthSlice.actions
 export default AuthSlice.reducer

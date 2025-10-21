@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,56 +14,63 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Link, useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { useState, useEffect } from "react"
+import { RegisterUser, clearError, clearSuccess } from "@/store/slices/AuthSlice"
+import { useNavigate, Link } from "react-router-dom"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export function SignupForm({ className, ...props }) {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
-
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { loading, error, success } = useSelector((state) => state.Auth)
 
-  const handleSubmit = async (e) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    role: "client",
+  })
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value })
+  }
+
+  const handleSubmit = (e) => {
     e.preventDefault()
-    setError(null)
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match")
       return
     }
-
-    try {
-      setLoading(true)
-      const res = await fetch("http://localhost:3000/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          role: "client", // default role, or make this selectable
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Signup failed")
-        return
-      }
-
-      console.log("✅ Signup successful:", data.message)
-      navigate("/login") // redirect after signup
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+      role: formData.role,
     }
+    dispatch(RegisterUser(payload))
   }
+
+  useEffect(() => {
+    if (success) {
+      navigate("/login")
+      dispatch(clearSuccess())
+    }
+  }, [success, navigate, dispatch])
+
+  // Clear error when user types
+  useEffect(() => {
+    if (error) dispatch(clearError())
+  }, [formData.name, formData.email, formData.phone, formData.password, formData.confirmPassword, formData.role])
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -72,63 +78,106 @@ export function SignupForm({ className, ...props }) {
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Create your account</CardTitle>
           <CardDescription>
-            Enter your information below to create your account
+            Enter your details below to create your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <FieldGroup className="space-y-4">
+          {/* Error block styled like LoginForm */}
+          {error && (
+            <div className="text-sm text-red-500 text-center mb-4">
+              {Array.isArray(error)
+                ? error.map((msg, i) => (
+                    <p key={i}>{typeof msg === "string" ? msg : msg.message}</p>
+                  ))
+                : typeof error === "string"
+                ? error
+                : error.message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
                 <Input
                   id="name"
                   type="text"
                   placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={formData.name}
+                  onChange={handleChange}
                   required
                 />
               </Field>
+
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                 />
               </Field>
-              <Field className="grid grid-cols-2 gap-4">
-                <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="confirm-password">
-                    Confirm Password
-                  </FieldLabel>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </Field>
-              </Field>
-              <FieldDescription>
-                Must be at least 6 characters long.
-              </FieldDescription>
 
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Field>
+                <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+212600000000"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </Field>
+
+              <Field>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="confirmPassword">
+                      Confirm Password
+                    </FieldLabel>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Field>
+                </div>
+                <FieldDescription>
+                  Must be at least 6 characters long.
+                </FieldDescription>
+              </Field>
+              
+<Field>
+  <FieldLabel htmlFor="role">Role</FieldLabel>
+  <Select
+    value={formData.role}
+    onValueChange={(value) => setFormData({ ...formData, role: value })}
+  >
+    <SelectTrigger id="role" className="w-full">
+      <SelectValue placeholder="Select a role" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="client">Client</SelectItem>
+      <SelectItem value="guide">Guide</SelectItem>
+    </SelectContent>
+  </Select>
+</Field>
 
               <Field>
                 <Button
@@ -139,15 +188,14 @@ export function SignupForm({ className, ...props }) {
                 >
                   {loading ? "Creating..." : "Create Account"}
                 </Button>
-                <Button variant="outline" type="button" className="w-full mt-2">
-                  Sign up with Google
-                </Button>
-                <FieldDescription className="text-center mt-2">
-                  Already have an account?{" "}
-                  <Link to="/login" className="text-[#EB662B] hover:underline">
-                    Sign in
-                  </Link>
-                </FieldDescription>
+                <Link to="/login">
+                  <FieldDescription className="text-center">
+                    Already have an account?{" "}
+                    <span className="text-[#EB662B] hover:underline">
+                      Sign in
+                    </span>
+                  </FieldDescription>
+                </Link>
               </Field>
             </FieldGroup>
           </form>
