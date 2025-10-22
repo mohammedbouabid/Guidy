@@ -6,13 +6,14 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-import TestRoute from "../pages/testRoute";
+// import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
-import AllUsers from "../pages/admin/AllUsers";
+import PacksGuid from "../pages/Guide/PacksGuid";
+import AllGuides from "../pages/admin/guides";
+import DashboardHome from "@/pages/dashboard/DashboardHome";
 import GuidePlaces from "@/pages/Guide/GuidePlaces";
-import PacksGuid from "@/pages/Guide/PacksGuid";
-import AddGuidePlaceForm from "../Components/GuidePlace/AddGuidePlaceForm";
-import UpdateGuidePlaceForm from "../Components/GuidePlace/UpdateGuidePlaceForm";
+import AddGuidePlaceForm from "@/Components/GuidePlace/AddGuidePlaceForm";
+import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
 
 const router = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ const router = createBrowserRouter([
     element: <GuestLayout />,
     children: [
       { path: "/", element: <LandingPage /> },
-      { path: "/test", element: <TestRoute /> },
+      // { path: "/test", element: <TestRoute /> },
       // { path: "/login", element: <LoginPage /> },
       // { path: "/register", element: <RegisterPage /> },
     ],
@@ -52,6 +53,8 @@ const router = createBrowserRouter([
       { path: "places", element: <GuidePlaces /> },
       { path: "places/add", element: <AddGuidePlaceForm /> },
       { path: "places/edit/:id", element: <UpdateGuidePlaceForm /> },
+      // { path: "packsguide", element: <PacksGuid /> },
+      // { path: "places", element: <GuidePlaces /> },
       // { path: "packs", element: <GuidePacks /> },
       // { path: "profile", element: <GuideProfile /> },
     ],
@@ -65,7 +68,8 @@ const router = createBrowserRouter([
       </ProtectedRoutes>
     ),
     children: [
-      { path: "AllUsers", element: <AllUsers /> },
+      { index: true, element: <DashboardHome /> },
+      { path: "guides", element: <AllGuides /> },
       // { path: "users", element: <UsersManagement /> },
       // { path: "packs", element: <PacksManagement /> },
       // { path: "bookings", element: <BookingsManagement /> },

@@ -1,10 +1,18 @@
 import { Outlet } from "react-router-dom";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
-const GuideLayout = () => (
-  <div className="min-h-screen ">
-    <div className="bg-blue-400">Navbar Guide</div>
-    <Outlet />
-  </div>
-);
+
+const GuideLayout = () => {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
+        <Outlet />
+      </main>
+    </SidebarProvider>
+  );
+};
 
 export default GuideLayout;
