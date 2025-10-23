@@ -14,7 +14,7 @@ const signUp = async (req, res, next) => {
 
     const existingUser = await User.findOne({ email: validEmail });
     if (existingUser) {
-      const error = new Error("email already exists");
+      const error = new Error("Email already exists");
       error.statusCode = 400;
       throw error;
     }
@@ -31,7 +31,7 @@ const signUp = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message : `${newUser.role} successfuly signed up`
+      message: `${newUser.role} Successfuly signed up`
     });
   } catch (err) {
     next(err);
@@ -89,7 +89,7 @@ const login = async (req, res, next) => {
     });
 
     if (!user) {
-      const error = new Error("no user found with this email");
+      const error = new Error("No User found with this email");
       error.statusCode = 404;
       throw error;
     }
@@ -97,7 +97,7 @@ const login = async (req, res, next) => {
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      const error = new Error("wrong password");
+      const error = new Error("Wrong password, Please try again");
       error.statusCode = 401;
       throw error;
     }
@@ -134,8 +134,16 @@ const login = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `${user.role} successfuly logged in`,
-    });
+      message: `${user.role} successfully logged in`,
+      user: {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || `https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg`,
+        role: user.role,
+        id: user._id
+      }
+    })
+
   } catch (error) {
     next(error);
   }

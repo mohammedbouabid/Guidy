@@ -6,7 +6,7 @@ export const createUserValidation = [
     .notEmpty()
     .withMessage("name is required")
     .isLength({ min: 2 })
-    .withMessage("name must be at least 2 characters")
+    .withMessage("Name must be at least 2 characters")
     .escape(),
 
   body("email")
@@ -14,7 +14,7 @@ export const createUserValidation = [
     .notEmpty()
     .withMessage("email is required")
     .isEmail()
-    .withMessage("please provide a valid email")
+    .withMessage("Please provide a valid email")
     .escape(),
 
   body("phone")
@@ -23,7 +23,7 @@ export const createUserValidation = [
     .notEmpty()
     .withMessage("phone number is required")
     .isMobilePhone("any")
-    .withMessage("please add a valid phone number")
+    .withMessage("Please add a valid phone number")
     .escape(),
 
   body("password")
@@ -31,7 +31,7 @@ export const createUserValidation = [
     .notEmpty()
     .withMessage("password is required")
     .isLength({ min: 6 })
-    .withMessage("password should be at least 6 characters")
+    .withMessage("Password should be at least 6 characters")
     .escape(),
 
   body("role")
@@ -39,7 +39,7 @@ export const createUserValidation = [
     .notEmpty()
     .withMessage("role is required")
     .isIn(["client", "guide", "admin"])
-    .withMessage("role must be client, guide or admin")
+    .withMessage("Role must be client, guide or admin")
     .escape(),
 ];
 
@@ -48,28 +48,28 @@ export const updateUserValidation = [
     .optional()
     .trim()
     .isLength({ min: 2 })
-    .withMessage("name must be at least 2 characters")
+    .withMessage("Name must be at least 2 characters")
     .escape(),
 
   body("email")
     .optional()
     .trim()
     .isEmail()
-    .withMessage("please provide a valid email")
+    .withMessage("Please provide a valid email")
     .escape(),
 
   body("password")
     .optional()
     .trim()
     .isLength({ min: 6 })
-    .withMessage("password should be at least 6 characters")
+    .withMessage("Password should be at least 6 characters")
     .escape(),
 
   body("role")
     .optional()
     .trim()
     .isIn(["client", "guide", "admin"])
-    .withMessage("role must be client, guide or admin")
+    .withMessage("Role must be client, guide or admin")
     .escape(),
 
   body("phone")

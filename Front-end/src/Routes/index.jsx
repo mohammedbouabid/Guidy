@@ -6,7 +6,12 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-// import TestRoute from "../pages/testRoute";
+
+import Login from "@/pages/Home/Login";
+import SignUpPage from "@/pages/Home/RegisterPage";
+import { GuideRegister } from "@/components/GuideRegister";
+
+//import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
 import AllGuides from "../pages/admin/guides";
@@ -26,7 +31,10 @@ const router = createBrowserRouter([
       // { path: "/test", element: <TestRoute /> },
       // { path: "/login", element: <LoginPage /> },
       // { path: "/register", element: <RegisterPage /> },
-    ],
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <SignUpPage /> },
+      {path:"/guideregister", element:<GuideRegister/>}
+       ],
   },
   {
     // Routes Client
