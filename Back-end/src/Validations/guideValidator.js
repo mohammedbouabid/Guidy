@@ -13,6 +13,6 @@ export const updateGuidePlaceSchema = z.object({
   name: z.string().min(3).optional(),
   description: z.string().min(10).optional(),
   location: z.string().optional(),
-  city: z.string().optional(),
+  city: z.string().optional(),  
   country: z.string().optional(),
 });
