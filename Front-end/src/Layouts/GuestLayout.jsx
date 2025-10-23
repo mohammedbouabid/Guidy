@@ -1,25 +1,26 @@
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import { Outlet } from "react-router-dom";
-import WhyChooseUs from "@/components/Features";
+import { useSelector, useDispatch } from "react-redux"
+import { Navigate, Outlet } from "react-router-dom"
+import Navbar from "@/components/Navbar"
+import { LogoutUser } from "@/store/slices/AuthSlice"
 
 const GuestLayout = () => {
-  // const { user, token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.Auth)
 
-//   if (token && user) return <Navigate to="/" />;
+  const handleLogout = () => {
+    dispatch(LogoutUser())
+  }
 
   return (
     <div className="h-screen">
-      <div  className="bg-white">
-            <Navbar/>
-            <HeroSection/>
-            <WhyChooseUs/>
-
-navbare Componenet   
+      <div className="bg-white">
+        <Navbar user={user} onLogout={handleLogout} />
+        
       </div>
-<Outlet />
+      <Outlet />
     </div>
-  );
-};
+  )
+}
 
-export default GuestLayout;
+export default GuestLayout
+

@@ -1,39 +1,117 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+// src/store/slices/AuthSlice.js
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 
-export const LoginUser=createAsyncThunk(
-  "Auth/LoginUser",
-    async(formData,{rejectWithValue})=>{
-        try{
-            const response=await axios.post('http://127.0.0.1:8000/api/login',formData)
-      localStorage.setItem("token", response.data.token);
-            return response.data
-
-        }catch(err){
-            return rejectWithValue(err.response?.data.errors || 'error inconnue')
-        }
+// -------------------- REGISTER --------------------
+export const RegisterUser = createAsyncThunk(
+  "auth/register",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("http://localhost:3000/api/signup", formData, {
+        withCredentials: true,
+      })
+      return res.data // backend should return { message: "Account created" }
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.errors || "Erreur inconnue")
     }
+  }
 )
 
+// -------------------- LOGIN --------------------
+export const LoginUser = createAsyncThunk(
+  "auth/login",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("http://localhost:3000/api/login", formData, {
+        withCredentials: true,
+      })
+      return res.data // backend should return { user, tokens }
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.errors || "Erreur inconnue")
+    }
+  }
+)
 
+// -------------------- LOGOUT --------------------
+export const LogoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      await axios.post("http://localhost:3000/api/logout", {}, { withCredentials: true })
+      return true
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.errors || "Erreur inconnue")
+    }
+  }
+)
+
+// -------------------- SLICE --------------------
 const AuthSlice = createSlice({
   name: "auth",
   initialState: {
+    user: JSON.parse(localStorage.getItem("user")) || null,
     loading: false,
-    initialLoading: true,
-    testMessage: "Hello from Redux Store!" // Nouveau state ajouté
+    error: null,
+    success: null, // 👈 used for register success
   },
   reducers: {
-    // Ajout d'un reducer pour modifier le message
-    updateTestMessage: (state, action) => {
-      state.testMessage = action.payload;
-    }
+    clearError: (state) => {
+      state.error = null
+    },
+    clearSuccess: (state) => {
+      state.success = null
+    },
   },
   extraReducers: (builder) => {
     builder
-      
-  },
-});
+      // REGISTER
+      .addCase(RegisterUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+        state.success = null
+      })
+      .addCase(RegisterUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.error = null
+        state.success = action.payload.message || "Account created successfully"
+        // ❌ do NOT set user or localStorage here
+      })
+      .addCase(RegisterUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
 
-export const { updateTestMessage } = AuthSlice.actions; // Export du nouveau reducer
-export default AuthSlice.reducer;
+      // LOGIN
+      .addCase(LoginUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(LoginUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.user = action.payload.user
+        localStorage.setItem("user", JSON.stringify(action.payload.user))
+      })
+      .addCase(LoginUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+
+      // LOGOUT
+      .addCase(LogoutUser.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(LogoutUser.fulfilled, (state) => {
+        state.loading = false
+        state.user = null
+        state.error = null
+        localStorage.removeItem("user")
+      })
+      .addCase(LogoutUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+  },
+})
+
+export const { clearError, clearSuccess } = AuthSlice.actions
+export default AuthSlice.reducer

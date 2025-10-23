@@ -74,4 +74,3 @@ packSchema.plugin(mongoosePaginate);
 
 
 export default mongoose.model('Pack', packSchema);
-
