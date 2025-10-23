@@ -8,8 +8,7 @@ const GuestLayout = () => {
   return (
     <div className="h-screen bg-fuchsia-700">
       <div  className="bg-orange-400">
-
-navbare Componenet   
+          navbare Componenet   
       </div>
 <Outlet />
     </div>

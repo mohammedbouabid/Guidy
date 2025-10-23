@@ -53,8 +53,8 @@ if (role === "admin") {
 } else if (role === "guide") {
   items = [
     { title: "Dashboard", url: "", icon: CircleGauge },
-    { title: "My Tours", url: "#", icon: Route },
-    { title: "My Destinations", url: "#", icon: MapPinned },
+    { title: "My Places", url: "places", icon: Route },
+    { title: "My Packs", url: "PacksGuide", icon: MapPinned },
     { title: "Calendar", url: "#", icon: CalendarRange },
   ];
 }

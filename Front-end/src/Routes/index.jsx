@@ -14,6 +14,8 @@ import DashboardHome from "@/pages/dashboard/DashboardHome";
 import GuidePlaces from "@/pages/Guide/GuidePlaces";
 import AddGuidePlaceForm from "@/Components/GuidePlace/AddGuidePlaceForm";
 import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
+import AddPack from "@/pages/Guide/AddPack";
+import UpdatePack from "@/pages/Guide/UpdatePack";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +52,8 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "PacksGuide", element: <PacksGuid /> },
+      { path: "packs/add", element: <AddPack /> },
+      { path: "packs/edit/:id", element: <UpdatePack /> },
       { path: "places", element: <GuidePlaces /> },
       { path: "places/add", element: <AddGuidePlaceForm /> },
       { path: "places/edit/:id", element: <UpdateGuidePlaceForm /> },

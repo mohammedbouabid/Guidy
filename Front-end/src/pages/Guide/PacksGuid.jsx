@@ -1,5 +1,6 @@
 import React from "react";
 import { Edit, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const products = [
   {
@@ -50,19 +51,20 @@ const products = [
 ];
 
 const PacksGuid = () => {
+  const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 flex items-center justify-center p-8">
-      <div className="w-full max-w-6xl bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
-        <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+    <div className="  w-full bg-gradient-to-br    to-gray-50  p-4">
+      <div className=" bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
+        <div className="px-6  py-4 border-b bg-gray-50 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-700">
              Product List</h2>
-          <button className="bg-[#EB662B]  text-white px-4 py-2 rounded-md hover:bg-[#d55a25] transition cursor-pointer">
-            + Add Product
+          <button onClick={() => navigate('/guide/packs/add')} className="bg-[#EB662B]  text-white px-4 py-2 rounded-md hover:bg-[#d55a25] transition cursor-pointer">
+            + Add Pack
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-gray-700">
+          <table className="w-full text-sm text-gray-700">
             <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
               <tr>
                 <th className="px-6 py-3 text-left font-semibold">Image</th>
@@ -82,7 +84,7 @@ const PacksGuid = () => {
                   key={product.id}
                   className="hover:bg-gray-50 transition duration-200"
                 >
-                  {/* Image */}
+                  {/* Image */}   
                   <td className="px-6 py-4">
                     <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#EB662B]">
                       <img
@@ -113,7 +115,7 @@ const PacksGuid = () => {
 
                   {/* Action buttons */}
                   <td className="px-6 py-4 flex justify-center space-x-3">
-                    <button className="p-2 rounded-lg bg-gray-100 hover:bg-orange-100 transition cursor-pointer">
+                    <button onClick={() => navigate(`/guide/packs/edit/${product._id || product.id}`)} className="p-2 rounded-lg bg-gray-100 hover:bg-orange-100 transition cursor-pointer">
                       <Edit size={18} className="text-green-600" />
                     </button>
                     <button className="p-2 rounded-lg bg-gray-100 hover:bg-red-100 transition cursor-pointer">
