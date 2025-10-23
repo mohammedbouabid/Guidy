@@ -11,6 +11,7 @@ import PacksGuid from "../pages/Guide/PacksGuid";
 import AllUsers from "../pages/admin/AllUsers";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
+import { GuideRegister } from "@/components/GuideRegister";
 
 
 const router = createBrowserRouter([
@@ -20,7 +21,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <LandingPage /> },
       { path: "/login", element: <Login /> },
-      { path: "/register", element: <SignUpPage /> }
+      { path: "/register", element: <SignUpPage /> },
+      {path:"/guideregister", element:<GuideRegister/>}
     ],
   },
   {

@@ -89,13 +89,13 @@ const CustomerReviewsSection = () => {
             <div className="flex justify-center gap-4 mt-6">
               <button
                 onClick={handlePrev}
-                className="w-8 h-8 rounded-full bg-white shadow hover:bg-gray-100 transition"
+                className="w-8 h-8 rounded-full bg-white shadow hover:bg-gray-100 transition cursor-pointer"
               >
                 ‹
               </button>
               <button
                 onClick={handleNext}
-                className="w-8 h-8 rounded-full bg-white shadow hover:bg-gray-100 transition"
+                className="w-8 h-8 rounded-full bg-white shadow hover:bg-gray-100 transition cursor-pointer"
               >
                 ›
               </button>
