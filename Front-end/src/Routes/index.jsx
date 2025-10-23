@@ -6,13 +6,16 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-import AllPacks from "../pages/Home/AllPacks";
-import PacksGuid from "../pages/Guide/PacksGuid";
 import AllUsers from "../pages/admin/AllUsers";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
 import { GuideRegister } from "@/components/GuideRegister";
 
+//import TestRoute from "../pages/testRoute";
+import AllPacks from "../pages/Home/AllPacks";
+import PacksGuid from "../pages/Guide/PacksGuid";
+import AllGuides from "../pages/admin/guides";
+import DashboardHome from "@/pages/dashboard/DashboardHome";
 
 const router = createBrowserRouter([
   {
@@ -48,7 +51,7 @@ const router = createBrowserRouter([
       </ProtectedRoutes>
     ),
     children: [
-      { path: "PacksGuide", element: <PacksGuid /> },
+      { path: "packsguide", element: <PacksGuid /> },
       // { path: "places", element: <GuidePlaces /> },
       // { path: "packs", element: <GuidePacks /> },
       // { path: "profile", element: <GuideProfile /> },
@@ -63,7 +66,8 @@ const router = createBrowserRouter([
       </ProtectedRoutes>
     ),
     children: [
-      { path: "AllUsers", element: <AllUsers /> },
+      { index: true, element: <DashboardHome /> },
+      { path: "guides", element: <AllGuides /> },
       // { path: "users", element: <UsersManagement /> },
       // { path: "packs", element: <PacksManagement /> },
       // { path: "bookings", element: <BookingsManagement /> },
