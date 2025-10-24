@@ -62,13 +62,6 @@ export const FeaturedPacksSection = () => {
                     className="w-full h-[199px] rounded-t-xl bg-cover bg-center bg-no-repeat"
                     style={{ backgroundImage: `url(${pack.profileImg})` }}
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-[11px] right-[11px] w-[35px] h-[35px] bg-white rounded-full shadow-[0px_10px_40px_#0000000d] hover:bg-white"
-                  >
-                    <HeartIcon className="w-[15px] h-[15px] text-black" />
-                  </Button>
                 </div>
 
                 <div className="p-[21px]">
@@ -82,17 +75,19 @@ export const FeaturedPacksSection = () => {
                   <h3 className="font-medium text-[#05073c] text-sm sm:text-[15.8px] leading-6 mb-[14px] min-h-[48px]">
                     {pack.title}
                   </h3>
+                  <p className="text-xs sm:text-[12.5px] text-[#717171] truncate mb-[10px]">
+                    {pack.description}
+                  </p>
 
                   <div className="flex items-center gap-[10px] mb-[16px]">
                     <div className="flex gap-[5px]">
                       {[...Array(5)].map((_, index) => (
                         <StarIcon
                           key={index}
-                          className={`w-[10px] h-[10px] ${
-                            index < Math.round(pack.avgRating)
+                          className={`w-[10px] h-[10px] ${index < Math.round(pack.avgRating)
                               ? "fill-[#e2ad64] text-[#e2ad64]"
                               : "text-gray-300"
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>
