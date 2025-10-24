@@ -18,7 +18,7 @@ export const createGuidePlace = async (req, res) => {
     const data = {
       ...req.body,
       images: imageUrls,
-      guideID: "68e2827f66a82c966fa0bfe4",
+      guideID: req.user.id,
     };
 
     const newPlace = await GuidePlace.create(data);
@@ -31,7 +31,7 @@ export const createGuidePlace = async (req, res) => {
 // Récupérer tous les lieux avec les informations du guide
 export const getAllGuidePlaces = async (req, res) => {
   try {
-    const places = await GuidePlace.find().populate({
+    const places = await GuidePlace.find({ guideID: req.user.id }).populate({
       path: "guideID",
       select: "firstName lastName email profileImage role", // Sélectionnez les champs dont vous avez besoin
     });
@@ -64,7 +64,7 @@ export const updateGuidePlace = async (req, res) => {
 
     const existingPlace = await GuidePlace.findOne({
       _id: req.params.id,
-      guideID: "68e2827f66a82c966fa0bfe4",
+      guideID: req.user.id,
     });
 
     if (!existingPlace) {
@@ -100,8 +100,8 @@ export const updateGuidePlace = async (req, res) => {
     };
 
     const updated = await GuidePlace.findOneAndUpdate(
-      { _id: req.params.id, guideID: "68e2827f66a82c966fa0bfe4" },
-      updatedData,
+      { _id: req.params.id, guideID: req.user.id },
+      updatedData,   
       { new: true, runValidators: true }
     );
 
@@ -133,7 +133,7 @@ export const deleteGuidePlace = async (req, res) => {
     await GuidePlace.findByIdAndDelete(req.params.id);
 
     res.json({
-      success: true,
+      success: true, 
       message: "Place deleted successfully",
     });
   } catch (error) {

@@ -5,6 +5,7 @@ import { Image as ImageIcon, Loader2, X } from 'lucide-react';
 import { fetchGuidePlaces } from '@/store/slices/guidePlaceSlice';
 import { createPack } from '@/store/slices/packSlice';
 import { toast } from 'react-hot-toast';
+import { validatePackForm, clearFieldError } from '@/validations/packValidation';
 
 const inputStyles = (error) => `
   w-full px-4 py-3 rounded-lg bg-gray-50 
@@ -42,47 +43,22 @@ export default function AddPack() {
   }, [dispatch]);
 
   const validate = () => {
-    const e = {};
-    if (!form.title || form.title.length < 3) e.title = 'Title must be at least 3 characters';
-    if (!form.description || form.description.length < 10) e.description = 'Description must be at least 10 characters';
-    if (!form.price || Number(form.price) <= 0) e.price = 'Price must be a positive number';
-    if (!form.startDate) e.startDate = 'Start date is required';
-    if (!form.endDate) e.endDate = 'End date is required';
-    if (form.startDate) {
-      const start = new Date(form.startDate);
-      const min = new Date();
-      min.setDate(min.getDate() + 15);
-      if (start < new Date(min.toDateString())) {
-        e.startDate = 'Start date must be at least 15 days in the future';
-      }
-    }
-    if (form.startDate && form.endDate) {
-      const start = new Date(form.startDate);
-      const end = new Date(form.endDate);
-      if (end <= start) {
-        e.endDate = 'End date must be after the start date';
-      }
-    }
-    if (!form.startLocation) e.startLocation = 'Start location is required';
-    if (!form.endLocation) e.endLocation = 'End location is required';
-    if (!form.maxClients || Number(form.maxClients) <= 0) e.maxClients = 'Max clients must be a positive number';
-    if (!selectedPlaces.length) e.guidesPlacesId = 'Select at least one place';
-    if (!imageFile) e.profileImg = 'An image is required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    const validationErrors = validatePackForm(form, selectedPlaces, imageFile, false);
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
   };
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+    if (errors[name]) setErrors(clearFieldError(errors, name));
   };
 
   const onSelectPlace = (id) => {
     setSelectedPlaces((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
-    if (errors.guidesPlacesId) setErrors((prev) => ({ ...prev, guidesPlacesId: '' }));
+    if (errors.guidesPlacesId) setErrors(clearFieldError(errors, 'guidesPlacesId'));
   };
 
   const onImageChange = (e) => {
@@ -90,7 +66,7 @@ export default function AddPack() {
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
-    if (errors.profileImg) setErrors((prev) => ({ ...prev, profileImg: '' }));
+    if (errors.profileImg) setErrors(clearFieldError(errors, 'profileImg'));
   };
 
   const handleSubmit = async (e) => {

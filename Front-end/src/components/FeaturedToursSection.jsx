@@ -32,7 +32,7 @@ export const FeaturedPacksSection = () => {
   }, [])
 
   if (loading) return <p className="text-center py-10">Loading tours...</p>
-  if (error) return <p className="text-center text-red-500 py-10">{error}</p>
+  if (error) return <p className="text-center text-red-500 py-10">{typeof error === 'string' ? error : error?.message || 'An error occurred'}</p>
 
   return (
     <section className="w-full py-12 px-25">

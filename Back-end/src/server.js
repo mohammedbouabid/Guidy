@@ -33,13 +33,7 @@ app.use(cors({
 }));
   
 
-// app.use("/static");
-app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+
 // Route test
 app.get("/", (req, res) => {
   res.send(`Serveur lancé sur le port ${port}`);

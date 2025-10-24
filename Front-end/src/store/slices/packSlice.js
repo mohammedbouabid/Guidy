@@ -53,6 +53,18 @@ export const updatePack = createAsyncThunk(
   }
 );
 
+export const deletePack = createAsyncThunk(
+  'pack/delete',
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/packs/${id}`);
+      return id; // Return the id for filtering in the reducer
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete pack');
+    }
+  }
+);
+
 const initialState = {
   items: [],
   current: null,
@@ -125,6 +137,19 @@ const packSlice = createSlice({
         if (idx !== -1) state.items[idx] = action.payload;
       })
       .addCase(updatePack.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(deletePack.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deletePack.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = state.items.filter(pack => pack._id !== action.payload);
+        state.success = true;
+      })
+      .addCase(deletePack.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
