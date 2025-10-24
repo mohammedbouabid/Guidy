@@ -59,62 +59,66 @@ export const FeaturedPacksSection = () => {
               <CardContent className="p-0">
                 <div className="relative">
                   <div
-                    className="w-full h-[199px] rounded-t-xl bg-cover bg-center bg-no-repeat"
+                    className="w-full h-[180px] rounded-t-xl bg-cover bg-center bg-no-repeat"
                     style={{ backgroundImage: `url(${pack.profileImg})` }}
                   />
                 </div>
 
-                <div className="p-[21px]">
-                  <div className="flex items-center gap-[5px] mb-[10px]">
+                <div className="p-[18px]">
+                  <div className="flex items-center gap-[5px] mb-[8px]">
                     <MapPinIcon className="w-4 h-4 text-[#717171]" />
-                    <span className="text-[#717171] text-xs sm:text-[12.3px]">
+                    <span className="text-[#717171] text-[13px]">
                       {pack.startLocation || "Unknown"}
                     </span>
                   </div>
 
-                  <h3 className="font-medium text-[#05073c] text-sm sm:text-[15.8px] leading-6 mb-[14px] min-h-[48px]">
+                  <h3 className="font-semibold text-[#05073c] text-[15.5px] leading-[21px] mb-[8px]">
                     {pack.title}
                   </h3>
-                  <p className="text-xs sm:text-[12.5px] text-[#717171] truncate mb-[10px]">
+
+                  <p className="text-[#05073c] font-semibold text-[14px] truncate mb-[10px]">
                     {pack.description}
                   </p>
 
-                  <div className="flex items-center gap-[10px] mb-[16px]">
-                    <div className="flex gap-[5px]">
-                      {[...Array(5)].map((_, index) => (
-                        <StarIcon
-                          key={index}
-                          className={`w-[10px] h-[10px] ${index < Math.round(pack.avgRating)
-                              ? "fill-[#e2ad64] text-[#e2ad64]"
-                              : "text-gray-300"
-                            }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-[#05073c] text-xs sm:text-[12.5px]">
-                      {pack.avgRating} ({pack.reviewsCount || 0})
-                    </span>
-                  </div>
+<div className="flex items-center gap-[10px] mb-[14px]">
+  <div className="flex gap-[5px]">
+    {[...Array(5)].map((_, index) => (
+      <StarIcon
+        key={index}
+        className={`w-[10px] h-[10px] ${
+          typeof pack.avgRating === "number" && index < Math.round(pack.avgRating)
+            ? "fill-[#e2ad64] text-[#e2ad64]"
+            : "text-gray-300"
+        }`}
+      />
+    ))}
+  </div>
+  <span className="text-[#05073c] text-[13px]">
+    {typeof pack.avgRating === "number"
+      ? `${pack.avgRating.toFixed(1)} (${pack.reviewsCount || 0})`
+      : "No ratings"}
+  </span>
+</div>
 
-                  <div className="flex items-center justify-between pt-[15px] border-t border-solid border-[#e7e6e6]">
+
+                  <div className="flex items-center justify-between pt-[12px] border-t border-solid border-[#e7e6e6]">
                     <div className="flex items-center gap-[4.8px]">
                       <ClockIcon className="w-4 h-4 text-[#05073c]" />
-                      <span className="text-[#05073c] text-xs sm:text-[12.6px]">
+                      <span className="text-[#05073c] text-[13px]">
                         {pack.duration || "N/A"}
                       </span>
                     </div>
 
                     <div className="flex items-baseline gap-1">
-                      <span className="text-[#05073c] text-xs sm:text-[13px]">
-                        From
-                      </span>
-                      <span className="font-medium text-[#05073c] text-sm sm:text-[14.5px]">
+                      <span className="text-[#05073c] text-[13px]">From</span>
+                      <span className="font-medium text-[#05073c] text-[15px]">
                         ${pack.price}
                       </span>
                     </div>
                   </div>
                 </div>
               </CardContent>
+
             </Card>
           ))}
         </div>

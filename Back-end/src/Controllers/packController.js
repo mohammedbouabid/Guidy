@@ -281,11 +281,11 @@ const deletePack = async (req, res) => {
 };
 const getPopularPacks = async (req, res) => {
   try {
-    const packs = await Pack.find(
-      { profileImg: { $exists: true, $ne: "" } } // only packs with valid images
-    )
-      .sort({ avgRating: -1 }) // highest rating first
-      .limit(8); // limit to 8 for homepage
+    const packs = await Pack.find({
+      avgRating: { $gt: 0 } // only packs with a rating above 0
+    })
+      .sort({ avgRating: -1 }) // highest rated first
+      .limit(8); // top 8 for homepage
 
     res.json({ docs: packs });
   } catch (err) {
@@ -293,6 +293,7 @@ const getPopularPacks = async (req, res) => {
     res.status(500).json({ message: "Error fetching popular packs" });
   }
 };
+
 
 export {
   getAllPacks,
