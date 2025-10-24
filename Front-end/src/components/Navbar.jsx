@@ -56,7 +56,7 @@ const Navbar = ({ user, onLogout }) => {
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-9 px-2 py-0 hover:bg-accent hover:text-accent-foreground flex items-center gap-2">
+                  <Button variant="ghost" className="h-9 px-2 py-0 hover:bg-accent hover:text-accent-foreground flex items-center gap-2 cursor-pointer">
                     <Avatar className="h-7 w-7">
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback className="text-xs">
@@ -95,5 +95,6 @@ const Navbar = ({ user, onLogout }) => {
     </nav>
   )
 }
+
 
 export default Navbar
