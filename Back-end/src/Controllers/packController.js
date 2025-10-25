@@ -282,7 +282,7 @@ const deletePack = async (req, res) => {
 const getPopularPacks = async (req, res) => {
   try {
     const packs = await Pack.find({
-      avgRating: { $gt: 0 } // only packs with a rating above 0
+       // only packs with a rating above 0
     })
       .sort({ avgRating: -1 }) // highest rated first
       .limit(8); // top 8 for homepage
