@@ -12,6 +12,8 @@ const GuestLayout = () => {
   }
 
   return (
+    
+
     <div className="h-screen">
       <div className="bg-white">
         <Navbar user={user} onLogout={handleLogout} />

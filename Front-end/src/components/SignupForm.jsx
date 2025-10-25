@@ -163,21 +163,7 @@ export function SignupForm({ className, ...props }) {
                 </FieldDescription>
               </Field>
               
-<Field>
-  <FieldLabel htmlFor="role">Role</FieldLabel>
-  <Select
-    value={formData.role}
-    onValueChange={(value) => setFormData({ ...formData, role: value })}
-  >
-    <SelectTrigger id="role" className="w-full">
-      <SelectValue placeholder="Select a role" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="client">Client</SelectItem>
-      <SelectItem value="guide">Guide</SelectItem>
-    </SelectContent>
-  </Select>
-</Field>
+
 
               <Field>
                 <Button

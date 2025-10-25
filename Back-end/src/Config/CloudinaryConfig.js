@@ -12,4 +12,4 @@ CloundinaryConfig.config({
 });
 
 
-export default CloundinaryConfig       
+export default CloundinaryConfig

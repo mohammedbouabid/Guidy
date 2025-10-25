@@ -1,24 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../api/axios';
 
 // Async Actions
 export const fetchGuidePlaces = createAsyncThunk(
   'guidePlace/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('/api/guide-places');
+      const response = await api.get('/guide-places');
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
-    }
+      return rejectWithValue(error.response?.data?.message || 'Une erreur est survenue');
+    }   
   }
 );
 
 export const createGuidePlace = createAsyncThunk(
   'guidePlace/create',
-  async (formData, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {   
     try {
-      const response = await axios.post('/api/guide-places', formData, {
+      const response = await api.post('/guide-places', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
@@ -32,24 +32,27 @@ export const updateGuidePlace = createAsyncThunk(
   'guidePlace/update',
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`/api/guide-places/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await api.put(`/guide-places/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }, // 🔥 important
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update place'
+      );
     }
   }
 );
+
 
 export const deleteGuidePlace = createAsyncThunk(
   'guidePlace/delete',
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`/api/guide-places/${id}`);
-      return id;
+      await api.delete(`/guide-places/${id}`);
+      return id; // Return the id for filtering in the reducer
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete place');
     }
   }
 );
@@ -99,7 +102,6 @@ const guidePlaceSlice = createSlice({
       })
       .addCase(createGuidePlace.fulfilled, (state, action) => {
         state.loading = false;
-        state.places.push(action.payload);
         state.success = true;
       })
       .addCase(createGuidePlace.rejected, (state, action) => {
@@ -114,9 +116,9 @@ const guidePlaceSlice = createSlice({
       })
       .addCase(updateGuidePlace.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.places.findIndex(place => place._id === action.payload._id);
+        const index = state.places.findIndex(p => p._id === action.payload.data._id);
         if (index !== -1) {
-          state.places[index] = action.payload;
+          state.places[index] = action.payload.data;
         }
         state.success = true;
       })

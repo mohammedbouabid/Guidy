@@ -20,7 +20,7 @@ const router = express.Router();
 
 // --- Public routes ---
 router.get("/", getAllPacks);
-router.get("/popular", getPopularPacks); // 👈 new endpoint
+router.get("/popular", getPopularPacks); //  new endpoint
 router.get("/:id", getPackById);
 
 

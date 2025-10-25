@@ -6,12 +6,21 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-import AllPacks from "../pages/Home/AllPacks";
-import PacksGuid from "../pages/Guide/PacksGuid";
-import AllUsers from "../pages/admin/AllUsers";
+
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
+import { GuideRegister } from "@/components/GuideRegister";
 
+//import TestRoute from "../pages/testRoute";
+import AllPacks from "../pages/Home/AllPacks";
+import PacksGuid from "../pages/Guide/PacksGuid";
+import AllGuides from "../pages/admin/guides";
+import DashboardHome from "@/pages/dashboard/DashboardHome";
+import GuidePlaces from "@/pages/Guide/GuidePlaces";
+import AddGuidePlaceForm from "@/Components/GuidePlace/AddGuidePlaceForm";
+import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
+import AddPack from "@/pages/Guide/AddPack";
+import UpdatePack from "@/pages/Guide/UpdatePack";
 
 const router = createBrowserRouter([
   {
@@ -19,9 +28,13 @@ const router = createBrowserRouter([
     element: <GuestLayout />,
     children: [
       { path: "/", element: <LandingPage /> },
+      // { path: "/test", element: <TestRoute /> },
+      // { path: "/login", element: <LoginPage /> },
+      // { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <Login /> },
-      { path: "/register", element: <SignUpPage /> }
-    ],
+      { path: "/register", element: <SignUpPage /> },
+      {path:"/guideregister", element:<GuideRegister/>}
+       ],
   },
   {
     // Routes Client
@@ -47,6 +60,12 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "PacksGuide", element: <PacksGuid /> },
+      { path: "packs/add", element: <AddPack /> },
+      { path: "packs/edit/:id", element: <UpdatePack /> },
+      { path: "places", element: <GuidePlaces /> },
+      { path: "places/add", element: <AddGuidePlaceForm /> },
+      { path: "places/edit/:id", element: <UpdateGuidePlaceForm /> },
+      // { path: "packsguide", element: <PacksGuid /> },
       // { path: "places", element: <GuidePlaces /> },
       // { path: "packs", element: <GuidePacks /> },
       // { path: "profile", element: <GuideProfile /> },
@@ -61,7 +80,8 @@ const router = createBrowserRouter([
       </ProtectedRoutes>
     ),
     children: [
-      { path: "AllUsers", element: <AllUsers /> },
+      { index: true, element: <DashboardHome /> },
+      { path: "guides", element: <AllGuides /> },
       // { path: "users", element: <UsersManagement /> },
       // { path: "packs", element: <PacksManagement /> },
       // { path: "bookings", element: <BookingsManagement /> },
