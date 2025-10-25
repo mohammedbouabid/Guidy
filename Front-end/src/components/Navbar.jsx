@@ -74,7 +74,7 @@ const Navbar = ({ user, onLogout }) => {
                            bg-[#eb662b] hover:bg-[#d4551f] transition 
                            shadow-lg hover:shadow-orange-400/50 
                            animate-pulse-slow
-                           cursor-pointer transition-colors hover:opacity-90"
+                           cursor-pointer"
                     style={{ backgroundColor: "#eb662b" }}
                   >
                     Log in
