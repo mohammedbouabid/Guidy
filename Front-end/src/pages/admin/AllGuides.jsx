@@ -1,4 +1,4 @@
-import UserManagement from "@/components/UserManagement";
+import UserManagement from "@/components/adminHelpers/UserManagement";
 import { createProfileColumn, createTextColumn, createDateColumn } from "@/utils/tableColumns";
 
 export default function AllGuides() {

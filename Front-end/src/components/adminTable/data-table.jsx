@@ -15,8 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import {
   Trash2,
   ChevronDown,
@@ -190,7 +190,7 @@ export function DataTable({
                     </TableHead>
                   ))}
                   {showActions && (onDelete || onView) && (
-                    <TableHead className="uppercase text-[12px] text-gray-600 w-32">
+                    <TableHead className="uppercase text-[12px] text-gray-600 w-32 pl-6">
                       action
                     </TableHead>
                   )}

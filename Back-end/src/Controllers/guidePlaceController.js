@@ -10,7 +10,9 @@ export const createGuidePlace = async (req, res) => {
     const imageUrls = req.files?.map((file) => file.path) || [];
 
     if (imageUrls.length === 0) {
-      return res.status(400).json({ message: "Au moins une image est requise" });
+      return res
+        .status(400)
+        .json({ message: "Au moins une image est requise" });
     }
 
     const data = {
@@ -29,8 +31,63 @@ export const createGuidePlace = async (req, res) => {
 //  Récupérer tous les lieux
 export const getAllGuidePlaces = async (req, res) => {
   try {
-    const places = await GuidePlace.find();
-    res.json(places);
+    const { search, page, limit, sortField, sortOrder, city, country } =
+      req.query;
+
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build sort object
+    let sortOption = {};
+    if (sortField) {
+      const sortDirection = sortOrder === "desc" ? -1 : 1;
+      sortOption[sortField] = sortDirection;
+    } else {
+      sortOption = { createdAt: -1 };
+    }
+
+    // Build query
+    let query = {};
+
+    // Filter by city if provided
+    if (city) {
+      query.city = city;
+    }
+
+    // Filter by country if provided
+    if (country) {
+      query.country = country;
+    }
+
+    // Search functionality
+    if (search) {
+      const regex = new RegExp(search, "i");
+      query.$or = [
+        { name: regex },
+        { location: regex },
+        { city: regex },
+        { country: regex },
+      ];
+    }
+
+    const places = await GuidePlace.find(query)
+      .populate("guideID", "name")
+      .skip(skip)
+      .limit(limitNum)
+      .collation({ locale: "en", strength: 1 })
+      .sort(sortOption);
+
+    const count = await GuidePlace.countDocuments(query);
+
+    res.json({
+      success: true,
+      places,
+      count,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(count / limitNum),
+    });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
@@ -39,7 +96,10 @@ export const getAllGuidePlaces = async (req, res) => {
 //  Récupérer un lieu par ID
 export const getGuidePlaceById = async (req, res) => {
   try {
-    const place = await GuidePlace.findById(req.params.id);
+    const place = await GuidePlace.findById(req.params.id).populate(
+      "guideID",
+      "name"
+    );
     if (!place) return res.status(404).json({ message: "Lieu non trouvé ❌" });
     res.json(place);
   } catch (error) {
@@ -57,7 +117,8 @@ export const updateGuidePlace = async (req, res) => {
 
     if (!existingPlace) {
       return res.status(404).json({
-        message: "Lieu non trouvé ou vous n'avez pas les droits pour le modifier",
+        message:
+          "Lieu non trouvé ou vous n'avez pas les droits pour le modifier",
       });
     }
 
@@ -102,7 +163,7 @@ export const deleteGuidePlace = async (req, res) => {
     // Supprimer les fichiers physiques
     deleted.images.forEach((img) => {
       const filePath = path.resolve("uploads", img);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);  
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     });
 
     res.json({ message: "Lieu supprimé" });

@@ -15,7 +15,7 @@ export const fetchUsers = createAsyncThunk(
     role = ""
   }, { rejectWithValue }) => {
     try {
-      const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZTI2YWVkNzA3OGY3ODM2ZGU5MzZkNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTQ4MDI4MywiZXhwIjoxNzYxNDgzODgzfQ.RQrAamcuTqBrR5XsZ2FA2eGVGcYAPW8immhYtV6M53k";
+      const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZTI2YWVkNzA3OGY3ODM2ZGU5MzZkNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTUwODA1NCwiZXhwIjoxNzYxNTExNjU0fQ.2FzI5Fx4S_pZlkiMps56GG5CaricVYCZD6xkQ6TxDVw";
       document.cookie = `accessToken=${accessToken}; path=/; samesite=lax`;
       
       const params = { page, limit, search };
