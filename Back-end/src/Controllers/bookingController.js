@@ -196,9 +196,34 @@ export const getAllBookings = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admins only.' });
     }
 
-    const bookings = await Booking.find()
-      .populate('userID', 'name email role')     // show user info
-      .populate('packID', 'title location date') // show pack info
+    // Filtres depuis les query params
+    const { userId, packId, startDate, endDate } = req.query;
+    
+    // Construire la requête de filtrage
+    let query = {};
+    
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      query.userID = userId;
+    }
+    
+    if (packId && mongoose.Types.ObjectId.isValid(packId)) {
+      query.packID = packId;
+    }
+    
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) {
+        query.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        query.createdAt.$lte = new Date(endDate);
+      }
+    }
+
+    const bookings = await Booking.find(query)
+      .populate('userID', 'name email role')
+      .populate('packID', 'title startLocation endLocation startDate endDate price')
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,

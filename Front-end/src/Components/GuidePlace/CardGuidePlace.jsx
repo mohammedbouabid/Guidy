@@ -13,6 +13,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import GuideDetailsModal from "./GuideDetailsModal";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { useDispatch } from "react-redux";
 import { deleteGuidePlace } from "../../store/slices/guidePlaceSlice";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ function CardGuidePlace({ place }) {
   const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, placeId: null, placeName: '' });
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -39,9 +41,18 @@ function CardGuidePlace({ place }) {
   // Add safety check for place object
   if (!place) return null;
 
+  const handleDeleteClick = () => {
+    setDeleteDialog({
+      isOpen: true,
+      placeId: place._id,
+      placeName: place.name
+    });
+    setShowActions(false);
+  };
+
   const handleDelete = async () => {
     try {
-      await dispatch(deleteGuidePlace(place._id)).unwrap();
+      await dispatch(deleteGuidePlace(deleteDialog.placeId)).unwrap();
 
       // Show deletion toast with red theme
       toast(
@@ -140,7 +151,7 @@ function CardGuidePlace({ place }) {
                   Edit Place
                 </button>
                 <button
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   className="flex items-center w-full gap-2 px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer  rounded-md transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -197,6 +208,18 @@ function CardGuidePlace({ place }) {
         place={place}
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
+      />
+
+      {/* Modal de confirmation de suppression */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, placeId: null, placeName: '' })}
+        onConfirm={handleDelete}
+        title="Supprimer le lieu"
+        message={`Êtes-vous sûr de vouloir supprimer "${deleteDialog.placeName}" ? Cette action est irréversible.`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        type="danger"
       />
     </div>
   );

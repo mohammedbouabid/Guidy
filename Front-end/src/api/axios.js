@@ -16,4 +16,35 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Detect expired access token
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      error.response?.data?.message?.includes("jwt expired")
+    ) {
+      originalRequest._retry = true;
+      try {
+        // Refresh token via cookie
+        await api.get('/refresh');
+
+        // Retry original request
+        return api(originalRequest);
+      } catch (refreshError) {
+        console.error("Refresh failed:", refreshError);
+        // Clear user info and redirect to login
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default api;

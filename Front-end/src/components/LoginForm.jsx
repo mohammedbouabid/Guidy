@@ -56,7 +56,7 @@ export function LoginForm({ className, ...props }) {
         <CardContent>
           {error && (
             <div className="text-sm text-red-500 text-center mb-4">
-              {typeof error === 'string' ? error : error?.message || 'An error occurred'}
+              {error}
             </div>
           )}
           <form onSubmit={handleSubmit}>

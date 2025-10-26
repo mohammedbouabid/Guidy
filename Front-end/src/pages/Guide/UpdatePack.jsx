@@ -5,7 +5,6 @@ import { Image as ImageIcon, Loader2, X } from 'lucide-react';
 import { fetchGuidePlaces } from '@/store/slices/guidePlaceSlice';
 import { fetchPackById, updatePack } from '@/store/slices/packSlice';
 import { toast } from 'react-hot-toast';
-import { validatePackForm, clearFieldError } from '@/validations/packValidation';
 
 const inputStyles = (error) => `
   w-full px-4 py-3 rounded-lg bg-gray-50 
@@ -56,7 +55,12 @@ export default function UpdatePack() {
           endLocation: p.endLocation || '',
           maxClients: p.maxClients ?? '',
         });
-        setSelectedPlaces(Array.isArray(p.guidesPlacesId) ? p.guidesPlacesId.map(String) : []);
+        // Extract IDs from guidesPlacesId (can be objects or strings)
+        setSelectedPlaces(
+          Array.isArray(p.guidesPlacesId) 
+            ? p.guidesPlacesId.map(place => typeof place === 'object' ? place._id : String(place))
+            : []
+        );
         setExistingImage(p.profileImg || '');
       })
       .catch((e) => {
@@ -65,20 +69,44 @@ export default function UpdatePack() {
   }, [dispatch, id]);
 
   const validate = () => {
-    const validationErrors = validatePackForm(form, selectedPlaces, newImageFile, true);
-    setErrors(validationErrors);
-    return Object.keys(validationErrors).length === 0;
+    const e = {};
+    if (!form.title || form.title.length < 3) e.title = 'Title must be at least 3 characters';
+    if (!form.description || form.description.length < 10) e.description = 'Description must be at least 10 characters';
+    if (!form.price || Number(form.price) <= 0) e.price = 'Price must be a positive number';
+    if (!form.startDate) e.startDate = 'Start date is required';
+    if (!form.endDate) e.endDate = 'End date is required';
+    if (form.startDate) {
+      const start = new Date(form.startDate);
+      const min = new Date();
+      min.setDate(min.getDate() + 15);
+      if (start < new Date(min.toDateString())) {
+        e.startDate = 'Start date must be at least 15 days in the future';
+      }
+    }
+    if (form.startDate && form.endDate) {
+      const start = new Date(form.startDate);
+      const end = new Date(form.endDate);
+      if (end <= start) {
+        e.endDate = 'End date must be after the start date';
+      }
+    }
+    if (!form.startLocation) e.startLocation = 'Start location is required';
+    if (!form.endLocation) e.endLocation = 'End location is required';
+    if (!form.maxClients || Number(form.maxClients) <= 0) e.maxClients = 'Max clients must be a positive number';
+    if (!selectedPlaces.length) e.guidesPlacesId = 'Select at least one place';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
-    if (errors[name]) setErrors(clearFieldError(errors, name));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const onSelectPlace = (pid) => {
     setSelectedPlaces((prev) => prev.includes(pid) ? prev.filter((i) => i !== pid) : [...prev, pid]);
-    if (errors.guidesPlacesId) setErrors(clearFieldError(errors, 'guidesPlacesId'));
+    if (errors.guidesPlacesId) setErrors((prev) => ({ ...prev, guidesPlacesId: '' }));
   };
 
   const onNewImage = (e) => {
@@ -104,15 +132,15 @@ export default function UpdatePack() {
     fd.append('startLocation', form.startLocation);
     fd.append('endLocation', form.endLocation);
     fd.append('maxClients', String(form.maxClients));
-    selectedPlaces.forEach((pid) => fd.append('guidesPlacesId', pid));
+    fd.append('guidesPlacesId', JSON.stringify(selectedPlaces));
     if (newImageFile) fd.append('profileImg', newImageFile);
 
     try {
       await dispatch(updatePack({ id, formData: fd })).unwrap();
-      toast.success('Pack updated successfully');
+      toast.success('Pack mis à jour avec succès');
       navigate('/guide/PacksGuide');
     } catch (err) {
-      toast.error(err?.message || 'Failed to update pack');
+      toast.error(err?.message || 'Échec de la mise à jour du pack');
     }
   };
 
@@ -210,8 +238,8 @@ export default function UpdatePack() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Guide Places</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-auto p-2 border rounded-xl">
               {(places || []).map((p) => (
-                <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(p._id) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
-                  <input type="checkbox" checked={selectedPlaces.includes(p._id)} onChange={() => onSelectPlace(p._id)} />
+                <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(String(p._id)) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
+                  <input type="checkbox" checked={selectedPlaces.includes(String(p._id))} onChange={() => onSelectPlace(String(p._id))} />
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
                       {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
@@ -229,10 +257,10 @@ export default function UpdatePack() {
 
           <div className="flex justify-end gap-4">
             <button type="button" onClick={() => navigate('/guide/PacksGuide')} className="px-6 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" disabled={loading}>
-              Cancel
+              Annuler
             </button>
             <button type="submit" disabled={loading} className="px-6 py-2 text-white cursor-pointer bg-[#EB662B] rounded-lg hover:bg-[#d55a26] transition-colors disabled:opacity-50 flex items-center gap-2">
-              {loading ? (<><Loader2 className="w-4 h-4 animate-spin" />Updating...</>) : 'Update Pack'}
+              {loading ? (<><Loader2 className="w-4 h-4 animate-spin" />Mise à jour...</>) : 'Mettre à jour'}
             </button>
           </div>
         </form>

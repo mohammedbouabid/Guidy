@@ -1,5 +1,5 @@
 // controllers/guidePlaceController.js
-import GuidePlace from "../Models/Guideplace.js";
+import GuidePlace from "../Models/GuidePlace.js";
 // import { v2 as CloundinaryConfig } from "cloudinary";
 
 
@@ -35,6 +35,7 @@ export const getAllGuidePlaces = async (req, res) => {
       path: "guideID",
       select: "firstName lastName email profileImage role", // Sélectionnez les champs dont vous avez besoin
     });
+    
     res.json(places);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });

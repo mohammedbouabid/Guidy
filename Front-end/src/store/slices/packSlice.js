@@ -1,66 +1,77 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../api/axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../../api/axios";
 
 export const createPack = createAsyncThunk(
-  'pack/create',
+  "pack/create",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await api.post('/packs', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const res = await api.post("/packs", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to create pack');
+      return rejectWithValue(error.response?.data || "Failed to create pack");
     }
   }
 );
 
 export const fetchPacks = createAsyncThunk(
-  'pack/fetchAll',
-  async (_, { rejectWithValue }) => {
+  "pack/fetchAll",
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
-      const res = await api.get('/packs');
+      const res = await api.get("/packs", { params: { page, limit } });
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch packs');
+      return rejectWithValue(error.response?.data || "Failed to fetch packs");
+    }
+  }
+);
+
+export const fetchGuidePacks = createAsyncThunk(
+  "pack/fetchGuidePacks",
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+    try {
+      const res = await api.get("/packs/all", { params: { page, limit } });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch guide packs");
     }
   }
 );
 
 export const fetchPackById = createAsyncThunk(
-  'pack/fetchById',
+  "pack/fetchById",
   async (id, { rejectWithValue }) => {
     try {
       const res = await api.get(`/packs/${id}`);
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch pack');
+      return rejectWithValue(error.response?.data || "Failed to fetch pack");
     }
   }
 );
 
 export const updatePack = createAsyncThunk(
-  'pack/update',
+  "pack/update",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
       const res = await api.put(`/packs/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to update pack');
+      return rejectWithValue(error.response?.data || "Failed to update pack");
     }
   }
 );
-
 export const deletePack = createAsyncThunk(
-  'pack/delete',
+  "pack/delete",
   async (id, { rejectWithValue }) => {
     try {
-      await api.delete(`/packs/${id}`);
-      return id; // Return the id for filtering in the reducer
+      const res = await api.delete(`/packs/${id}`);
+      return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete pack');
+      return rejectWithValue(error.response?.data || "Failed to delete pack");
     }
   }
 );
@@ -71,10 +82,14 @@ const initialState = {
   loading: false,
   error: null,
   success: false,
+  page: 1,
+  totalPages: 1,
+  totalDocs: 0,
+  limit: 10,
 };
 
 const packSlice = createSlice({
-  name: 'pack',
+  name: "pack",
   initialState,
   reducers: {
     resetStatus: (state) => {
@@ -90,9 +105,49 @@ const packSlice = createSlice({
       })
       .addCase(fetchPacks.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload?.docs || action.payload || [];
+        const payload = action.payload;
+        if (payload && Array.isArray(payload.docs)) {
+          state.items = payload.docs;
+          state.page = payload.page ?? 1;
+          state.totalPages = payload.totalPages ?? 1;
+          state.totalDocs = payload.totalDocs ?? payload.total ?? payload.docs.length ?? 0;
+          state.limit = payload.limit ?? state.limit;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+        }
       })
       .addCase(fetchPacks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchGuidePacks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGuidePacks.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        if (payload && Array.isArray(payload.docs)) {
+          state.items = payload.docs;
+          state.page = payload.page ?? 1;
+          state.totalPages = payload.totalPages ?? 1;
+          state.totalDocs = payload.totalDocs ?? payload.total ?? payload.docs.length ?? 0;
+          state.limit = payload.limit ?? state.limit;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+        }
+      })
+      .addCase(fetchGuidePacks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -140,14 +195,16 @@ const packSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // 🗑️ DELETE PACK
       .addCase(deletePack.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(deletePack.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = state.items.filter(pack => pack._id !== action.payload);
         state.success = true;
+        // Supprimer le pack du tableau local
+        state.items = state.items.filter((p) => p._id !== action.meta.arg);
       })
       .addCase(deletePack.rejected, (state, action) => {
         state.loading = false;
