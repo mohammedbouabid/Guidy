@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import {
-  Settings,
   CircleGauge,
   UsersRound,
   MapPinned,
@@ -14,6 +13,7 @@ import {
   PanelBottomOpen,
   UserRoundPen,
   LogOut,
+  MessageSquareHeart,
 } from "lucide-react";
 
 import {
@@ -46,9 +46,10 @@ if (role === "admin") {
     { title: "Dashboard", url: "", icon: CircleGauge },
     { title: "Guides", url: "guides", icon: UsersRound },
     { title: "Clients", url: "clients", icon: UsersRound },
-    { title: "Destinations", url: "#", icon: MapPinned },
+    { title: "Destinations", url: "destinations", icon: MapPinned },
     { title: "Tours", url: "#", icon: Route },
     { title: "Bookings", url: "#", icon: BookmarkCheck },
+    { title: "Ratings", url: "#", icon: MessageSquareHeart },
   ];
 } else if (role === "guide") {
   items = [

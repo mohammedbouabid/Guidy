@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DataTable } from "@/components/data-table";
+import { DataTable } from "@/components/adminTable/data-table";
 import { fetchUsers, deleteUser, getUserById, clearSelectedUser } from "@/store/slices/usersSlice";
-import UserDetailsModal from "@/components/UserDetailsModal";
+import UserDetailsModal from "@/components/adminHelpers/UserDetailsModal";
 import Swal from "sweetalert2";
 import { Calendar, UserCheck } from "lucide-react";
 
@@ -207,20 +207,14 @@ export default function UserManagement({ role = "guide", title = "Users", column
         const user = row.original;
         return (
           <div className="flex items-center gap-2">
-            <a
-              href={user.profileImage}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
               <img
                 src={
                   user.profileImage ||
                   "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg"
                 }
                 alt={user.name}
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-8 h-8 rounded-full object-cover border-2 border-[var(--accent)]"
               />
-            </a>
             <span className="truncate text-sm sm:text-base max-w-[100px] sm:max-w-[100px]">
               {user.name}
             </span>

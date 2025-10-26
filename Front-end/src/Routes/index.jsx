@@ -12,6 +12,7 @@ import PacksGuid from "../pages/Guide/PacksGuid";
 import AllGuides from "../pages/admin/AllGuides";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
 import AllClients from "@/pages/admin/AllClients";
+import GuidePlacesPage from "@/pages/admin/GuidePlaces";
 
 const router = createBrowserRouter([
   {
@@ -65,7 +66,7 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardHome /> },
       { path: "guides", element: <AllGuides /> },
       { path: "clients", element: <AllClients /> },
-      // { path: "packs", element: <PacksManagement /> },
+      { path: "destinations", element: <GuidePlacesPage /> },
       // { path: "bookings", element: <BookingsManagement /> },
     ],
   },

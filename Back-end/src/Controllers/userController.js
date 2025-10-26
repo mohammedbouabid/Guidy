@@ -264,7 +264,6 @@ const getAllUsers = async (req, res, next) => {
         default:
           startDate = null;
       }
-      console.log(startDate);
 
       if (startDate) {
         query.createdAt = { $gte: startDate };
@@ -328,6 +327,7 @@ const getAllUsers = async (req, res, next) => {
       .select("profileImage name email phone cin createdAt")
       .skip(skip)
       .limit(limitNum)
+      .collation({ locale: "en", strength: 1 })
       .sort(sortOption);
 
     const count = await User.countDocuments(query);
