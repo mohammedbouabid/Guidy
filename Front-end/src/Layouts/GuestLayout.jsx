@@ -1,4 +1,7 @@
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
 import { Outlet } from "react-router-dom";
+import WhyChooseUs from "@/components/Features";
 
 const GuestLayout = () => {
   // const { user, token } = useSelector((state) => state.auth);
@@ -6,8 +9,11 @@ const GuestLayout = () => {
 //   if (token && user) return <Navigate to="/" />;
 
   return (
-    <div className="h-screen bg-fuchsia-700">
-      <div  className="bg-orange-400">
+    <div className="h-screen">
+      <div  className="bg-white">
+            <Navbar/>
+            <HeroSection/>
+            <WhyChooseUs/>
 
 navbare Componenet   
       </div>

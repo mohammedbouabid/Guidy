@@ -10,7 +10,7 @@ import bookingRoutes from "./Routes/bookingRoutes.js";
 import ratingRoutes from "./Routes/ratingRoutes.js";
 import { errorHandler } from "./Middlewares/errorHandler.js";
 import { notFound } from "./Middlewares/notFound.js";
-
+import cors from "cors";
 
 dotenv.config();
 
@@ -29,6 +29,15 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send(`Serveur lancé sur le port ${port}`);
 });
+
+// Allow requests from your frontend
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your frontend origin
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // if you send cookies or auth headers
+  })
+);
 
 // Guide Place Routes
 

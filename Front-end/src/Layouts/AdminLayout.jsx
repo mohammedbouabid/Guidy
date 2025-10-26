@@ -7,7 +7,7 @@ const AdminLayout = () => {
     <SidebarProvider>
       <AppSidebar />
       <main>
-        <SidebarTrigger />
+        <SidebarTrigger className={"fixed"}/>
         <Outlet />
       </main>
     </SidebarProvider>

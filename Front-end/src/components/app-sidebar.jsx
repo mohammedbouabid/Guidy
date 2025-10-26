@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // ---- Dynamic Menu ----
-const role = "guide"; // you can replace this with context or props
+const role = "admin"; // you can replace this with context or props
 
 let items = [];
 
@@ -45,7 +45,7 @@ if (role === "admin") {
   items = [
     { title: "Dashboard", url: "", icon: CircleGauge },
     { title: "Guides", url: "guides", icon: UsersRound },
-    { title: "Clients", url: "#", icon: UsersRound },
+    { title: "Clients", url: "clients", icon: UsersRound },
     { title: "Destinations", url: "#", icon: MapPinned },
     { title: "Tours", url: "#", icon: Route },
     { title: "Bookings", url: "#", icon: BookmarkCheck },

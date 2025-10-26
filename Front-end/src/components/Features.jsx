@@ -1,0 +1,61 @@
+import React from "react"
+
+import flexibilityIcon from "../assets/icons/flexibilityIcon.png"
+import experiencesIcon from "../assets/icons/experiencesIcon.png"
+import qualityIcon from "../assets/icons/qualityIcon.png"
+import supportIcon from "../assets/icons/supportIcon.png"
+
+export default function Features() {
+  const features = [
+    {
+      title: "Ultimate flexibility",
+      description:
+        "You're in control, with free cancellation and payment options to satisfy any plan or budget.",
+      icon: flexibilityIcon,
+    },
+    {
+      title: "Memorable experiences",
+      description:
+        "Browse and book tours and activities so incredible, you’ll want to tell your friends.",
+      icon: experiencesIcon,
+    },
+    {
+      title: "Quality at our core",
+      description:
+        "High-quality standards. Millions of reviews. A tour company.",
+      icon: qualityIcon,
+    },
+    {
+      title: "Award-winning support",
+      description:
+        "New place? New plan? No problem. We’re here to help, 24/7.",
+      icon: supportIcon,
+    },
+  ]
+
+  return (
+    <section className="py-16 px-25">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold text-left text-gray-900 mb-12">
+          Why choose Guidy
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          {features.map((feature, idx) => (
+            <div key={idx} className="flex flex-col items-left text-left">
+              <img
+                src={feature.icon}
+                alt={feature.title}
+                className="h-12 w-12 mb-4 object-contain"
+              />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-gray-600">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
