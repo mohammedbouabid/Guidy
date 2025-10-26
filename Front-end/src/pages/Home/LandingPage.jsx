@@ -26,8 +26,8 @@ const Home = () => {
         <LogosCarousel />
       </FadeInSection>
 
-      <FadeInSection delay={0.4}>
-        <PromoBanner />
+      <FadeInSection delay={0.3}>
+        <PromoBanner/>
       </FadeInSection>
 
       <FadeInSection delay={0.5}>

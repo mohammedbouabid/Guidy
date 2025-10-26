@@ -21,6 +21,7 @@ import AddGuidePlaceForm from "@/Components/GuidePlace/AddGuidePlaceForm";
 import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
 import AddPack from "@/pages/Guide/AddPack";
 import UpdatePack from "@/pages/Guide/UpdatePack";
+import ProfilePage from "@/pages/Home/ProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +34,8 @@ const router = createBrowserRouter([
       // { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <SignUpPage /> },
-      {path:"/guideregister", element:<GuideRegister/>}
+      {path:"/guideregister", element:<GuideRegister/>},
+      {path:"/profile", element:<ProfilePage/>}
        ],
   },
   {

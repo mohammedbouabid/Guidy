@@ -1,9 +1,8 @@
 import React from "react";
 import { ChevronRightIcon } from "lucide-react";
-import { Button } from "./ui/button"; // adjust import to your Button component
+import { Button } from "./ui/button";
 
 const FeaturedGuides = () => {
-  // Temporary static data with mock trips
   const guides = [
     {
       id: 1,
@@ -44,32 +43,21 @@ const FeaturedGuides = () => {
   ];
 
   return (
-    <section className="w-full py-8 px-25">
-      <div className="max-w-[1320px] mx-auto px-25">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className="max-w-screen-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="[font-family:'Inter',Helvetica] font-bold text-[#05073c] text-[29.9px] leading-[45px]">
-            Featured Guides
-          </h2>
-          <Button
-            variant="ghost"
-            className="h-auto p-0 hover:bg-transparent group"
-          >
-            <span className="[font-family:'Inter',Helvetica] font-normal text-[#05073c] text-[14.3px] leading-[28.1px] mr-1">
-              See all
-            </span>
-            <ChevronRightIcon className="w-4 h-4 text-[#05073c]" />
-          </Button>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#05073c] leading-tight mb-6">
+          Featured Guides
+        </h2>
 
         {/* Guides Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
           {guides.map((guide) => (
             <div
               key={guide.id}
               className="flex flex-col items-center text-center"
             >
-              <div className="w-28 h-28 rounded-full overflow-hidden shadow-md mb-3 cursor-pointer">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-md mb-3 hover:scale-105 transition-transform duration-300">
                 <img
                   src={guide.image}
                   alt={guide.name}
@@ -83,8 +71,20 @@ const FeaturedGuides = () => {
             </div>
           ))}
         </div>
+
+        {/* Bottom “See All” Button */}
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            className="h-auto px-0 py-0 text-sm sm:text-base text-[#05073c] hover:text-orange-500 hover:bg-transparent group"
+          >
+            <span className="mr-1">See all</span>
+            <ChevronRightIcon className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </section>
+
   );
 };
 
