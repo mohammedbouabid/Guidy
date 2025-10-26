@@ -64,7 +64,6 @@ export default function ProfileHeader() {
               <h1 className="text-2xl font-bold">{formattedName}</h1>
               <Badge variant="secondary">{user.role || "Member"}</Badge>
             </div>
-            <p className="text-muted-foreground">{user.title || "Traveler"}</p>
             <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <Mail className="size-4" />

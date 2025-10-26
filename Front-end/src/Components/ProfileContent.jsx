@@ -10,16 +10,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
-
-
-
 export default function ProfileContent() {
+  const { user } = useSelector((state) => state.Auth)
+  if (!user) return null
+  const [firstName, lastName] = user.name.split(" ")
+
+
   return (
-    <Tabs defaultValue="personal" className="space-y-6">
+    <Tabs defaultValue="personal" className="space-y-6 py-10">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="personal">Personal</TabsTrigger>
         <TabsTrigger value="account">Account</TabsTrigger>
       </TabsList>
+
       {/* Personal Information */}
       <TabsContent value="personal" className="space-y-6">
         <Card>
@@ -30,33 +33,31 @@ export default function ProfileContent() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue="John" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue="Doe" />
+                <Label htmlFor="firstName">Full Name</Label>
+                <Input id="firstName" defaultValue={user.name || ""} readOnly />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                <Input id="email" type="email" defaultValue={user.email || ""} readOnly />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" defaultValue="+1 (555) 123-4567" />
+                <Input id="phone" defaultValue={user.phone || ""} readOnly />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
               <Textarea
                 id="bio"
-                placeholder="Tell us about yourself..."
-                defaultValue="Passionate product designer with 8+ years of experience creating user-centered digital experiences. I love solving complex problems and turning ideas into beautiful, functional products."
-                rows={4} />
+                defaultValue={user.bio || "No bio provided"}
+                readOnly
+                rows={4}
+              />
             </div>
           </CardContent>
         </Card>
       </TabsContent>
+
       {/* Account Settings */}
       <TabsContent value="account" className="space-y-6">
         <Card>
@@ -90,7 +91,7 @@ export default function ProfileContent() {
                   Make your profile visible to other users
                 </p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked disabled />
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -124,7 +125,6 @@ export default function ProfileContent() {
           </CardContent>
         </Card>
       </TabsContent>
-
     </Tabs>
-  );
+  )
 }
