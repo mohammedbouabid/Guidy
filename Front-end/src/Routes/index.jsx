@@ -9,8 +9,9 @@ import LandingPage from "../pages/Home/LandingPage";
 //import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
-import AllGuides from "../pages/admin/guides";
+import AllGuides from "../pages/admin/AllGuides";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
+import AllClients from "@/pages/admin/AllClients";
 
 const router = createBrowserRouter([
   {
@@ -63,7 +64,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardHome /> },
       { path: "guides", element: <AllGuides /> },
-      // { path: "users", element: <UsersManagement /> },
+      { path: "clients", element: <AllClients /> },
       // { path: "packs", element: <PacksManagement /> },
       // { path: "bookings", element: <BookingsManagement /> },
     ],
