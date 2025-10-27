@@ -75,7 +75,7 @@ const updateUser = async (req, res, next) => {
     if (update.password) {
       update.password = await bcrypt.hash(update.password, 10);
     }
-    
+
     delete update.refreshToken;
     delete update.cin;
     delete update.role;
@@ -85,6 +85,22 @@ const updateUser = async (req, res, next) => {
       { $set: update },
       { new: true, runValidators: true }
     )
+
+    const updatedUser = await User.findById(req.user.id)
+
+    res.cookie("userInfo", JSON.stringify({
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      profileImage: updatedUser.profileImage,
+      role: updatedUser.role,
+      id: updatedUser._id
+    }), {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
 
     res.status(200).json({ success: true, user: `${userRole} updated successfuly` });
   } catch (error) {
@@ -121,7 +137,7 @@ const deleteUserById = async (req, res, next) => {
       throw error;
     }
 
-    if( user.role === "admin" ) {
+    if (user.role === "admin") {
       const error = new Error("admin can't be deleted");
       error.statusCode = 400;
       throw error;

@@ -121,17 +121,7 @@ export function GuideRegister({ className, ...props }) {
                 />
               </Field>
 
-              <Field>
-                <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+212600000000"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-              </Field>
+
 
               <Field>
                 <div className="grid grid-cols-2 gap-4">
