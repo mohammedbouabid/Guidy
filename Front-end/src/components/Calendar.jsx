@@ -1,9 +1,8 @@
-"use client";
 import * as React from "react"
 
 import { Calendar } from "@/components/ui/calendar"
 
-export default function Calendar05() {
+export default function Calendar() {
   const [dateRange, setDateRange] = React.useState({
     from: new Date(2025, 5, 12),
     to: new Date(2025, 6, 15),

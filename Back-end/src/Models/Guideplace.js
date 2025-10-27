@@ -19,6 +19,7 @@ const guidePlaceSchema = new mongoose.Schema(
     guideID: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
+  
 );
 
 const GuidePlace = mongoose.model("GuidePlace", guidePlaceSchema);

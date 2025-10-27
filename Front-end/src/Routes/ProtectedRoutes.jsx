@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 
 
 const ProtectedRoutes = ({ children, allowedRoles }) => {
-  // const { user, token } = useSelector((state) => state.Auth);
+const { user } = useSelector((state) => state.Auth);
   // const location = useLocation();
 
   // if (!token) {
@@ -11,10 +11,9 @@ const ProtectedRoutes = ({ children, allowedRoles }) => {
   //   return <Navigate to="/login" state={{ from: location }} replace />;
   // }
 
-  if (!allowedRoles.includes("admin")) {
+  if (!allowedRoles.includes(user.role)) {
     // Rediriger vers la page d'accueil si le rôle n'est pas autorisé
     return <Navigate to="/" replace />;
-    console.log("acces dined")
   }
 
   return children;

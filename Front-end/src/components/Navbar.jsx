@@ -1,55 +1,172 @@
-import React from "react";
+import React from "react"
+import { Link, useLocation } from "react-router-dom"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { ChevronDownIcon } from "@radix-ui/react-icons"
+import { Home, Search, Store, ShoppingCart, User } from "lucide-react"
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
+  const location = useLocation()
+
+  // Helper to check active route
+  const isActive = (path) => location.pathname === path
+
   return (
-    <nav className="w-full bg-white ">
-      {/* Container */}
-      <div className="max-w-7xl mx-auto px-25 py-0.5">
-        <div className="flex h-16 items-center justify-between">
-          {/* Left: Logo */}
-          <div className="flex items-center">
-            <span
-              className="text-[22px] font-bold tracking-tight cursor-pointer"
-              style={{ color: "#eb662b" }}
-            >
-              Guidy
-            </span>
-          </div>
+    <>
+      {/* Desktop / Tablet Top Navbar */}
+      <nav className="hidden md:block w-full sticky top-0 z-50 bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-2">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <Link to="/">
+              <span
+                className="text-[22px] font-bold tracking-tight cursor-pointer"
+                style={{ color: "#eb662b" }}
+              >
+                Guidy
+              </span>
+            </Link>
 
-          {/* Middle: Search Bar */}
-          <div className="flex-1 mx-6 max-w-xl">
-            <input
-              type="text"
-              placeholder="Search destinations or activities"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
-            />
-          </div>
+            {/* Right side */}
+            <div className="flex items-center space-x-5">
+              <Link to="/destinations" className="text-sm text-gray-700 hover:text-[#eb662b]">
+                Destinations
+              </Link>
+              <Link to="/activities" className="text-sm text-gray-700 hover:text-[#eb662b]">
+                Activities
+              </Link>
+              <span className="text-sm text-gray-700">USD</span>
 
-          {/* Right: Links */}
-          <div className="flex items-center space-x-5">
-            <a href="#" className="text-sm text-gray-700 hover:text-[#eb662b]">
-              Destinations
-            </a>
-            <a href="#" className="text-sm text-gray-700 hover:text-[#eb662b]">
-              Activities
-            </a>
-            <a href="#" className="text-sm text-gray-700 hover:text-[#eb662b]">
-              USD
-            </a>
-            <a href="#" className="text-sm text-gray-700 hover:text-[#eb662b]">
-              Sign up
-            </a>
-            <button
-              className="text-white text-sm px-5 py-2 rounded-3xl transition-colors hover:cursor-pointer"
-              style={{ backgroundColor: "#eb662b" }}
-            >
-              Log in
-            </button>
+              {!user ? (
+                <>
+                  <Link to="/register">
+                    <span className="text-sm text-gray-700 hover:text-[#eb662b] cursor-pointer">
+                      Sign up
+                    </span>
+                  </Link>
+                  <Link to="/GuideRegister">
+                    <button className="text-white text-sm px-5 py-2 rounded-3xl font-medium bg-[#eb662b] hover:bg-[#d4551f] transition shadow-lg hover:shadow-orange-400/50 animate-pulse-slow cursor-pointer">
+                      Become a Guide
+                    </button>
+                  </Link>
+                  <Link to="/login">
+                    <button className="text-white text-sm px-5 py-2 rounded-3xl font-medium bg-[#eb662b] hover:bg-[#d4551f] transition shadow-lg hover:shadow-orange-400/50 animate-pulse-slow cursor-pointer">
+                      Log in
+                    </button>
+                  </Link>
+                </>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-9 px-2 py-0 hover:bg-accent hover:text-accent-foreground flex items-center gap-2 cursor-pointer"
+                    >
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback className="text-xs">
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDownIcon className="h-3 w-3 ml-1" />
+                      <span className="sr-only">User menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/billing">Billing</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={onLogout}
+                      className="text-red-600 hover:text-white hover:bg-red-600"
+                    >
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
-  );
-};
+      </nav>
 
-export default Navbar;
+      {/* Mobile Bottom Navbar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-md z-50">
+        <div className="flex justify-around items-center h-16">
+          <Link
+            to="/"
+            className={`flex flex-col items-center text-xs ${
+              isActive("/") ? "text-[#eb662b]" : "text-gray-500"
+            }`}
+          >
+            <Home className="h-5 w-5" />
+            Home
+          </Link>
+          <Link
+            to="/search"
+            className={`flex flex-col items-center text-xs ${
+              isActive("/search") ? "text-[#eb662b]" : "text-gray-500"
+            }`}
+          >
+            <Search className="h-5 w-5" />
+            Search
+          </Link>
+          <Link
+            to="/store"
+            className={`flex flex-col items-center text-xs ${
+              isActive("/store") ? "text-[#eb662b]" : "text-gray-500"
+            }`}
+          >
+            <Store className="h-5 w-5" />
+            Store
+          </Link>
+          <Link
+            to="/cart"
+            className={`flex flex-col items-center text-xs ${
+              isActive("/cart") ? "text-[#eb662b]" : "text-gray-500"
+            }`}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            Cart
+          </Link>
+          <Link
+            to="/profile"
+            className={`flex flex-col items-center text-xs ${
+              isActive("/profile") ? "text-[#eb662b]" : "text-gray-500"
+            }`}
+          >
+            <User className="h-5 w-5" />
+            Profile
+          </Link>
+        </div>
+      </nav>
+    </>
+  )
+}
+
+export default Navbar

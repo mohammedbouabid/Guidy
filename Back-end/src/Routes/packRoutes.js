@@ -5,36 +5,48 @@ import {
   createPack,
   updatePack,
   getAllPacks,
+  getPopularPacks,
   getPackById,
   deletePack,
+  getAllPacksForGuide,
 } from "../Controllers/packController.js";
 
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import { authorizeRoles } from "../Middlewares/authorizeRole.js";
 import { getPacksFiltered } from "../Controllers/packController.js"; // ← add this import
+import Pack from "../Models/Pack.js";
 
 
 const router = express.Router();
+
+// --- Public routes ---
+
+router.get("/", getAllPacks);
+router.get("/popular", getPopularPacks); // 👈 new endpoint
+
+// --- Protected routes (require authentication) ---
 router.use(verifyToken);
 
-// Use the new upload middleware
+router.get("/all", getAllPacksForGuide);
+router.get("/:id", getPackById);
+
 router.post(
   "/",
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
   createPack
 );
-router.get("/filter", getPacksFiltered); // ← add this line BEFORE "/:id"
 
 router.put(
   "/:id",
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
-  updatePack
+  updatePack  
 );
 
-router.get("/", getAllPacks);
-router.get("/:id", getPackById);
 router.delete("/:id", authorizeRoles(["guide", "admin"]), deletePack);
+// in your routes file
+
+
 
 export default router;

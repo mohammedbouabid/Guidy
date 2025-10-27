@@ -47,10 +47,10 @@ export const getPacksFiltered = async (req, res) => {
 
     // id/guideId (admin/client can pass guideId; guide already restricted)
     if (id) {
-      try { filter._id = new mongoose.Types.ObjectId(id); } catch {}
+      try { filter._id = new mongoose.Types.ObjectId(id); } catch { }
     }
     if (guideId && req.user?.role?.toLowerCase() !== "guide") {
-      try { filter.guideId = new mongoose.Types.ObjectId(guideId); } catch {}
+      try { filter.guideId = new mongoose.Types.ObjectId(guideId); } catch { }
     }
 
     // title contains (case-insensitive)
@@ -69,12 +69,12 @@ export const getPacksFiltered = async (req, res) => {
     if (startDateFrom || startDateTo) {
       filter.startDate = {};
       if (startDateFrom) filter.startDate.$gte = new Date(startDateFrom);
-      if (startDateTo)   filter.startDate.$lte = new Date(startDateTo);
+      if (startDateTo) filter.startDate.$lte = new Date(startDateTo);
     }
     if (endDateFrom || endDateTo) {
       filter.endDate = {};
       if (endDateFrom) filter.endDate.$gte = new Date(endDateFrom);
-      if (endDateTo)   filter.endDate.$lte = new Date(endDateTo);
+      if (endDateTo) filter.endDate.$lte = new Date(endDateTo);
     }
 
     // locations (exact, case-insensitive)
@@ -84,9 +84,9 @@ export const getPacksFiltered = async (req, res) => {
     if (endLocation) {
       filter.endLocation = { $regex: `^${endLocation}$`, $options: "i" };
     }
-
+   
     // avgRating range (uses stored avgRating on Pack)
-    if (avgRatingMin || avgRatingMax) {
+    if (avgRatingMin || avgRatingMax) {   
       filter.avgRating = {};
       if (avgRatingMin) filter.avgRating.$gte = Number(avgRatingMin);
       if (avgRatingMax) filter.avgRating.$lte = Number(avgRatingMax);
@@ -100,14 +100,14 @@ export const getPacksFiltered = async (req, res) => {
     }
 
     // pagination + sort
-    const page  = parseInt(req.query.page)  || 1;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const sortParam  = req.query.sort || ""; // e.g. "price" or "-price"
+    const sortParam = req.query.sort || ""; // e.g. "price" or "-price"
     // build options without sort by default
-const options = { page, limit };
-if (sortParam) options.sort = sortParam;  // only attach when non-empty
+    const options = { page, limit };
+    if (sortParam) options.sort = sortParam;  // only attach when non-empty
 
-const packs = await Pack.paginate(filter, options);
+    const packs = await Pack.paginate(filter, options);
     return res.status(200).json(packs);
   } catch (error) {
     return res.status(500).json({ message: "Error filtering packs", error: error.message });
@@ -116,6 +116,7 @@ const packs = await Pack.paginate(filter, options);
 
 // Gets all the packs. Makes sure the guides get only the packs they need, which are their packs.
 const getAllPacks = async (req, res) => {
+  console.log("req?.user?.id",req?.user?.id);
   try {
     const options = {
       page: parseInt(req.query.page) || 1,
@@ -123,11 +124,9 @@ const getAllPacks = async (req, res) => {
     };
 
     let packs;
-    if (req.user.role.toLowerCase() === "guide") {
-      packs = await Pack.paginate({ guideId: req.user.id }, options);
-    } else {
+    
       packs = await Pack.paginate({}, options);
-    }
+    
 
     // --- NEW: compute averages for all packs in this page in a single aggregation
     const ids = (packs.docs || []).map(p => p._id);
@@ -158,13 +157,61 @@ const getAllPacks = async (req, res) => {
   }
 };
 
+const getAllPacksForGuide  = async (req, res) => {
+  try {
+    const options = {
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 10,
+      populate: {
+        path: 'guidesPlacesId',
+        select: 'name city country images description'
+      }
+    };
+
+    // 🎯 Récupérer uniquement les packs du user connecté avec populate
+    console.log("req?.user?.id",req?.user?.id);
+    const packs = await Pack.paginate({ guideId: req?.user?.id }, options);
+
+    // 🔢 Récupérer les IDs pour calculer les moyennes
+    const ids = (packs.docs || []).map((p) => p._id);
+    const avgMap = await computeAvgMap(ids);
+
+    // 🔁 Mettre à jour la moyenne de chaque pack
+    const bulkOps = [];
+    for (const doc of packs.docs) {
+      const avg = avgMap.get(String(doc._id)) ?? 0; 
+      doc.avgRating = avg;
+
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: doc._id },
+          update: { $set: { avgRating: avg } },
+        },
+      });
+    }
+
+    if (bulkOps.length) {
+      await Pack.bulkWrite(bulkOps);
+    }
+
+    return res.status(200).json(packs);
+  } catch (error) {
+    console.error("❌ Erreur lors du chargement des packs :", error);
+    return res.status(500).json({
+      message: "Erreur lors du chargement des packs",
+      error: error.message,
+    });
+  }
+};
+
+
 // Create a pack. Makes sure only guides have access to this controller
 const createPack = async (req, res) => {
   try {
     if (req.user.role.toLowerCase() !== 'guide') {
       return res.status(403).json({ message: 'You don\'t seem to have the right permissions to perform this action' });
     }
-    const {
+    let {
       guidesPlacesId,
       profileImg,
       title,
@@ -177,6 +224,21 @@ const createPack = async (req, res) => {
       endLocation,
       maxClients
     } = req.body;
+
+    // Parse guidesPlacesId if it's a string (from FormData)
+    if (guidesPlacesId && typeof guidesPlacesId === 'string') {
+      try {
+        guidesPlacesId = JSON.parse(guidesPlacesId);
+      } catch (e) {
+        // If it's not valid JSON, try to split by comma
+        guidesPlacesId = guidesPlacesId.split(',').map(id => id.trim());
+      }
+    }
+    
+    // Ensure guidesPlacesId is an array
+    if (guidesPlacesId && !Array.isArray(guidesPlacesId)) {
+      guidesPlacesId = [guidesPlacesId];
+    }
 
     const guideId = req.user.id;
     const profileImgUrl = req.file?.path; // e.g. https://res.cloudinary.com/...
@@ -196,9 +258,7 @@ const createPack = async (req, res) => {
       endLocation,
       maxClients,
       profileImg: profileImgUrl, // <— store the URL in MongoDB
-
     });
-
     const savedPack = await newPack.save();
     res.status(201).json(savedPack);
   } catch (error) {
@@ -211,9 +271,11 @@ const getPackById = async (req, res) => {
   try {
     let pack;
     if (req.user.role.toLowerCase() === "guide") {
-      pack = await Pack.findOne({ _id: req.params.id, guideId: req.user.id });
+      pack = await Pack.findOne({ _id: req.params.id, guideId: req.user.id })
+        .populate('guidesPlacesId', 'name city country images description');
     } else {
-      pack = await Pack.findById(req.params.id);
+      pack = await Pack.findById(req.params.id)
+        .populate('guidesPlacesId', 'name city country images description');
     }
 
     if (!pack) {
@@ -246,9 +308,33 @@ const updatePack = async (req, res) => {
     if (req.user.role.toLowerCase() !== 'guide') {
       return res.status(403).json({ message: 'You don\'t seem to have the right permissions to perform this action' });
     }
+
+    // Prepare update data
+    const updateData = { ...req.body };
+    
+    // Parse guidesPlacesId if it's a string (from FormData)
+    if (updateData.guidesPlacesId && typeof updateData.guidesPlacesId === 'string') {
+      try {
+        updateData.guidesPlacesId = JSON.parse(updateData.guidesPlacesId);
+      } catch (e) {
+        // If it's not valid JSON, try to split by comma
+        updateData.guidesPlacesId = updateData.guidesPlacesId.split(',').map(id => id.trim());
+      }
+    }
+    
+    // Ensure guidesPlacesId is an array
+    if (updateData.guidesPlacesId && !Array.isArray(updateData.guidesPlacesId)) {
+      updateData.guidesPlacesId = [updateData.guidesPlacesId];
+    }
+    
+    // If a new image was uploaded, use its URL
+    if (req.file?.path) {
+      updateData.profileImg = req.file.path;
+    }
+
     const updatedPack = await Pack.findOneAndUpdate(
       { _id: req.params.id, guideId: req.user.id },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -275,13 +361,30 @@ const deletePack = async (req, res) => {
     }
 
     res.status(202).json(pack);
-  } catch (error) {
+  } catch (error) {   
     res.status(500).json({ message: 'Error deleting pack', error: error.message });
   }
 };
+const getPopularPacks = async (req, res) => {
+  try {
+    const packs = await Pack.find({
+       // only packs with a rating above 0
+    })
+      .sort({ avgRating: -1 }) // highest rated first
+      .limit(8); // top 8 for homepage
+
+    res.json({ docs: packs });
+  } catch (err) {
+    console.error("Error in getPopularPacks:", err);
+    res.status(500).json({ message: "Error fetching popular packs" });
+  }
+};
+
 
 export {
   getAllPacks,
+  getAllPacksForGuide,
+  getPopularPacks,
   createPack,
   getPackById,
   updatePack,

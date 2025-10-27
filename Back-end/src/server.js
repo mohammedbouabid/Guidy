@@ -10,41 +10,39 @@ import bookingRoutes from "./Routes/bookingRoutes.js";
 import ratingRoutes from "./Routes/ratingRoutes.js";
 import { errorHandler } from "./Middlewares/errorHandler.js";
 import { notFound } from "./Middlewares/notFound.js";
-import cors from "cors";
+
+import cors from "cors"
+
 
 dotenv.config();
 
 const app = express();
-
-const port = process.env.PORT || 3000;
-
-connectDB();
+    
+const port = process.env.PORT || 3000;   
+   
+connectDB();   
 
 // Middleware pour parser le JSON
 app.use(express.json());
-app.use(cookieParser());
-// app.use("/static");
+app.use(cookieParser());   
 
+// app.use("/static");
+app.use(cors({
+  origin: 'http://localhost:5121', // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 // Route test
 app.get("/", (req, res) => {
   res.send(`Serveur lancé sur le port ${port}`);
 });
 
-// Allow requests from your frontend
-app.use(
-  cors({
-    origin: "http://localhost:5173", // your frontend origin
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // if you send cookies or auth headers
-  })
-);
-
 // Guide Place Routes
 
 // auth api
-app.use("/api/guide-places", guideRoutes);
-
 // Routes
+app.use("/api/guide-places", guideRoutes);
 app.use("/api", authRoutes);
 app.use("/api/packs/", packRouter);
 app.use("/api", userRoutes);
