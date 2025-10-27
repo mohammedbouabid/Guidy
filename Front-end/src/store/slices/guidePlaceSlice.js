@@ -7,6 +7,7 @@ export const fetchGuidePlaces = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/guide-places');
+      
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Une erreur est survenue');

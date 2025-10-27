@@ -35,7 +35,7 @@ export default function UpdateGuidePlaceForm() {
 
   // Load existing place data
   useEffect(() => {
-    const place = places.find(p => p._id === id);
+    const place = placesForGuide.find(p => p._id === id);
     if (place) {
       setFormData({
         name: place.name,
