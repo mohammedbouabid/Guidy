@@ -79,10 +79,9 @@ export const getAllGuidePlaces = async (req, res) => {
       .sort(sortOption);
 
     const count = await GuidePlace.countDocuments(query);
-
     res.json({
       success: true,
-      places,
+      places,   
       count,
       page: pageNum,
       limit: limitNum,
@@ -92,13 +91,13 @@ export const getAllGuidePlaces = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
 export const getAllGuidePlacesForGuide = async (req, res) => {
-  try {
+  try {   
     const places = await GuidePlace.find({ guideID: req.user.id }).populate({
       path: "guideID",
       select: "firstName lastName email profileImage role", // Sélectionnez les champs dont vous avez besoin
     });
-    
     res.json(places);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
