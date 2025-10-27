@@ -55,7 +55,12 @@ export default function UpdatePack() {
           endLocation: p.endLocation || '',
           maxClients: p.maxClients ?? '',
         });
-        setSelectedPlaces(Array.isArray(p.guidesPlacesId) ? p.guidesPlacesId.map(String) : []);
+        // Extract IDs from guidesPlacesId (can be objects or strings)
+        setSelectedPlaces(
+          Array.isArray(p.guidesPlacesId) 
+            ? p.guidesPlacesId.map(place => typeof place === 'object' ? place._id : String(place))
+            : []
+        );
         setExistingImage(p.profileImg || '');
       })
       .catch((e) => {
@@ -127,15 +132,15 @@ export default function UpdatePack() {
     fd.append('startLocation', form.startLocation);
     fd.append('endLocation', form.endLocation);
     fd.append('maxClients', String(form.maxClients));
-    selectedPlaces.forEach((pid) => fd.append('guidesPlacesId', pid));
+    fd.append('guidesPlacesId', JSON.stringify(selectedPlaces));
     if (newImageFile) fd.append('profileImg', newImageFile);
 
     try {
       await dispatch(updatePack({ id, formData: fd })).unwrap();
-      toast.success('Pack updated successfully');
+      toast.success('Pack mis à jour avec succès');
       navigate('/guide/PacksGuide');
     } catch (err) {
-      toast.error(err?.message || 'Failed to update pack');
+      toast.error(err?.message || 'Échec de la mise à jour du pack');
     }
   };
 
@@ -233,8 +238,8 @@ export default function UpdatePack() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Guide Places</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-auto p-2 border rounded-xl">
               {(places || []).map((p) => (
-                <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(p._id) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
-                  <input type="checkbox" checked={selectedPlaces.includes(p._id)} onChange={() => onSelectPlace(p._id)} />
+                <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(String(p._id)) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
+                  <input type="checkbox" checked={selectedPlaces.includes(String(p._id))} onChange={() => onSelectPlace(String(p._id))} />
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
                       {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
@@ -252,10 +257,10 @@ export default function UpdatePack() {
 
           <div className="flex justify-end gap-4">
             <button type="button" onClick={() => navigate('/guide/PacksGuide')} className="px-6 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" disabled={loading}>
-              Cancel
+              Annuler
             </button>
             <button type="submit" disabled={loading} className="px-6 py-2 text-white cursor-pointer bg-[#EB662B] rounded-lg hover:bg-[#d55a26] transition-colors disabled:opacity-50 flex items-center gap-2">
-              {loading ? (<><Loader2 className="w-4 h-4 animate-spin" />Updating...</>) : 'Update Pack'}
+              {loading ? (<><Loader2 className="w-4 h-4 animate-spin" />Mise à jour...</>) : 'Mettre à jour'}
             </button>
           </div>
         </form>

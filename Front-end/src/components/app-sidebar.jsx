@@ -14,6 +14,7 @@ import {
   PanelBottomOpen,
   UserRoundPen,
   LogOut,
+  BookIcon,
 } from "lucide-react";
 
 import {
@@ -56,6 +57,7 @@ if (role === "admin") {
     { title: "My Places", url: "places", icon: Route },
     { title: "My Packs", url: "PacksGuide", icon: MapPinned },
     { title: "Calendar", url: "#", icon: CalendarRange },
+    { title: "Bokking", url: "bookingsGuide", icon: BookIcon },
   ];
 }
 

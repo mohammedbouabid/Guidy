@@ -109,15 +109,15 @@ export default function AddPack() {
     fd.append('startLocation', form.startLocation);
     fd.append('endLocation', form.endLocation);
     fd.append('maxClients', String(form.maxClients));
-    selectedPlaces.forEach((id) => fd.append('guidesPlacesId', id));
+    fd.append('guidesPlacesId', JSON.stringify(selectedPlaces));
     if (imageFile) fd.append('profileImg', imageFile);
 
     try {
       await dispatch(createPack(fd)).unwrap();
-      toast.success('Pack created successfully');
+      toast.success('Pack créé avec succès');
       navigate('/guide/PacksGuide');
     } catch (err) {
-      toast.error(err?.message || 'Failed to create pack');
+      toast.error(err?.message || 'Échec de la création du pack');
     }
   };
 
@@ -204,8 +204,8 @@ export default function AddPack() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Guide Places</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-auto p-2 border rounded-xl">
               {(places || []).map((p) => (
-                <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(p._id) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
-                  <input type="checkbox" checked={selectedPlaces.includes(p._id)} onChange={() => onSelectPlace(p._id)} />
+                <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(String(p._id)) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
+                  <input type="checkbox" checked={selectedPlaces.includes(String(p._id))} onChange={() => onSelectPlace(String(p._id))} />
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
                       {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
@@ -223,10 +223,10 @@ export default function AddPack() {
 
           <div className="flex justify-end gap-4">
             <button type="button" onClick={() => navigate('/guide/PacksGuide')} className="px-6 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" disabled={packLoading}>
-              Cancel
+              Annuler
             </button>
             <button type="submit" disabled={packLoading} className="px-6 py-2 text-white cursor-pointer bg-[#EB662B] rounded-lg hover:bg-[#d55a26] transition-colors disabled:opacity-50 flex items-center gap-2">
-              {packLoading ? (<><Loader2 className="w-4 h-4 animate-spin" />Creating...</>) : 'Add Pack'}
+              {packLoading ? (<><Loader2 className="w-4 h-4 animate-spin" />Création...</>) : 'Ajouter le Pack'}
             </button>
           </div>
         </form>

@@ -17,23 +17,26 @@ const router = express.Router();
 
 router.post(
   "/",
-  
+  verifyToken,
+  authorizeRoles(["guide", "admin"]),
   upload.array("images", 10),
   handleUploadErrors,
   validate(createGuidePlaceSchema),
   createGuidePlace
 );
-router.get("/", getAllGuidePlaces);
+router.get("/",verifyToken,
+  authorizeRoles(["guide", "admin"]),
+   getAllGuidePlaces);
 router.get("/:id", verifyToken, authorizeRoles(["guide","admin"]),getGuidePlaceById);
 router.put(
   "/:id",
- 
-  
+verifyToken,
+ authorizeRoles(["guide","admin"]),
   upload.array("images", 10),
   handleUploadErrors,
   validate(updateGuidePlaceSchema),
   updateGuidePlace
 );
-router.delete("/:id", deleteGuidePlace);
+router.delete("/:id", verifyToken, authorizeRoles(["guide","admin"]),deleteGuidePlace);
 
 export default router;
