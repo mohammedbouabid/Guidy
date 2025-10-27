@@ -1,5 +1,8 @@
-import React from "react"
-import { Link, useLocation } from "react-router-dom"
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { useLocation, Link } from "react-router-dom"
+import { hydrateUserFromCookie } from "@/store/slices/AuthSlice"
+import { getUserFromCookie } from "@/lib/getUserFromCookie"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,10 +16,16 @@ import { Button } from "@/components/ui/button"
 import { ChevronDownIcon } from "@radix-ui/react-icons"
 import { Home, Search, Store, ShoppingCart, User } from "lucide-react"
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ onLogout }) => {
+  const dispatch = useDispatch()
   const location = useLocation()
+  const user = useSelector((state) => state.Auth.user)
 
-  // Helper to check active route
+  useEffect(() => {
+    const userFromCookie = getUserFromCookie()
+    if (userFromCookie) dispatch(hydrateUserFromCookie(userFromCookie))
+  }, [])
+
   const isActive = (path) => location.pathname === path
 
   return (
