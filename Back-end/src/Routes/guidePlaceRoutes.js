@@ -15,6 +15,9 @@ import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import upload, { handleUploadErrors } from "../Middlewares/uploadsMultiple.js";
 const router = express.Router();  
 
+router.get("/all-places-guide",verifyToken,
+  authorizeRoles(["guide", "admin"]),
+   getAllGuidePlaces);
 router.post(
   "/",
   verifyToken,
