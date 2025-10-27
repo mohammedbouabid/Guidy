@@ -34,24 +34,29 @@ export default function Features() {
   ]
 
   return (
-    <section className="py-16 px-25">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-left text-gray-900 mb-12">
+    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <div className="max-w-screen-xl mx-auto text-center">
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#05073c] mb-14">
           Why choose Guidy
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, idx) => (
-            <div key={idx} className="flex flex-col items-left text-left">
+            <div
+              key={idx}
+              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 flex flex-col items-center text-center"
+            >
               <img
                 src={feature.icon}
                 alt={feature.title}
                 className="h-12 w-12 mb-4 object-contain"
               />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-[#05073c] mb-2">
                 {feature.title}
               </h3>
-              <p className="text-sm text-gray-600">{feature.description}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
