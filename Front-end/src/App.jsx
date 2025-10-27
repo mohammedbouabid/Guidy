@@ -15,6 +15,8 @@ function App() {
 
   if (!booted || !isHydrated) return <Loader />;
 
+  
+
   return <RouterProvider router={router} />;
 }
 
