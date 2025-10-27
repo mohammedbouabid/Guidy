@@ -18,7 +18,7 @@ export default function AddPack() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { places, loading: placesLoading } = useSelector((s) => s.guidePlace);
+  const { placesForGuide, loading: placesLoading } = useSelector((s) => s.guidePlace);
   const { loading: packLoading } = useSelector((s) => s.pack);
 
   const [form, setForm] = useState({
@@ -203,7 +203,7 @@ export default function AddPack() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Guide Places</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-auto p-2 border rounded-xl">
-              {(places || []).map((p) => (
+              {(placesForGuide || []).map((p) => (
                 <label key={p._id} className={`flex items-center gap-3 p-3 rounded-lg border ${selectedPlaces.includes(String(p._id)) ? 'border-[#EB662B] bg-orange-50' : 'border-gray-200'}`}>
                   <input type="checkbox" checked={selectedPlaces.includes(String(p._id))} onChange={() => onSelectPlace(String(p._id))} />
                   <div className="flex items-center gap-3">
