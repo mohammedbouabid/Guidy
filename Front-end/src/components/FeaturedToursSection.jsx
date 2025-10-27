@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react"
 import {
-  ChevronRightIcon,
   ClockIcon,
   HeartIcon,
   MapPinIcon,
   StarIcon,
 } from "lucide-react"
-import { Button } from "./ui/button"// adjust path
-import { Card, CardContent } from "./ui/card" // adjust path
+import { Button } from "./ui/button"
+import { Card, CardContent } from "./ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "./ui/carousel"
+import { ChevronRightIcon } from "lucide-react";
 
 export const FeaturedPacksSection = () => {
   const [packs, setPacks] = useState([])
@@ -35,95 +42,107 @@ export const FeaturedPacksSection = () => {
   if (error) return <p className="text-center text-red-500 py-10">{error}</p>
 
   return (
-    <section className="w-full py-12 px-25">
-      <div className="max-w-[1320px] mx-auto">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="font-bold text-[#05073c] text-2xl sm:text-[29.4px] leading-tight">
-            Find Popular Tours
-          </h2>
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className="max-w-screen-2xl mx-auto">
+        {/* Header */}
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#05073c] leading-tight mb-6">
+          Find Popular Tours
+        </h2>
+
+        {/* Carousel */}
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-4">
+            {packs.map((pack) => (
+              <CarouselItem
+                key={pack._id}
+                className="pl-4 basis-[90%] sm:basis-1/2 md:basis-1/3 xl:basis-1/4"
+              >
+                <Card className="rounded-xl border border-[#e7e6e6] overflow-hidden hover:shadow-md transition-shadow duration-300">
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      <div
+                        className="w-full h-[180px] sm:h-[200px] bg-cover bg-center bg-no-repeat"
+                        style={{ backgroundImage: `url(${pack.profileImg})` }}
+                      />
+                    </div>
+
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPinIcon className="w-4 h-4 text-[#717171]" />
+                        <span className="text-xs text-[#717171]">
+                          {pack.startLocation || "Unknown"}
+                        </span>
+                      </div>
+
+                      <h3 className="text-sm sm:text-base font-semibold text-[#05073c] leading-snug mb-2">
+                        {pack.title}
+                      </h3>
+
+                      <p className="text-sm font-medium text-[#05073c] truncate mb-2">
+                        {pack.description}
+                      </p>
+
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, index) => (
+                            <StarIcon
+                              key={index}
+                              className={`w-3 h-3 ${typeof pack.avgRating === "number" &&
+                                  index < Math.round(pack.avgRating)
+                                  ? "fill-[#e2ad64] text-[#e2ad64]"
+                                  : "text-gray-300"
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-[#05073c]">
+                          {typeof pack.avgRating === "number"
+                            ? pack.avgRating.toFixed(1)
+                            : "No ratings"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-[#e7e6e6]">
+                        <div className="flex items-center gap-2">
+                          <ClockIcon className="w-4 h-4 text-[#05073c]" />
+                          <span className="text-xs text-[#05073c]">
+                            {pack.duration || "N/A"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xs text-[#05073c]">From</span>
+                          <span className="text-sm font-medium text-[#05073c]">
+                            ${pack.price}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+
+          <div className="flex justify-center mt-6 gap-4">
+            <CarouselPrevious />
+            <CarouselNext />
+          </div>
+        </Carousel>
+
+        {/* Bottom “See All” Button */}
+        <div className="flex justify-center mt-8">
           <Button
             variant="ghost"
-            className="h-auto p-0 font-normal text-[#05073c] text-sm sm:text-[14.3px] hover:bg-transparent flex items-center"
+            className="text-sm sm:text-base text-[#05073c] hover:text-orange-500 hover:bg-transparent px-0 h-auto font-normal cursor-pointer group"
           >
             See all
-            <ChevronRightIcon className="w-4 h-4 ml-1" />
+            <ChevronRightIcon className="w-4 h-4 text-[#05073c] group-hover:text-orange-500" />
           </Button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[30px]">
-          {packs.map((pack) => (
-            <Card
-              key={pack._id}
-              className="rounded-xl border border-solid border-[#e7e6e6] overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              <CardContent className="p-0">
-                <div className="relative">
-                  <div
-                    className="w-full h-[199px] rounded-t-xl bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(${pack.profileImg})` }}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-[11px] right-[11px] w-[35px] h-[35px] bg-white rounded-full shadow-[0px_10px_40px_#0000000d] hover:bg-white"
-                  >
-                    <HeartIcon className="w-[15px] h-[15px] text-black" />
-                  </Button>
-                </div>
-
-                <div className="p-[21px]">
-                  <div className="flex items-center gap-[5px] mb-[10px]">
-                    <MapPinIcon className="w-4 h-4 text-[#717171]" />
-                    <span className="text-[#717171] text-xs sm:text-[12.3px]">
-                      {pack.startLocation || "Unknown"}
-                    </span>
-                  </div>
-
-                  <h3 className="font-medium text-[#05073c] text-sm sm:text-[15.8px] leading-6 mb-[14px] min-h-[48px]">
-                    {pack.title}
-                  </h3>
-
-                  <div className="flex items-center gap-[10px] mb-[16px]">
-                    <div className="flex gap-[5px]">
-                      {[...Array(5)].map((_, index) => (
-                        <StarIcon
-                          key={index}
-                          className={`w-[10px] h-[10px] ${
-                            index < Math.round(pack.avgRating)
-                              ? "fill-[#e2ad64] text-[#e2ad64]"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-[#05073c] text-xs sm:text-[12.5px]">
-                      {pack.avgRating} ({pack.reviewsCount || 0})
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-[15px] border-t border-solid border-[#e7e6e6]">
-                    <div className="flex items-center gap-[4.8px]">
-                      <ClockIcon className="w-4 h-4 text-[#05073c]" />
-                      <span className="text-[#05073c] text-xs sm:text-[12.6px]">
-                        {pack.duration || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[#05073c] text-xs sm:text-[13px]">
-                        From
-                      </span>
-                      <span className="font-medium text-[#05073c] text-sm sm:text-[14.5px]">
-                        ${pack.price}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </div>
     </section>
+
+
   )
 }
