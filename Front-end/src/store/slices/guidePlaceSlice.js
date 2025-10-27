@@ -13,6 +13,17 @@ export const fetchGuidePlaces = createAsyncThunk(
     }   
   }
 );
+export const fetchGuidePlacesForGuide = createAsyncThunk(
+  'guidePlace/fetchForGuide',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/guide-places/all-places-guide');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Une erreur est survenue');
+    }   
+  }
+);
 
 export const createGuidePlace = createAsyncThunk(
   'guidePlace/create',
@@ -60,6 +71,7 @@ export const deleteGuidePlace = createAsyncThunk(
 // Initial State
 const initialState = {
   places: [],
+  placesForGuide: [],
   currentPlace: null,
   loading: false,
   error: null,
@@ -91,6 +103,18 @@ const guidePlaceSlice = createSlice({
         state.places = action.payload;
       })
       .addCase(fetchGuidePlaces.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchGuidePlacesForGuide.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGuidePlacesForGuide.fulfilled, (state, action) => {
+        state.loading = false;
+        state.placesForGuide = action.payload;
+      })
+      .addCase(fetchGuidePlacesForGuide.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

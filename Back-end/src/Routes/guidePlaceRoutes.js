@@ -27,6 +27,9 @@ router.post(
 router.get("/",verifyToken,
   authorizeRoles(["guide", "admin"]),
    getAllGuidePlaces);
+router.get("/all-places-guide",verifyToken,
+  authorizeRoles(["guide", "admin"]),
+   getAllGuidePlaces);
 router.get("/:id", verifyToken, authorizeRoles(["guide","admin"]),getGuidePlaceById);
 router.put(
   "/:id",
