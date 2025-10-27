@@ -42,7 +42,7 @@ export const getAllGuidePlaces = async (req, res) => {
   }
 };
 export const getAllGuidePlacesForGuide = async (req, res) => {
-  try {
+  try {   
     const places = await GuidePlace.find({ guideID: req.user.id }).populate({
       path: "guideID",
       select: "firstName lastName email profileImage role", // Sélectionnez les champs dont vous avez besoin

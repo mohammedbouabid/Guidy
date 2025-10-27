@@ -25,6 +25,7 @@ import ProfilePage from "@/pages/Home/ProfilePage";
 import PackDetails from "@/pages/Guide/PackDetails";
 import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
+import GuideDashboard from "@/pages/Guide/GuideDashboard";
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
       </ProtectedRoutes>
     ),
     children: [
+      { index: true, element: <GuideDashboard /> },
       { path: "PacksGuide", element: <PacksGuid /> },
       { path: "packs/add", element: <AddPack /> },
       { path: "packs/edit/:id", element: <UpdatePack /> },

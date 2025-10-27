@@ -6,6 +6,7 @@ import {
   getGuidePlaceById,
   updateGuidePlace,
   deleteGuidePlace,
+  getAllGuidePlacesForGuide,
 } from "../Controllers/guidePlaceController.js";
 import { validate } from "../Middlewares/validate.js";
 import { uploadImages } from "../Middlewares/uploadImages.js";
@@ -29,7 +30,7 @@ router.get("/",verifyToken,
    getAllGuidePlaces);
 router.get("/all-places-guide",verifyToken,
   authorizeRoles(["guide", "admin"]),
-   getAllGuidePlaces);
+   getAllGuidePlacesForGuide);
 router.get("/:id", verifyToken, authorizeRoles(["guide","admin"]),getGuidePlaceById);
 router.put(
   "/:id",
