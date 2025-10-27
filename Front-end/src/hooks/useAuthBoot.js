@@ -9,16 +9,9 @@ export function useAuthBoot() {
 
   useEffect(() => {
     const user = getUserFromCookie();
-    if (user) {
-      dispatch(hydrateUserFromCookie(user));
-    }
-
-    const timer = setTimeout(() => {
-      setBooted(true);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [dispatch]);
+    dispatch(hydrateUserFromCookie(user || null)); // ✅ always dispatch
+    setBooted(true); // ✅ mark boot complete
+  }, []);
 
   return booted;
 }
