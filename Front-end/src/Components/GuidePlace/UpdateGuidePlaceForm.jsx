@@ -17,7 +17,7 @@ export default function UpdateGuidePlaceForm() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { places, loading } = useSelector((state) => state.guidePlace);
+  const { placesForGuide, loading } = useSelector((state) => state.guidePlace);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -46,7 +46,7 @@ export default function UpdateGuidePlaceForm() {
       });
       setExistingImages(place.images);
     }
-  }, [id, places]);
+  }, [id, placesForGuide]);
 
   const validateForm = () => {
     const newErrors = {};

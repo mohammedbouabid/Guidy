@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Image as ImageIcon, Loader2, X } from 'lucide-react';
-import { fetchGuidePlaces } from '@/store/slices/guidePlaceSlice';
+import { fetchGuidePlacesForGuide } from '@/store/slices/guidePlaceSlice';
 import { fetchPackById, updatePack } from '@/store/slices/packSlice';
 import { toast } from 'react-hot-toast';
 
@@ -40,7 +40,7 @@ export default function UpdatePack() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    dispatch(fetchGuidePlaces());
+    dispatch(fetchGuidePlacesForGuide());
     dispatch(fetchPackById(id))
       .unwrap()
       .then((p) => {

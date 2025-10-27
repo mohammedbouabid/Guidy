@@ -2,23 +2,23 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import CardGuidePlace from "../../Components/GuidePlace/CardGuidePlace";
-import { fetchGuidePlaces } from "../../store/slices/guidePlaceSlice";
+import { fetchGuidePlacesForGuide } from "../../store/slices/guidePlaceSlice";
 import { Loader2 } from "lucide-react";
 
 export default function GuidePlaces() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { places, loading, error } = useSelector((state) => state.guidePlace);
+  const { placesForGuide, loading, error } = useSelector((state) => state.guidePlace);
 
   useEffect(() => {
-    dispatch(fetchGuidePlaces());
+    dispatch(fetchGuidePlacesForGuide());
   }, [dispatch]);
 
   // Refresh the list when navigating back from add form
   useEffect(() => {
     if (location.state?.refresh) {
-      dispatch(fetchGuidePlaces());
+      dispatch(fetchGuidePlacesForGuide());
     }
   }, [location, dispatch]);
 
@@ -54,9 +54,9 @@ export default function GuidePlaces() {
           </button>
         </div>
 
-        {Array.isArray(places) && places.length > 0 ? (
+        {Array.isArray(placesForGuide) && placesForGuide.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {places.map((place) => (
+            {placesForGuide.map((place) => (
               <CardGuidePlace key={place._id} place={place} />
             ))}
           </div>
