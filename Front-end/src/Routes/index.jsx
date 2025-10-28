@@ -28,6 +28,7 @@ import PackDetails from "@/pages/Guide/PackDetails";
 import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
+import PackDetailsPage from "@/components/PackDetailsPage";
 
 const router = createBrowserRouter([
   {
@@ -41,7 +42,8 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
-      {path:"/profile", element:<ProfilePage/>}
+      {path:"/profile", element:<ProfilePage/>},
+      { path: "/packs/:id", element: <PackDetailsPage /> }
        ],
   },
   {
