@@ -8,11 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Calendar, Mail, MapPin } from "lucide-react"
 import { hydrateUserFromCookie } from "@/store/slices/AuthSlice"
 import { getUserFromCookie } from "@/lib/getUserFromCookie"
+import Loader from "./loader"
 
 export default function ProfileHeader() {
   const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.Auth)
+  const { user, isHydrated } = useSelector((state) => state.Auth)
   const [uploading, setUploading] = useState(false)
+
+  if (!isHydrated || !user) return <Loader />;
 
   if (!user) return null
 
@@ -68,7 +71,7 @@ export default function ProfileHeader() {
       setUploading(false)
     }
   }
-
+  console.log("Hydrated user:", user);
 
   return (
     <Card>
@@ -76,12 +79,15 @@ export default function ProfileHeader() {
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
           {/* Avatar + Upload Button */}
           <div className="relative">
-            <Avatar className="h-24 w-24">
-              {user.profileImage ? (
-                <AvatarImage src={user.profileImage} alt={formattedName} />
-              ) : (
-                <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
-              )}
+            <Avatar key={user.profileImage || "fallback"} className="h-24 w-24">
+              <AvatarImage
+                src={user.profileImage}
+                alt={formattedName}
+                onError={(e) => {
+                  e.target.style.display = "none"; // fallback will show
+                }}
+              />
+              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             </Avatar>
 
 
@@ -124,9 +130,6 @@ export default function ProfileHeader() {
               </div>
             </div>
           </div>
-
-          {/* Edit Button */}
-          <Button variant="default">Edit Profile</Button>
         </div>
       </CardContent>
     </Card>
