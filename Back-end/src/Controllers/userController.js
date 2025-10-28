@@ -414,6 +414,72 @@ const getUser = async (req, res, next) => {
   }
 };
 
+// Change Password
+const changePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, password } = req.body;
+    const userId = req.user?.id;
+
+    if (!oldPassword || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "old password and new password are required" 
+      });
+    }
+
+    // Validate new password length
+    if (password.length < 8) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "password must be at least 8 characters long" 
+      });
+    }
+
+    // Get user with password
+    const user = await User.findById(userId).select("+password");
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "user not found" 
+      });
+    }
+
+    // Verify old password
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "incorrect old password" 
+      });
+    }
+
+    // Check if new password is same as old password
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "new password cannot be the same as old password" 
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: "password changed successfully" 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   addUser,
   updateUser,
@@ -422,4 +488,5 @@ export {
   getAllUsers,
   getUserById,
   getUser,
+  changePassword,
 };
