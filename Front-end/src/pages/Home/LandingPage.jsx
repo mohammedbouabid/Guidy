@@ -1,10 +1,10 @@
-import HeroSection from "@/components/HeroSection"
-import WhyChooseUs from "@/components/Features"
-import { FeaturedPacksSection } from "@/components/FeaturedToursSection"
-import PromoBanner from "@/components/PromoBanner"
-import FeaturedGuides from "@/components/FeaturedGuides"
-import CustomerReviewsSection from "@/components/CustomerReviewsSection"
-import LogosCarousel from "@/components/LogosCarousel"
+import HeroSection from "@/components/LandingPage/HeroSection"
+import WhyChooseUs from "@/components/LandingPage/Features"
+import { FeaturedPacksSection } from "@/components/LandingPage/FeaturedToursSection"
+import PromoBanner from "@/components/LandingPage/PromoBanner"
+import FeaturedGuides from "@/components/LandingPage/FeaturedGuides"
+import CustomerReviewsSection from "@/components/LandingPage/CustomerReviewsSection"
+import LogosCarousel from "@/components/LandingPage/LogosCarousel"
 import FadeInSection from "@/components/FadeInSection"
 
 const Home = () => {

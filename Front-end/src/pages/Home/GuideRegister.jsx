@@ -1,4 +1,4 @@
-import { GuideRegister } from "@/components/SignupForm"
+import { GuideRegister } from "@/components/AuthPages/SignupForm"
 
 export default function GuideRegister() {
   return (

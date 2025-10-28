@@ -1,6 +1,6 @@
 import React from "react";
-import { DateRangePicker } from "./ui/DateRangePicker";
-import { TourTypeSelect } from "./TourTypeSelect";
+import { DateRangePicker } from "../ui/DateRangePicker";
+import { TourTypeSelect } from "../TourTypeSelect";
 
 export default function SearchBar() {
   return (

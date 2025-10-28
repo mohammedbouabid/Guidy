@@ -6,15 +6,15 @@ import {
   MapPinIcon,
   StarIcon,
 } from "lucide-react"
-import { Button } from "./ui/button"
-import { Card, CardContent } from "./ui/card"
+import { Button } from "../ui/button"
+import { Card, CardContent } from "../ui/card"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "./ui/carousel"
+} from "../ui/carousel"
 import { ChevronRightIcon } from "lucide-react";
 
 export const FeaturedPacksSection = () => {
