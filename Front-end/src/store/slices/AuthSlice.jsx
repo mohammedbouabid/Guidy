@@ -54,7 +54,8 @@ const AuthSlice = createSlice({
     user: null,
     loading: false,
     error: null,
-    success: null, // 👈 used for register success
+    success: null,
+    isHydrated: false,
   },
   reducers: {
     clearError: (state) => {
@@ -65,6 +66,7 @@ const AuthSlice = createSlice({
     },
     hydrateUserFromCookie: (state, action) => {
       state.user = action.payload
+      state.isHydrated = true;
     }
 
   },
