@@ -3,10 +3,11 @@ import { useSelector } from "react-redux";
 
 
 const ProtectedRoutes = ({ children, allowedRoles }) => {
- const { user } = useSelector((state) => state.Auth);
+ const { user,token } = useSelector((state) => state.Auth);
   const location = useLocation();
+  
 
-  if (!user) {
+  if (!token) {
     // Rediriger vers login si non authentifié
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

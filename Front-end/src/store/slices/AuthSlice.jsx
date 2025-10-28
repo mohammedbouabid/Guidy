@@ -95,6 +95,8 @@ const AuthSlice = createSlice({
       .addCase(LoginUser.fulfilled, (state, action) => {
         state.loading = false
         state.user = action.payload.user
+        // KHASK TAKHOD TOKEN OTHETO FE STATE  BACH NEDIRO
+ 
       })
       .addCase(LoginUser.rejected, (state, action) => {
         state.loading = false
