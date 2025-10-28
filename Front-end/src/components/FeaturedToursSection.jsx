@@ -74,7 +74,7 @@ export const FeaturedPacksSection = () => {
                         </span>
                       </div>
 
-                      <h3 className="text-sm sm:text-base font-semibold text-[#05073c] leading-snug mb-2">
+                      <h3 className="text-sm sm:text-base font-semibold text-[#05073c] leading-snug mb-2 truncate">
                         {pack.title}
                       </h3>
 
