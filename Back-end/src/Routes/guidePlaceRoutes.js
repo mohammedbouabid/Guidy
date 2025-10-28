@@ -16,6 +16,7 @@ import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import upload, { handleUploadErrors } from "../Middlewares/uploadsMultiple.js";
 const router = express.Router();  
 
+
 router.post(
   "/",
   verifyToken,
@@ -25,17 +26,19 @@ router.post(
   validate(createGuidePlaceSchema),
   createGuidePlace
 );
-router.get("/",verifyToken,
-  authorizeRoles(["guide", "admin"]),
-   getAllGuidePlaces);
+
 router.get("/all-places-guide",verifyToken,
   authorizeRoles(["guide", "admin"]),
    getAllGuidePlacesForGuide);
+
+router.get("/",verifyToken,
+  authorizeRoles(["guide", "admin"]),
+   getAllGuidePlaces);
 router.get("/:id", verifyToken, authorizeRoles(["guide","admin"]),getGuidePlaceById);
 router.put(
   "/:id",
 verifyToken,
- authorizeRoles(["guide","admin"]),
+ authorizeRoles(["guide","admin"]),  
   upload.array("images", 10),
   handleUploadErrors,
   validate(updateGuidePlaceSchema),
