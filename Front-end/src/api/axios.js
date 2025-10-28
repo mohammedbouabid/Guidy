@@ -2,42 +2,43 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
-  withCredentials: true,
+  withCredentials: true, // ✅ This automatically sends cookies
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Detect expired access token
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      error.response?.data?.message?.includes("jwt expired")
-    ) {
+    // Check if this is a 401 error and we haven't retried yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      
       try {
-        // Refresh token via cookie
-        await api.get('/refresh');
-
-        // Retry original request
+        console.log('🔄 Access token expired, refreshing...');
+        
+        // Call refresh endpoint (uses refreshToken cookie from backend)
+        await axios.post('http://localhost:3000/api/refresh', {}, {
+          withCredentials: true // Important: send cookies
+        });
+        
+        console.log('✅ Token refreshed successfully');
+        
+        // Retry the original request with new access token
         return api(originalRequest);
+        
       } catch (refreshError) {
-        console.error("Refresh failed:", refreshError);
-        // Clear user info and redirect to login
-        localStorage.removeItem('user');
+        console.error('❌ Refresh failed:', refreshError);
+        
+        // Clear cookies and redirect to login
+        document.cookie = 'accessToken=; Max-Age=0; path=/;';
+        document.cookie = 'refreshToken=; Max-Age=0; path=/;';
+        document.cookie = 'userInfo=; Max-Age=0; path=/;';
+        
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

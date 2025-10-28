@@ -6,10 +6,10 @@ const ProtectedRoutes = ({ children, allowedRoles }) => {
  const { user } = useSelector((state) => state.Auth);
   const location = useLocation();
 
-/*   if (!user) {
+   if (!user) {
     // Rediriger vers login si non authentifié
     return <Navigate to="/login" state={{ from: location }} replace />;
-  } */
+  } 
 
   if (!allowedRoles.includes(user.role)) {
     // Rediriger vers la page d'accueil si le rôle n'est pas autorisé
@@ -21,4 +21,3 @@ const ProtectedRoutes = ({ children, allowedRoles }) => {
 };
 
 export default ProtectedRoutes;
-
