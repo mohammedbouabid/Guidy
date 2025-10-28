@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post("/user", verifyToken, authorizeRoles(["admin"]), createUserValidation, validate, addUser);
 
-router.put("/user/", verifyToken, authorizeRoles(["admin", "guide", "client"]), updateUserValidation, validate, upload.single("profileImage"), updateUser);
+router.put("/user/", verifyToken, authorizeRoles(["admin", "guide", "client"]), updateUserValidation, validate, upload.single("avatar"), updateUser);
 
 router.delete("/user/:id", verifyToken, authorizeRoles(["admin", "client", "guide"]), deleteUserById, logout);
 router.delete("/user", verifyToken, authorizeRoles(["admin"]), deleteManyUsersValidation, validate, deleteManyUsers);

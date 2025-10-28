@@ -88,9 +88,23 @@ const updateUser = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    res
-      .status(200)
-      .json({ success: true, user: `${userRole} updated successfuly` });
+    const updatedUser = await User.findById(req.user.id)
+
+    res.cookie("userInfo", JSON.stringify({
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      profileImage: updatedUser.profileImage,
+      role: updatedUser.role,
+      id: updatedUser._id
+    }), {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
+
+    res.status(200).json({ success: true, user: `${userRole} updated successfuly` });
   } catch (error) {
     next(error);
   }
