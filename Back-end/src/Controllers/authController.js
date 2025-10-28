@@ -135,7 +135,7 @@ const login = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone:user.phone,
-      avatar: user.avatar || "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
+      profileImage: user.profileImage || "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
       role: user.role,
       id: user._id
     }), {
@@ -151,7 +151,7 @@ const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone || 'N/A' ,
-        avatar: user.avatar || `https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg`,
+        profileImage: user.profileImage || `https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg`,
         role: user.role,
         id: user._id
       }

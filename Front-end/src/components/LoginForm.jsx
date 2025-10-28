@@ -54,7 +54,7 @@ export function LoginForm({ className, ...props }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          
+
           {error && (
             <div className="text-sm text-red-500 text-center mb-4">
               {error}
@@ -109,11 +109,12 @@ export function LoginForm({ className, ...props }) {
                 >
                   {loading ? "Logging in..." : "Login"}
                 </Button>
-                <Link to="/register">
-                  <FieldDescription className="text-center">
-                    Don&apos;t have an account? <a href="#" className="text-[#EB662B] hover:underline">Sign up</a>
-                  </FieldDescription>
-                </Link>
+                <FieldDescription className="text-center">
+                  Don&apos;t have an account?{" "}
+                  <Link to="/register" className="text-[#EB662B] hover:underline">
+                    Sign up
+                  </Link>
+                </FieldDescription>
               </Field>
             </FieldGroup>
           </form>
