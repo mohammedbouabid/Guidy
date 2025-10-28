@@ -410,7 +410,7 @@ export default function ProfileContent() {
                   })}
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className={"cursor-pointer"}>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleSave} disabled={loading}>
                     {loading ? "Saving..." : "Confirm & Save"}
                   </AlertDialogAction>
@@ -490,7 +490,7 @@ export default function ProfileContent() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-3 py-2 "
                           onClick={() => togglePasswordVisibility('old')}
                         >
                           {showPasswords.old ? (
@@ -516,7 +516,7 @@ export default function ProfileContent() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-3 py-2 "
                           onClick={() => togglePasswordVisibility('new')}
                         >
                           {showPasswords.new ? (
@@ -545,7 +545,7 @@ export default function ProfileContent() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-3 py-2 "
                           onClick={() => togglePasswordVisibility('confirm')}
                         >
                           {showPasswords.confirm ? (
@@ -557,9 +557,10 @@ export default function ProfileContent() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-end gap-3">
+                  <div className="flex justify-end gap-3 ">
                     <Button
                       variant="outline"
+                      className={"cursor-pointer"}
                       onClick={() => {
                         setShowPasswordDialog(false)
                         setPasswordData({
@@ -574,6 +575,7 @@ export default function ProfileContent() {
                     <Button
                       onClick={handlePasswordChangeSubmit}
                       disabled={!isPasswordFormValid}
+                      className={"cursor-pointer"}
                     >
                       Change Password
                     </Button>
@@ -600,7 +602,7 @@ export default function ProfileContent() {
                   </ul>
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="cursor-pointer"> Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handlePasswordChangeConfirm}
                     disabled={passwordLoading}

@@ -9,7 +9,7 @@ import LandingPage from "../pages/Home/LandingPage";
 import FilterPage from "@/pages/Home/FilterPage";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
-import { GuideRegister } from "@/components/GuideRegister";
+import { GuideRegister } from "@/components/AuthPages/GuideRegister";
 
 //import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
