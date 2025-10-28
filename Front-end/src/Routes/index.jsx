@@ -14,8 +14,10 @@ import { GuideRegister } from "@/components/GuideRegister";
 //import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
-import AllGuides from "../pages/admin/guides";
+import AllGuides from "../pages/admin/AllGuides";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
+import AllClients from "@/pages/admin/AllClients";
+import GuidePlacesPage from "@/pages/admin/GuidePlaces";
 import GuidePlaces from "@/pages/Guide/GuidePlaces";
 import AddGuidePlaceForm from "@/Components/GuidePlace/AddGuidePlaceForm";
 import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
@@ -88,7 +90,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardHome /> },
       { path: "guides", element: <AllGuides /> },
-      // { path: "bookings", element: <AllBookings /> },
+      { path: "clients", element: <AllClients /> },
+      { path: "destinations", element: <GuidePlacesPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

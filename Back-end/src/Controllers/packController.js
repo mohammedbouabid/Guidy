@@ -116,7 +116,6 @@ export const getPacksFiltered = async (req, res) => {
 
 // Gets all the packs. Makes sure the guides get only the packs they need, which are their packs.
 const getAllPacks = async (req, res) => {
-  console.log("req?.user?.id",req?.user?.id);
   try {
     const options = {
       page: parseInt(req.query.page) || 1,
@@ -169,7 +168,6 @@ const getAllPacksForGuide  = async (req, res) => {
     };
 
     // 🎯 Récupérer uniquement les packs du user connecté avec populate
-    console.log("req?.user?.id",req?.user?.id);
     const packs = await Pack.paginate({ guideId: req?.user?.id }, options);
 
     // 🔢 Récupérer les IDs pour calculer les moyennes

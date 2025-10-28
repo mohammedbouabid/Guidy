@@ -19,7 +19,9 @@ const addUser = async (req, res, next) => {
     newUser.password = await bcrypt.hash(newUser.password, 10);
     await User.create(newUser);
 
-    res.status(201).json({ success: true, message: `${newUser.role} successfuly created` });
+    res
+      .status(201)
+      .json({ success: true, message: `${newUser.role} successfuly created` });
   } catch (err) {
     next(err);
   }
@@ -84,7 +86,7 @@ const updateUser = async (req, res, next) => {
       req.user.id,
       { $set: update },
       { new: true, runValidators: true }
-    )
+    );
 
     const updatedUser = await User.findById(req.user.id)
 
@@ -159,7 +161,7 @@ const deleteUserById = async (req, res, next) => {
     } else {
       res.status(200).json({
         success: true,
-        message: "user soft-deleted successfully"
+        message: "user soft-deleted successfully",
       });
     }
   } catch (err) {
@@ -211,7 +213,16 @@ const deleteManyUsers = async (req, res, next) => {
 // Get all Users (Guide and Client)
 const getAllUsers = async (req, res, next) => {
   try {
-    const { role, search, page, limit, sort, order } = req.query;
+    const {
+      role,
+      search,
+      page,
+      limit,
+      sort,
+      order,
+      dateFilter,
+      profileCompletionFilter,
+    } = req.query;
     const normalizedRole = role ? role.toLowerCase() : null;
 
     const pageNum = parseInt(page) || 1;
@@ -244,25 +255,96 @@ const getAllUsers = async (req, res, next) => {
       }
     }
 
+    // Date filter logic
+    if (dateFilter) {
+      const now = new Date();
+      let startDate;
+
+      switch (dateFilter) {
+        case "today":
+          startDate = new Date(now.setHours(0, 0, 0, 0));
+          break;
+        case "week":
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 7);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case "month":
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case "year":
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
+        default:
+          startDate = null;
+      }
+
+      if (startDate) {
+        query.createdAt = { $gte: startDate };
+      }
+    }
+
+    // Profile Completion filter logic
+    if (profileCompletionFilter) {
+      switch (profileCompletionFilter) {
+        case "complete":
+          // Both phone and CIN must exist
+          query.phone = { $exists: true, $ne: null, $ne: "" };
+          query.cin = { $exists: true, $ne: null, $ne: "" };
+          break;
+        case "incomplete":
+          // Either phone or CIN is missing
+          query.$or = [
+            { phone: { $exists: false } },
+            { phone: null },
+            { phone: "" },
+            { cin: { $exists: false } },
+            { cin: null },
+            { cin: "" },
+          ];
+          break;
+        case "no-phone":
+          // Phone is missing
+          query.$or = [
+            { phone: { $exists: false } },
+            { phone: null },
+            { phone: "" },
+          ];
+          break;
+        case "no-cin":
+          // CIN is missing
+          query.$or = [{ cin: { $exists: false } }, { cin: null }, { cin: "" }];
+          break;
+      }
+    }
+
     // Search by name or email if provided
     if (search) {
       const regex = new RegExp(search, "i");
-      query.$or = [{ name: regex }, { email: regex }];
+      const searchQuery = [
+        { name: regex },
+        { email: regex },
+        { phone: regex },
+        { cin: regex },
+      ];
+
+      // If there's already an $or from profile completion filter, combine them properly
+      if (query.$or) {
+        query.$and = [{ $or: query.$or }, { $or: searchQuery }];
+        delete query.$or;
+      } else {
+        query.$or = searchQuery;
+      }
     }
 
     const users = await User.find(query)
-      .select("name email profileImage")
+      .select("profileImage name email phone cin createdAt")
       .skip(skip)
       .limit(limitNum)
+      .collation({ locale: "en", strength: 1 })
       .sort(sortOption);
 
-    if (users.length === 0) {
-      const error = new Error("no user is found");
-      error.statusCode = 404;
-      throw error;
-    }
-
-    const count = await User.countDocuments({ role: { $in: ["client", "guide"] }, isDeleted: false });
+    const count = await User.countDocuments(query);
 
     res.status(200).json({
       success: true,
@@ -290,7 +372,7 @@ const getUserById = async (req, res, next) => {
     const user = await User.findOne({
       _id: id,
       isDeleted: false,
-    }).select("name email profileImage");
+    }).select("profileImage name email phone cin createdAt role");
 
     if (!user) {
       const error = new Error("user not found");
@@ -339,5 +421,5 @@ export {
   deleteManyUsers,
   getAllUsers,
   getUserById,
-  getUser
+  getUser,
 };

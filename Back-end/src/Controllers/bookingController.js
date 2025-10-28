@@ -176,7 +176,6 @@ export const cancelBooking = async (req, res) => {
     if (bookingUserId !== userID) {
       return res.status(403).json({ message: 'You can only cancel your own bookings.' });
     }
-    console.log('Booking:', booking);
     // Proceed to cancel the booking
     booking.isCancelled = true;
     await booking.save();
