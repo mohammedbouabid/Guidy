@@ -6,7 +6,7 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-
+import FilterPage from "@/pages/Home/FilterPage";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
 import { GuideRegister } from "@/components/GuideRegister";
@@ -41,7 +41,8 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
-      {path:"/profile", element:<ProfilePage/>}
+      {path:"/profile", element:<ProfilePage/>},
+      {path:"/filter", element:<FilterPage/>},
        ],
   },
   {
