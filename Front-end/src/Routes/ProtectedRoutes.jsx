@@ -14,7 +14,6 @@ const ProtectedRoutes = ({ children, allowedRoles }) => {
   if (!allowedRoles.includes(user.role)) {
     // Rediriger vers la page d'accueil si le rôle n'est pas autorisé
     return <Navigate to="/" replace />;
-    console.log("acces dined")
   }
 
   return children;

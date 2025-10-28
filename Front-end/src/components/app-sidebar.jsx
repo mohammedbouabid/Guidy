@@ -99,7 +99,7 @@ export function AppSidebar() {
                     className={`flex items-center w-full gap-2 px-4 py-6 rounded-md transition-all duration-200 cursor-pointer
                       ${
                         activeItem === item.title
-                          ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] scale-[1.03]"
+                          ? "bg-[#EB662B] text-[var(--sidebar-accent-foreground)] scale-[1.03]"
                           : "hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
                       }`}
                   >
