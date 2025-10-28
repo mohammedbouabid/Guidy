@@ -28,7 +28,7 @@ import PackDetails from "@/pages/Guide/PackDetails";
 import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
-import PackDetailsPage from "@/components/PackDetailsPage";
+import PackDetailsPage from "@/pages/Home/PackDetailsPage";
 
 const router = createBrowserRouter([
   {
