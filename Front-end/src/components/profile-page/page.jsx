@@ -1,5 +1,5 @@
-import ProfileHeader from "../ProfileHeader";
-import ProfileContent from "../ProfileContent";
+import ProfileHeader from "../Profile/ProfileHeader";
+import ProfileContent from "../Profile/ProfileContent";
 
 export default function Page() {
   return (

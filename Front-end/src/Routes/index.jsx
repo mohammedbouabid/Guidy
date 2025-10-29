@@ -9,7 +9,7 @@ import LandingPage from "../pages/Home/LandingPage";
 import FilterPage from "@/pages/Home/FilterPage";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
-import { GuideRegister } from "@/components/GuideRegister";
+import { GuideRegister } from "@/components/AuthPages/GuideRegister";
 
 //import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
@@ -28,6 +28,7 @@ import PackDetails from "@/pages/Guide/PackDetails";
 import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
+import PackDetailsPage from "@/components/PackDetailsPage";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
       {path:"/profile", element:<ProfilePage/>},
+      { path: "/packs/:id", element: <PackDetailsPage /> },
       {path:"/filter", element:<FilterPage/>},
        ],
   },

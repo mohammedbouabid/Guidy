@@ -1,6 +1,6 @@
 import React from "react"
-import ProfileContent from "@/components/ProfileContent"
-import ProfileHeader from "@/components/ProfileHeader"
+import ProfileContent from "@/components/Profile/ProfileContent"
+import ProfileHeader from "@/components/Profile/ProfileHeader"
 
 export default function ProfilePage() {
     return (

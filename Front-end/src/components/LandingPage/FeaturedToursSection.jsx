@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   ClockIcon,
   HeartIcon,
   MapPinIcon,
   StarIcon,
 } from "lucide-react"
-import { Button } from "./ui/button"
-import { Card, CardContent } from "./ui/card"
+import { Button } from "../ui/button"
+import { Card, CardContent } from "../ui/card"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "./ui/carousel"
+} from "../ui/carousel"
 import { ChevronRightIcon } from "lucide-react";
 
 export const FeaturedPacksSection = () => {
+  const navigate = useNavigate();
   const [packs, setPacks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -38,6 +40,14 @@ export const FeaturedPacksSection = () => {
     fetchPopularPacks()
   }, [])
 
+  const handlePackClick = (packId) => {
+    navigate(`/packs/${packId}`);
+  };
+
+  const handleSeeAllClick = () => {
+    navigate("/packs");
+  };
+
   if (loading) return <p className="text-center py-10">Loading tours...</p>
   if (error) return <p className="text-center text-red-500 py-10">{error}</p>
 
@@ -57,7 +67,10 @@ export const FeaturedPacksSection = () => {
                 key={pack._id}
                 className="pl-4 basis-[90%] sm:basis-1/2 md:basis-1/3 xl:basis-1/4"
               >
-                <Card className="rounded-xl border border-[#e7e6e6] overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <Card 
+                  className="rounded-xl border border-[#e7e6e6] overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                  onClick={() => handlePackClick(pack._id)}
+                >
                   <CardContent className="p-0">
                     <div className="relative">
                       <div
@@ -130,10 +143,11 @@ export const FeaturedPacksSection = () => {
           </div>
         </Carousel>
 
-        {/* Bottom “See All” Button */}
+        {/* Bottom "See All" Button */}
         <div className="flex justify-center mt-8">
           <Button
             variant="ghost"
+            onClick={handleSeeAllClick}
             className="text-sm sm:text-base text-[#05073c] hover:text-orange-500 hover:bg-transparent px-0 h-auto font-normal cursor-pointer group"
           >
             See all

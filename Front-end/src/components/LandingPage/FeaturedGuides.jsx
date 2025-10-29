@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronRightIcon } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 const FeaturedGuides = () => {
   const guides = [
