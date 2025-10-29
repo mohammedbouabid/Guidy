@@ -267,11 +267,18 @@ const createPack = async (req, res) => {
 // Gets a pack by it's ID. Makes sure the guides only get access to their packs and not to other guides packs.
 const getPackById = async (req, res) => {
   try {
+    // For public access, always fetch the pack
+    // Only apply guide restriction if user is authenticated AND is a guide
     let pack;
-    if (req.user.role.toLowerCase() === "guide") {
-      pack = await Pack.findOne({ _id: req.params.id, guideId: req.user.id })
-        .populate('guidesPlacesId', 'name city country images description');
+    
+    if (req.user && req.user.role.toLowerCase() === "guide") {
+      // Authenticated guide: only show their own packs
+      pack = await Pack.findOne({ 
+        _id: req.params.id, 
+        guideId: req.user.id 
+      }).populate('guidesPlacesId', 'name city country images description');
     } else {
+      // Public or non-guide: show any pack
       pack = await Pack.findById(req.params.id)
         .populate('guidesPlacesId', 'name city country images description');
     }
@@ -280,23 +287,27 @@ const getPackById = async (req, res) => {
       return res.status(404).json({ message: 'Pack not found' });
     }
 
-    // --- NEW: compute average for this single pack and persist it
+    // Compute average rating for this pack
     const result = await Rating.aggregate([
       { $match: { packID: new mongoose.Types.ObjectId(pack._id) } },
       { $group: { _id: "$packID", avgRating: { $avg: "$stars" } } }
     ]);
     const avg = result.length ? Number(Number(result[0].avgRating).toFixed(2)) : 0;
 
-    // attach to response (ensure plain object if needed)
+    // Attach to response (ensure plain object if needed)
     const packObj = typeof pack.toObject === "function" ? pack.toObject() : pack;
     packObj.avgRating = avg;
 
-    // persist in DB
+    // Persist in DB
     await Pack.updateOne({ _id: pack._id }, { $set: { avgRating: avg } });
 
     return res.status(200).json(packObj);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching pack', error: error.message });
+    console.error('Error in getPackById:', error);
+    res.status(500).json({ 
+      message: 'Error fetching pack', 
+      error: error.message 
+    });
   }
 };
 

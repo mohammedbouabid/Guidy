@@ -22,13 +22,14 @@ const router = express.Router();
 // --- Public routes ---
 
 router.get("/", getAllPacks);
-router.get("/popular", getPopularPacks); // 👈 new endpoint
+router.get("/popular", getPopularPacks); // 👈 new endpoint*
+router.get("/:id", getPackById);
 
 // --- Protected routes (require authentication) ---
 router.use(verifyToken);
 
 router.get("/all", getAllPacksForGuide);
-router.get("/:id", getPackById);
+
 
 router.post(
   "/",

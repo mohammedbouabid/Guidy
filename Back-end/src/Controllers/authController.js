@@ -222,17 +222,7 @@ const refreshAccessToken = async (req, res, next) => {
 // User Logout
 const logout = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (refreshToken) {
-      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-      const user = await User.findById(decoded.id);
-      if (user) {
-        user.refreshToken = null;
-        await user.save();
-      }
-    }
-
+  
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
     res.clearCookie("userInfo");
