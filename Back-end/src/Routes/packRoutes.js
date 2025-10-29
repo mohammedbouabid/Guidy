@@ -22,6 +22,8 @@ const router = express.Router();
 // --- Public routes ---
 
 router.get("/", getAllPacks);
+router.get("/popular", getPopularPacks); // 👈 new endpoint*
+router.get("/:id", getPackById);
 router.get("/popular", getPopularPacks); // 👈 new endpoint
 router.get("/filter", getPacksFiltered); // ← new route for filtering packs
 
@@ -29,7 +31,7 @@ router.get("/filter", getPacksFiltered); // ← new route for filtering packs
 router.use(verifyToken);
 
 router.get("/all", getAllPacksForGuide);
-router.get("/:id", getPackById);
+
 
 router.post(
   "/",
