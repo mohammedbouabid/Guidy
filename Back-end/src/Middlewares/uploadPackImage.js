@@ -1,7 +1,7 @@
 // src/Middlewares/uploadPackImage.js
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "../Config/cloudinary.js";
+import cloudinary from "../Config/CloudinaryConfig.js";
 
 // 🗂️ Configure storage for PACK images
 const packImageStorage = new CloudinaryStorage({
