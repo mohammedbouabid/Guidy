@@ -23,6 +23,7 @@ const router = express.Router();
 
 router.get("/", getAllPacks);
 router.get("/popular", getPopularPacks); // 👈 new endpoint
+router.get("/filter", getPacksFiltered); // ← new route for filtering packs
 
 // --- Protected routes (require authentication) ---
 router.use(verifyToken);
