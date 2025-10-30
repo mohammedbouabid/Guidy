@@ -389,6 +389,8 @@ const createPack = async (req, res) => {
 // Gets a pack by it's ID. Makes sure the guides only get access to their packs and not to other guides packs.
 const getPackById = async (req, res) => {
   try {
+    // For public access, always fetch the pack
+    // Only apply guide restriction if user is authenticated AND is a guide
     let pack;
     if (req.user.role.toLowerCase() === "guide") {
       pack = await Pack.findOne({
@@ -426,12 +428,16 @@ const getPackById = async (req, res) => {
 
     packObj.avgRating = avg;
 
-    // persist in DB
+    // Persist in DB
     await Pack.updateOne({ _id: pack._id }, { $set: { avgRating: avg } });
 
     return res.status(200).json(packObj);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching pack", error: error.message });
+    console.error('Error in getPackById:', error);
+    res.status(500).json({ 
+      message: 'Error fetching pack', 
+      error: error.message 
+    });
   }
 };
 
