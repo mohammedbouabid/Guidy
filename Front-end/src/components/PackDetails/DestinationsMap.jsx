@@ -140,40 +140,58 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
 
       const bounds = [];
 
-      // Add markers for places
+      // Group places by city to handle multiple destinations in same location
+      const placesByLocation = {};
       for (const place of places) {
         if (!place.city || !place.country) continue;
+        const key = `${place.city}, ${place.country}`;
+        if (!placesByLocation[key]) {
+          placesByLocation[key] = [];
+        }
+        placesByLocation[key].push(place);
+      }
+
+      // Add markers for each location
+      for (const [locationKey, locationPlaces] of Object.entries(placesByLocation)) {
+        const [city, country] = locationKey.split(', ');
+        const coords = await geocodeLocation(city, country);
         
-        const coords = await geocodeLocation(place.city, place.country);
         if (coords) {
-          bounds.push([coords.lat, coords.lng]);
+          // Add slight offset for multiple places in same city
+          locationPlaces.forEach((place, idx) => {
+            const offset = idx * 0.002; // Small offset to prevent exact overlap
+            const lat = coords.lat + (idx % 2 === 0 ? offset : -offset);
+            const lng = coords.lng + (idx < locationPlaces.length / 2 ? offset : -offset);
+            
+            bounds.push([lat, lng]);
 
-          // Blue marker for destinations
-          const markerIcon = window.L.divIcon({
-            className: 'custom-marker-destination',
-            html: `<div style="background-color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
+            // Blue marker for destinations
+            const markerIcon = window.L.divIcon({
+              className: 'custom-marker-destination',
+              html: `<div style="background-color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            });
+
+            const marker = window.L.marker([lat, lng], { icon: markerIcon }).addTo(map);
+
+            const popupContent = `
+              <div style="min-width: 200px; max-width: 250px;">
+                <h3 style="font-weight: bold; margin-bottom: 8px; color: #05073c; font-size: 16px;">${place.name}</h3>
+                <p style="font-size: 14px; color: #666; margin-bottom: 4px;">${place.city}, ${place.country}</p>
+                ${place.images && place.images[0] ? `
+                  <img src="${place.images[0]}" alt="${place.name}" 
+                    style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-top: 8px;" />
+                ` : ''}
+                ${place.description ? `
+                  <p style="font-size: 13px; color: #444; margin-top: 8px; line-height: 1.4;">
+                    ${place.description.substring(0, 100)}${place.description.length > 100 ? '...' : ''}
+                  </p>
+                ` : ''}
+              </div>
+            `;
+            marker.bindPopup(popupContent, { maxWidth: 300 });
           });
-
-          const marker = window.L.marker([coords.lat, coords.lng], { icon: markerIcon }).addTo(map);
-
-          const popupContent = `
-            <div style="min-width: 200px; max-width: 250px;">
-              <h3 style="font-weight: bold; margin-bottom: 8px; color: #05073c; font-size: 16px;">${place.name}</h3>
-              <p style="font-size: 14px; color: #666; margin-bottom: 4px;">${place.city}, ${place.country}</p>
-              ${place.images && place.images[0] ? `
-                <img src="${place.images[0]}" alt="${place.name}" 
-                  style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-top: 8px;" />
-              ` : ''}
-              ${place.description ? `
-                <p style="font-size: 13px; color: #444; margin-top: 8px; line-height: 1.4;">
-                  ${place.description.substring(0, 100)}${place.description.length > 100 ? '...' : ''}
-                </p>
-              ` : ''}
-            </div>
-          `;
-          marker.bindPopup(popupContent, { maxWidth: 300 });
         }
       }
 
