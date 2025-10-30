@@ -14,7 +14,7 @@ export default function ProfileHeader() {
   const dispatch = useDispatch()
   const { user, isHydrated } = useSelector((state) => state.Auth)
   const [uploading, setUploading] = useState(false)
-  
+
   if (!isHydrated || !user) return <Loader />;
 
   if (!user) return null
@@ -80,15 +80,15 @@ export default function ProfileHeader() {
           {/* Avatar + Upload Button */}
           <div className="relative">
             <Avatar key={user.profileImage || "fallback"} className="h-24 w-24">
-  <AvatarImage
-    src={user.profileImage}
-    alt={formattedName}
-    onError={(e) => {
-      e.target.style.display = "none"; // fallback will show
-    }}
-  />
-  <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
-</Avatar>
+              <AvatarImage
+                src={user.profileImage}
+                alt={formattedName}
+                onError={(e) => {
+                  e.target.style.display = "none"; // fallback will show
+                }}
+              />
+              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+            </Avatar>
 
 
             <input
@@ -130,9 +130,6 @@ export default function ProfileHeader() {
               </div>
             </div>
           </div>
-
-          {/* Edit Button */}
-          <Button variant="default">Edit Profile</Button>
         </div>
       </CardContent>
     </Card>

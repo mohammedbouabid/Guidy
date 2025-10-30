@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ChevronDownIcon } from "@radix-ui/react-icons"
-import { Home, Search, Store, ShoppingCart, User } from "lucide-react"
+import { Home, Search, Store, ShoppingCart, User, LayoutDashboard } from "lucide-react"
 
 const Navbar = ({ onLogout }) => {
   const dispatch = useDispatch()
@@ -100,19 +100,41 @@ const Navbar = ({ onLogout }) => {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    {user.role === "admin" && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {user.role === "guide" && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/guide" className="cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem asChild>
-                      <Link to="/profile">Profile</Link>
+                      <Link to="/profile?tab=personal" className="cursor-pointer">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/settings">Settings</Link>
+                      <Link to="/profile?tab=account" className="cursor-pointer">Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/billing">Billing</Link>
+                      <Link to="/billing" className="cursor-pointer">Billing</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={onLogout}
-                      className="text-red-600 hover:text-white hover:bg-red-600"
+                      className="text-red-600 hover:text-white hover:bg-red-600 cursor-pointer"
                     >
                       Log out
                     </DropdownMenuItem>
@@ -163,15 +185,90 @@ const Navbar = ({ onLogout }) => {
             <ShoppingCart className="h-5 w-5" />
             Cart
           </Link>
-          <Link
-            to="/profile"
-            className={`flex flex-col items-center text-xs ${
-              isActive("/profile") ? "text-[#eb662b]" : "text-gray-500"
-            }`}
-          >
-            <User className="h-5 w-5" />
-            Profile
-          </Link>
+          
+          {/* Profile Dropdown for Mobile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={`flex flex-col items-center text-xs ${
+                  isActive("/profile") ? "text-[#eb662b]" : "text-gray-500"
+                } focus:outline-none`}
+              >
+                <User className="h-5 w-5" />
+                Profile
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 mb-2">
+              {!user ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/login" className="cursor-pointer">
+                      Log in
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/register" className="cursor-pointer">
+                      Sign up
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/GuideRegister" className="cursor-pointer text-[#eb662b]">
+                      Become a Guide
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {user.role === "admin" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  {user.role === "guide" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/guide" className="cursor-pointer">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile?tab=personal" className="cursor-pointer">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile?tab=account" className="cursor-pointer">Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/billing" className="cursor-pointer">Billing</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={onLogout}
+                    className="text-red-600 hover:text-white hover:bg-red-600 cursor-pointer"
+                  >
+                    Log out
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </nav>
     </>

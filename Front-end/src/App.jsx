@@ -13,9 +13,12 @@ function App() {
   const isHydrated = useSelector((state) => state.Auth.isHydrated);
   const booted = useAuthBoot();
 
+
   if (!booted || !isHydrated) return <Loader />;
 
-  
+  console.log("Booted:", booted)
+console.log("Hydrated:", isHydrated)
+
 
   return <RouterProvider router={router} />;
 }

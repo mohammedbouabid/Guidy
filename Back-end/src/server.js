@@ -28,7 +28,7 @@ app.use(cookieParser());
 
 // app.use("/static");
 app.use(cors({
-  origin: 'http://localhost:5121', // Your frontend URL
+  origin: 'http://localhost:7865', // Your frontend URL
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

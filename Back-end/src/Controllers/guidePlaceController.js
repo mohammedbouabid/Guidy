@@ -31,23 +31,73 @@ export const createGuidePlace = async (req, res) => {
 // Récupérer tous les lieux avec les informations du guide
 export const getAllGuidePlaces = async (req, res) => {
   try {
-    const places = await GuidePlace.find({ guideID: req.user.id }).populate({
-      path: "guideID",
-      select: "firstName lastName email profileImage role", // Sélectionnez les champs dont vous avez besoin
+    const { search, page, limit, sortField, sortOrder, city, country } =
+      req.query;
+
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build sort object
+    let sortOption = {};
+    if (sortField) {
+      const sortDirection = sortOrder === "desc" ? -1 : 1;
+      sortOption[sortField] = sortDirection;
+    } else {
+      sortOption = { createdAt: -1 };
+    }
+
+    // Build query
+    let query = {};
+
+    // Filter by city if provided
+    if (city) {
+      query.city = city;
+    }
+
+    // Filter by country if provided
+    if (country) {
+      query.country = country;
+    }
+
+    // Search functionality
+    if (search) {
+      const regex = new RegExp(search, "i");
+      query.$or = [
+        { name: regex },
+        { location: regex },
+        { city: regex },
+        { country: regex },
+      ];
+    }
+
+    const places = await GuidePlace.find(query)
+      .populate("guideID", "name")
+      .skip(skip)
+      .limit(limitNum)
+      .collation({ locale: "en", strength: 1 })
+      .sort(sortOption);
+
+    const count = await GuidePlace.countDocuments(query);
+    res.json({
+      success: true,
+      places,   
+      count,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(count / limitNum),
     });
-    
-    res.json(places);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
 export const getAllGuidePlacesForGuide = async (req, res) => {
   try {   
     const places = await GuidePlace.find({ guideID: req.user.id }).populate({
       path: "guideID",
       select: "firstName lastName email profileImage role", // Sélectionnez les champs dont vous avez besoin
     });
-    
     res.json(places);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
@@ -57,9 +107,10 @@ export const getAllGuidePlacesForGuide = async (req, res) => {
 // Récupérer un lieu par ID avec les informations du guide
 export const getGuidePlaceById = async (req, res) => {
   try {
+
     const place = await GuidePlace.findById(req.params.id).populate({
       path: "guideID",
-      select: "firstName lastName email profileImage role",
+      select: "name email profileImage role",
     });
     if (!place) return res.status(404).json({ message: "Lieu non trouvé ❌" });
     res.json(place);
@@ -145,6 +196,11 @@ export const deleteGuidePlace = async (req, res) => {
     // Delete from database
     await GuidePlace.findByIdAndDelete(req.params.id);
 
+    // Supprimer les fichiers physiques
+    deleted.images.forEach((img) => {
+      const filePath = path.resolve("uploads", img);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      })
     res.json({
       success: true, 
       message: "Place deleted successfully",

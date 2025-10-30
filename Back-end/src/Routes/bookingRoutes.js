@@ -5,13 +5,15 @@ import {
   getBookingsByUser,
   getBookingsByGuide,
   cancelBooking,
-  getAllBookings
+  getAllBookings,
+  getMonthlyBookingStats
 } from '../Controllers/bookingController.js';
 import { verifyToken } from '../Middlewares/verifyJwtToken.js';
 import { authorizeRoles } from '../Middlewares/authorizeRole.js';
 
 const router = express.Router();
 
+router.get('/stats/monthly', verifyToken, authorizeRoles(["guide","admin"]), getMonthlyBookingStats);
 router.get('/guide', verifyToken, authorizeRoles(["guide","admin"]), getBookingsByGuide);
 router.get('/user', verifyToken, authorizeRoles(["client","admin"]), getBookingsByUser);
 router.get('/all', verifyToken , authorizeRoles(["admin"]), getAllBookings);

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import {
-  Settings,
   CircleGauge,
   UsersRound,
   MapPinned,
@@ -14,7 +13,9 @@ import {
   PanelBottomOpen,
   UserRoundPen,
   LogOut,
+  MessageSquareHeart,
   BookIcon,
+  ChartArea,
 } from "lucide-react";
 
 import {
@@ -36,9 +37,19 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useSelector } from "react-redux";
 
 // ---- Dynamic Menu ----
-const role = "guide"; // you can replace this with context or props
+
+
+export function AppSidebar() {
+  const [activeItem, setActiveItem] = useState();
+  const { user} = useSelector((state) => state.Auth);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Update activeItem based on current URL
+  const role =user.role ; // you can replace this with context or props
 
 let items = [];
 
@@ -46,27 +57,22 @@ if (role === "admin") {
   items = [
     { title: "Dashboard", url: "", icon: CircleGauge },
     { title: "Guides", url: "guides", icon: UsersRound },
-    { title: "Clients", url: "#", icon: UsersRound },
-    { title: "Destinations", url: "#", icon: MapPinned },
+    { title: "Clients", url: "clients", icon: UsersRound },
+    { title: "Destinations", url: "destinations", icon: MapPinned },
     { title: "Tours", url: "#", icon: Route },
     { title: "Bookings", url: "#", icon: BookmarkCheck },
+    { title: "Ratings", url: "#", icon: MessageSquareHeart },
   ];
 } else if (role === "guide") {
   items = [
     { title: "Dashboard", url: "", icon: CircleGauge },
     { title: "My Places", url: "places", icon: Route },
     { title: "My Packs", url: "PacksGuide", icon: MapPinned },
-    { title: "Calendar", url: "#", icon: CalendarRange },
     { title: "Bokking", url: "bookingsGuide", icon: BookIcon },
+    { title: "Calendar", url: "#", icon: CalendarRange },
+    { title: "Analytics", url: "Analytics", icon: ChartArea },
   ];
 }
-
-export function AppSidebar() {
-  const [activeItem, setActiveItem] = useState();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Update activeItem based on current URL
   useEffect(() => {
     const path = location.pathname.split("/").pop();
     const found = items.find((item) => item.url === path);

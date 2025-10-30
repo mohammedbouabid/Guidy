@@ -176,7 +176,6 @@ export const cancelBooking = async (req, res) => {
     if (bookingUserId !== userID) {
       return res.status(403).json({ message: 'You can only cancel your own bookings.' });
     }
-    console.log('Booking:', booking);
     // Proceed to cancel the booking
     booking.isCancelled = true;
     await booking.save();
@@ -234,5 +233,139 @@ export const getAllBookings = async (req, res) => {
   } catch (error) {
     console.error('Get all bookings error:', error);
     res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+// Obtenir les statistiques des réservations avec filtres (year, month, week)
+export const getMonthlyBookingStats = async (req, res) => {
+  try {
+    const guideID = req.user?.id;
+    const userRole = req.user?.role;
+
+    // Paramètres de filtrage
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+    const filterType = req.query.filterType || 'year'; // 'year', 'month', 'week'
+    const month = req.query.month ? parseInt(req.query.month) : null;
+    const week = req.query.week ? parseInt(req.query.week) : null;
+
+    let startDate, endDate;
+    
+    // Définir les dates selon le type de filtre
+    if (filterType === 'year') {
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
+    } else if (filterType === 'month' && month) {
+      startDate = new Date(year, month - 1, 1);
+      endDate = new Date(year, month, 0, 23, 59, 59);
+    } else if (filterType === 'week' && week) {
+      // Calculer la semaine
+      const firstDay = new Date(year, 0, 1);
+      const dayOfWeek = firstDay.getDay();
+      const daysToAdd = (week - 1) * 7 - dayOfWeek + 1;
+      startDate = new Date(year, 0, 1 + daysToAdd);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+      endDate.setHours(23, 59, 59);
+    } else {
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
+    }
+
+    let matchCondition = {
+      createdAt: { $gte: startDate, $lte: endDate },
+      isCancelled: false
+    };
+
+    // Si c'est un guide, filtrer par ses packs
+    if (userRole === 'guide') {
+      const packs = await Pack.find({ guideId: guideID });
+      const packIDs = packs.map(pack => pack._id);
+      matchCondition.packID = { $in: packIDs };
+    }
+
+    let result;
+
+    // Agrégation selon le type de filtre
+    if (filterType === 'year') {
+      const monthlyStats = await Booking.aggregate([
+        { $match: matchCondition },
+        {
+          $group: {
+            _id: { $month: "$createdAt" },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]);
+
+      const monthNames = ["January", "February", "March", "April", "May", "June", 
+                          "July", "August", "September", "October", "November", "December"];
+      
+      result = monthNames.map((month, index) => {
+        const stat = monthlyStats.find(s => s._id === index + 1);
+        return {
+          month: month,
+          desktop: stat ? stat.count : 0
+        };
+      });
+    } else if (filterType === 'month') {
+      // Agrégation par jour du mois
+      const dailyStats = await Booking.aggregate([
+        { $match: matchCondition },
+        {
+          $group: {
+            _id: { $dayOfMonth: "$createdAt" },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]);
+
+      const daysInMonth = new Date(year, month, 0).getDate();
+      result = Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1;
+        const stat = dailyStats.find(s => s._id === day);
+        return {
+          month: day.toString(),
+          desktop: stat ? stat.count : 0
+        };
+      });
+    } else if (filterType === 'week') {
+      // Agrégation par jour de la semaine
+      const dailyStats = await Booking.aggregate([
+        { $match: matchCondition },
+        {
+          $group: {
+            _id: { $dayOfWeek: "$createdAt" },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]);
+
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      result = dayNames.map((day, index) => {
+        const stat = dailyStats.find(s => s._id === index + 1);
+        return {
+          month: day,
+          desktop: stat ? stat.count : 0
+        };
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      year: year,
+      filterType: filterType,
+      month: month,
+      week: week,
+      data: result
+    });
+  } catch (error) {
+    console.error('Get booking stats error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error.' 
+    });
   }
 };

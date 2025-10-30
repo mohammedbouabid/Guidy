@@ -72,9 +72,29 @@ export const cancelBooking = createAsyncThunk(
   }
 );
 
+// Récupérer les statistiques mensuelles avec filtres
+export const fetchMonthlyStats = createAsyncThunk(
+  "booking/fetchMonthlyStats",
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      
+      const res = await api.get("/bookings/stats/monthly", { params });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch monthly stats");
+    }
+  }
+);
+
 const initialState = {
   items: [],
   current: null,
+  monthlyStats: [],
   loading: false,
   error: null,
   success: false,
@@ -202,6 +222,20 @@ const bookingSlice = createSlice({
         }
       })
       .addCase(cancelBooking.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch Monthly Stats
+      .addCase(fetchMonthlyStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMonthlyStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.monthlyStats = action.payload.data || [];
+      })
+      .addCase(fetchMonthlyStats.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

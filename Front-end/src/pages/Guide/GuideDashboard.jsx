@@ -245,7 +245,7 @@ const GuideDashboard = () => {
                 >
                   <Link to={`/guide/places/edit/${place._id}`}>
                     <div className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer group">
-                      <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-4 flex-1">                                                                                                  
                         {/* Image */}
                         <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
                           {place.images && place.images.length > 0 ? (

@@ -9,8 +9,11 @@ export function useAuthBoot() {
 
   useEffect(() => {
     const user = getUserFromCookie();
-    dispatch(hydrateUserFromCookie(user || null)); // ✅ always dispatch
-    setBooted(true); // ✅ mark boot complete
+    dispatch(hydrateUserFromCookie(user || null)); // ✅ always hydrate, even if null
+
+    // ⏱ Add a short delay for cinematic loader
+    const timer = setTimeout(() => setBooted(true), 1200); // 1.2s feels smooth
+    return () => clearTimeout(timer);
   }, []);
 
   return booted;

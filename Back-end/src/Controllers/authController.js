@@ -135,7 +135,7 @@ const login = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone:user.phone,
-      avatar: user.avatar || "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
+      profileImage: user.profileImage || "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
       role: user.role,
       id: user._id
     }), {
@@ -151,7 +151,7 @@ const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone || 'N/A' ,
-        avatar: user.avatar || `https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg`,
+        profileImage: user.profileImage || `https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg`,
         role: user.role,
         id: user._id
       }
@@ -222,16 +222,7 @@ const refreshAccessToken = async (req, res, next) => {
 // User Logout
 const logout = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (refreshToken) {
-      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-      const user = await User.findById(decoded.id);
-      if (user) {
-        user.refreshToken = null;
-        await user.save();
-      }
-    }
+    
 
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
