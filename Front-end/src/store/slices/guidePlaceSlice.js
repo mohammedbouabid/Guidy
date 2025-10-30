@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../api/axios';
 import axios from 'axios';
 
 // Async Actions
@@ -14,8 +15,6 @@ export const fetchGuidePlaces = createAsyncThunk(
     country = ""
   }, { rejectWithValue }) => {
     try {
-      const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZTI2YWVkNzA3OGY3ODM2ZGU5MzZkNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTUwODA1NCwiZXhwIjoxNzYxNTExNjU0fQ.2FzI5Fx4S_pZlkiMps56GG5CaricVYCZD6xkQ6TxDVw";
-      document.cookie = `accessToken=${accessToken}; path=/; samesite=lax`;
       
       const params = { page, limit };
       if (search) params.search = search;
@@ -30,14 +29,25 @@ export const fetchGuidePlaces = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
-    }
+      return rejectWithValue(error.response?.data?.message || 'Une erreur est survenue');
+    }   
+  }
+);
+export const fetchGuidePlacesForGuide = createAsyncThunk(
+  'guidePlace/fetchForGuide',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/guide-places/all-places-guide');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Une erreur est survenue');
+    }   
   }
 );
 
 export const createGuidePlace = createAsyncThunk(
   'guidePlace/create',
-  async (formData, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {   
     try {
       const response = await axios.post('http://localhost:3000/api/guide-places', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -54,9 +64,8 @@ export const updateGuidePlace = createAsyncThunk(
   'guidePlace/update',
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`http://localhost:3000/api/guide-places/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true,
+      const response = await api.put(`/guide-places/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }, // 🔥 important
       });
       return response.data;
     } catch (error) {
@@ -74,10 +83,13 @@ export const getGuidePlaceById = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
+      return rejectWithValue(
+        error.response?.data?.message || 'Une erreur est survenue'
+      );
     }
   }
 );
+
 
 export const deleteGuidePlace = createAsyncThunk(
   'guidePlace/delete',
@@ -88,7 +100,7 @@ export const deleteGuidePlace = createAsyncThunk(
       });
       return id;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Une erreur est survenue');
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete place');
     }
   }
 );
@@ -96,6 +108,7 @@ export const deleteGuidePlace = createAsyncThunk(
 // Initial State
 const initialState = {
   places: [],
+  placesForGuide: [],
   currentPlace: null,
   selectedPlace: null,
   loading: false,
@@ -167,6 +180,18 @@ const guidePlaceSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(fetchGuidePlacesForGuide.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGuidePlacesForGuide.fulfilled, (state, action) => {
+        state.loading = false;
+        state.placesForGuide = action.payload;
+      })
+      .addCase(fetchGuidePlacesForGuide.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
       // Get place by ID
       .addCase(getGuidePlaceById.pending, (state) => {
@@ -189,7 +214,6 @@ const guidePlaceSlice = createSlice({
       })
       .addCase(createGuidePlace.fulfilled, (state, action) => {
         state.loading = false;
-        state.places.push(action.payload);
         state.success = true;
       })
       .addCase(createGuidePlace.rejected, (state, action) => {
@@ -204,9 +228,9 @@ const guidePlaceSlice = createSlice({
       })
       .addCase(updateGuidePlace.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.places.findIndex(place => place._id === action.payload._id);
+        const index = state.places.findIndex(p => p._id === action.payload.data._id);
         if (index !== -1) {
-          state.places[index] = action.payload;
+          state.places[index] = action.payload.data;
         }
         state.success = true;
       })

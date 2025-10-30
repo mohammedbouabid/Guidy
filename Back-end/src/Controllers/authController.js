@@ -5,16 +5,14 @@ import User from "../Models/User.js";
 // Sign Up User
 const signUp = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, phone, password, role } = req.body;
     const validEmail = email.toLowerCase();
     const validName = name.toLowerCase();
     const validRole = role.toLowerCase();
 
-    console.log(email);
-
     const existingUser = await User.findOne({ email: validEmail });
     if (existingUser) {
-      const error = new Error("email already exists");
+      const error = new Error("Email already exists");
       error.statusCode = 400;
       throw error;
     }
@@ -24,6 +22,7 @@ const signUp = async (req, res, next) => {
     const newUser = {
       name: validName,
       email: validEmail,
+      phone,
       password: hashedPwd,
       role: validRole,
     };
@@ -31,7 +30,7 @@ const signUp = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message : `${newUser.role} successfuly signed up`
+      message: `${newUser.role} Successfuly signed up`
     });
   } catch (err) {
     next(err);
@@ -89,7 +88,7 @@ const login = async (req, res, next) => {
     });
 
     if (!user) {
-      const error = new Error("no user found with this email");
+      const error = new Error("No User found with this email");
       error.statusCode = 404;
       throw error;
     }
@@ -97,7 +96,7 @@ const login = async (req, res, next) => {
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      const error = new Error("wrong password");
+      const error = new Error("Wrong password, Please try again");
       error.statusCode = 401;
       throw error;
     }
@@ -132,10 +131,32 @@ const login = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    res.cookie("userInfo", JSON.stringify({
+      name: user.name,
+      email: user.email,
+      phone:user.phone,
+      profileImage: user.profileImage || "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
+      role: user.role,
+      id: user._id
+    }), {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({
       success: true,
-      message: `${user.role} successfuly logged in`,
-    });
+      message: `${user.role} successfully logged in`,
+      user: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone || 'N/A' ,
+        profileImage: user.profileImage || `https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg`,
+        role: user.role,
+        id: user._id
+      }
+    })
+
   } catch (error) {
     next(error);
   }
@@ -201,19 +222,10 @@ const refreshAccessToken = async (req, res, next) => {
 // User Logout
 const logout = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (refreshToken) {
-      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-      const user = await User.findById(decoded.id);
-      if (user) {
-        user.refreshToken = null;
-        await user.save();
-      }
-    }
-
+  
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
+    res.clearCookie("userInfo");
 
     res.status(200).json({ success: true, message: "logged out successfully" });
   } catch (error) {

@@ -10,7 +10,7 @@ const packSchema = mongoose.Schema({
     },
     guidesPlacesId: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Guideplace',
+        ref: 'GuidePlace',
         required: true
     }],
       profileImg: {
@@ -58,6 +58,11 @@ const packSchema = mongoose.Schema({
         type: String,
         required: true
     },
+  categories: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Category",
+  required: false,
+}],
     avgRating: {
         type: Number,
     },
@@ -74,4 +79,3 @@ packSchema.plugin(mongoosePaginate);
 
 
 export default mongoose.model('Pack', packSchema);
-

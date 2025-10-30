@@ -6,6 +6,11 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
+import FilterPage from "@/pages/Home/FilterPage";
+import Login from "@/pages/Home/Login";
+import SignUpPage from "@/pages/Home/RegisterPage";
+import { GuideRegister } from "@/components/AuthPages/GuideRegister";
+
 //import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
 import PacksGuid from "../pages/Guide/PacksGuid";
@@ -13,17 +18,34 @@ import AllGuides from "../pages/admin/AllGuides";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
 import AllClients from "@/pages/admin/AllClients";
 import GuidePlacesPage from "@/pages/admin/GuidePlaces";
+import GuidePlaces from "@/pages/Guide/GuidePlaces";
+import AddGuidePlaceForm from "@/Components/GuidePlace/AddGuidePlaceForm";
+import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
+import AddPack from "@/pages/Guide/AddPack";
+import UpdatePack from "@/pages/Guide/UpdatePack";
+import ProfilePage from "@/pages/Home/ProfilePage";
+import PackDetails from "@/pages/Guide/PackDetails";
+import GuideBookings from "../pages/Guide/GuideBookings";
+import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
+import GuideDashboard from "@/pages/Guide/GuideDashboard";
+import PackDetailsPage from "@/pages/Home/PackDetailsPage";
 
 const router = createBrowserRouter([
   {
     // Routes publiques
-    element: <GuestLayout />,
+    element: <GuestLayout />,   
     children: [
       { path: "/", element: <LandingPage /> },
-      //{ path: "/test", element: <TestRoute /> },
+      // { path: "/test", element: <TestRoute /> },
       // { path: "/login", element: <LoginPage /> },
       // { path: "/register", element: <RegisterPage /> },
-    ],
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <SignUpPage /> },
+      {path:"/guideregister", element:<GuideRegister/>},
+      {path:"/profile", element:<ProfilePage/>},
+      { path: "/packs/:id", element: <PackDetailsPage /> },
+      {path:"/filter", element:<FilterPage/>},
+       ],
   },
   {
     // Routes Client
@@ -48,10 +70,16 @@ const router = createBrowserRouter([
       </ProtectedRoutes>
     ),
     children: [
-      { path: "packsguide", element: <PacksGuid /> },
-      // { path: "places", element: <GuidePlaces /> },
-      // { path: "packs", element: <GuidePacks /> },
-      // { path: "profile", element: <GuideProfile /> },
+      { index: true, element: <GuideDashboard /> },
+      { path: "PacksGuide", element: <PacksGuid /> },
+      { path: "packs/add", element: <AddPack /> },
+      { path: "packs/edit/:id", element: <UpdatePack /> },
+      { path: "packs/details/:id", element: <PackDetails /> },
+      { path: "places", element: <GuidePlaces /> },
+      { path: "places/add", element: <AddGuidePlaceForm /> },
+      { path: "places/edit/:id", element: <UpdateGuidePlaceForm /> },
+      { path: "bookingsGuide", element: <GuideBookings /> },
+      { path: "bookingsGuide/:id", element: <BookingDetailsModal /> },
     ],
   },
   {
@@ -67,7 +95,6 @@ const router = createBrowserRouter([
       { path: "guides", element: <AllGuides /> },
       { path: "clients", element: <AllClients /> },
       { path: "destinations", element: <GuidePlacesPage /> },
-      // { path: "bookings", element: <BookingsManagement /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

@@ -14,6 +14,7 @@ import {
   UserRoundPen,
   LogOut,
   MessageSquareHeart,
+  BookIcon,
 } from "lucide-react";
 
 import {
@@ -35,9 +36,19 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useSelector } from "react-redux";
 
 // ---- Dynamic Menu ----
-const role = "admin"; // you can replace this with context or props
+
+
+export function AppSidebar() {
+  const [activeItem, setActiveItem] = useState();
+  const { user} = useSelector((state) => state.Auth);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Update activeItem based on current URL
+  const role =user.role ; // you can replace this with context or props
 
 let items = [];
 
@@ -54,18 +65,12 @@ if (role === "admin") {
 } else if (role === "guide") {
   items = [
     { title: "Dashboard", url: "", icon: CircleGauge },
-    { title: "My Tours", url: "#", icon: Route },
-    { title: "My Destinations", url: "#", icon: MapPinned },
+    { title: "My Places", url: "places", icon: Route },
+    { title: "My Packs", url: "PacksGuide", icon: MapPinned },
     { title: "Calendar", url: "#", icon: CalendarRange },
+    { title: "Bokking", url: "bookingsGuide", icon: BookIcon },
   ];
 }
-
-export function AppSidebar() {
-  const [activeItem, setActiveItem] = useState();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Update activeItem based on current URL
   useEffect(() => {
     const path = location.pathname.split("/").pop();
     const found = items.find((item) => item.url === path);
