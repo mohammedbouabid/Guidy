@@ -42,7 +42,7 @@ export default function FaqSection() {
       <CardContent>
         <div className="divide-y divide-gray-200">
           {faqs.map((faq, index) => (
-            <div key={index} className="py-4">
+            <div key={index} className="py-4 cursor-pointer">
               <button
                 onClick={() => toggleFaq(index)}
                 className="flex justify-between items-center w-full text-left"
@@ -51,7 +51,7 @@ export default function FaqSection() {
                   {faq.question}
                 </span>
                 {openIndex === index ? (
-                  <ChevronUp className="w-5 h-5 text-gray-500" />
+                  <ChevronUp className="w-5 h-5 text-gray-500 " />
                 ) : (
                   <ChevronDown className="w-5 h-5 text-gray-500" />
                 )}
