@@ -1,5 +1,5 @@
 import UserManagement from "@/components/adminHelpers/UserManagement";
-import { createProfileColumn, createTextColumn, createDateColumn } from "@/utils/tableColumns";
+import { createProfileColumn, createTextColumn, createDateColumn } from "@/components/adminHelpers/tableColumns";
 
 export default function AllClients() {
   const clientsColumns = [
