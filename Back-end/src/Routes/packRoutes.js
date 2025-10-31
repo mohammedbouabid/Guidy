@@ -9,6 +9,7 @@ import {
   getPackById,
   deletePack,
   getAllPacksForGuide,
+  getMonthlyPackStats,
 } from "../Controllers/packController.js";
 
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
@@ -27,6 +28,7 @@ router.get("/popular", getPopularPacks); // 👈 new endpoint
 // --- Protected routes (require authentication) ---
 router.use(verifyToken);
 
+router.get("/stats/monthly", authorizeRoles(["guide", "admin"]), getMonthlyPackStats);
 router.get("/all", getAllPacksForGuide);
 router.get("/:id", getPackById);
 

@@ -65,6 +65,8 @@ const packSchema = mongoose.Schema({
         type: Number,
         required:true
     }
+}, {
+    timestamps: true  // ✅ Active createdAt et updatedAt automatiquement
 });
 
 

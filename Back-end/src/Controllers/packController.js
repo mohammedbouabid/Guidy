@@ -379,6 +379,96 @@ const getPopularPacks = async (req, res) => {
 };
 
 
+// Get monthly pack creation stats
+const getMonthlyPackStats = async (req, res) => {
+  try {
+    const guideId = req.user?.id;
+    const userRole = req.user?.role;
+
+    // Get year from query or use current year
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+
+    // Define date range for the year
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+    let matchCondition = {};
+
+    // If user is a guide, filter by their packs only
+    if (userRole === 'guide') {
+      matchCondition.guideId = new mongoose.Types.ObjectId(guideId);
+    }
+
+    // First, check if packs have createdAt field
+    const samplePack = await Pack.findOne(matchCondition);
+    const hasCreatedAt = samplePack && samplePack.createdAt;
+
+    console.log("📊 Sample pack:", samplePack);
+    console.log("📊 Has createdAt:", hasCreatedAt);
+
+    let stats;
+    
+    if (hasCreatedAt) {
+      // If packs have createdAt, filter by year
+      matchCondition.createdAt = { $gte: startDate, $lte: endDate };
+      
+      stats = await Pack.aggregate([
+        { $match: matchCondition },
+        {
+          $group: {
+            _id: { $month: "$createdAt" },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]);
+    } else {
+      // If no createdAt, distribute all packs across months evenly or use startDate
+      stats = await Pack.aggregate([
+        { $match: matchCondition },
+        {
+          $group: {
+            _id: { $month: "$startDate" }, // Use startDate as fallback
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]);
+    }
+
+    console.log("📊 Stats from DB:", stats);
+
+    // Create array with all 12 months
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const result = monthNames.map((month, index) => {
+      const monthData = stats.find(s => s._id === index + 1);
+      return {
+        month: month,
+        packs: monthData ? monthData.count : 0
+      };
+    });
+
+    console.log("📊 Final result:", result);
+
+    res.status(200).json({
+      success: true,
+      year: year,
+      data: result
+    });
+  } catch (error) {
+    console.error("❌ Error in getMonthlyPackStats:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching monthly pack stats',
+      error: error.message
+    });
+  }
+};
+
 export {
   getAllPacks,
   getAllPacksForGuide,
@@ -387,4 +477,5 @@ export {
   getPackById,
   updatePack,
   deletePack,
+  getMonthlyPackStats,
 };

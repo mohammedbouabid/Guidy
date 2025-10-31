@@ -76,10 +76,29 @@ export const deletePack = createAsyncThunk(
   }
 );
 
+export const fetchMonthlyPackStats = createAsyncThunk(
+  "pack/fetchMonthlyStats",
+  async ({ year } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      console.log("🔄 Fetching pack stats for year:", year);
+      const res = await api.get("/packs/stats/monthly", { params });
+      console.log("✅ Pack stats response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error fetching pack stats:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to fetch monthly stats");
+    }
+  }
+);
+
 const initialState = {
   items: [],
   current: null,
+  monthlyStats: [],
   loading: false,
+  statsLoading: false,
   error: null,
   success: false,
   page: 1,
@@ -208,6 +227,19 @@ const packSlice = createSlice({
       })
       .addCase(deletePack.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      // 📊 FETCH MONTHLY STATS
+      .addCase(fetchMonthlyPackStats.pending, (state) => {
+        state.statsLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchMonthlyPackStats.fulfilled, (state, action) => {
+        state.statsLoading = false;
+        state.monthlyStats = action.payload.data || [];
+      })
+      .addCase(fetchMonthlyPackStats.rejected, (state, action) => {
+        state.statsLoading = false;
         state.error = action.payload;
       });
   },
