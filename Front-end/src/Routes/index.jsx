@@ -29,6 +29,7 @@ import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
 import PackDetailsPage from "@/components/PackDetailsPage";
+import RatingsPage from "@/pages/admin/Ratings";
 
 const router = createBrowserRouter([
   {
@@ -95,6 +96,7 @@ const router = createBrowserRouter([
       { path: "guides", element: <AllGuides /> },
       { path: "clients", element: <AllClients /> },
       { path: "destinations", element: <GuidePlacesPage /> },
+      { path: "ratings", element: <RatingsPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

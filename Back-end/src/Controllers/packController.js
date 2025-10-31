@@ -268,7 +268,7 @@ const createPack = async (req, res) => {
 const getPackById = async (req, res) => {
   try {
     let pack;
-    if (req.user.role.toLowerCase() === "guide") {
+    if (req.user && req.user.role.toLowerCase() === "guide") {
       pack = await Pack.findOne({ _id: req.params.id, guideId: req.user.id })
         .populate('guidesPlacesId', 'name city country images description');
     } else {

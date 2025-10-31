@@ -60,7 +60,7 @@ if (role === "admin") {
     { title: "Destinations", url: "destinations", icon: MapPinned },
     { title: "Tours", url: "#", icon: Route },
     { title: "Bookings", url: "#", icon: BookmarkCheck },
-    { title: "Ratings", url: "#", icon: MessageSquareHeart },
+    { title: "Ratings", url: "ratings", icon: MessageSquareHeart },
   ];
 } else if (role === "guide") {
   items = [
