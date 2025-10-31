@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Calendar, Mail, MapPin } from "lucide-react"
 import { hydrateUserFromCookie } from "@/store/slices/AuthSlice"
 import { getUserFromCookie } from "@/lib/getUserFromCookie"
-import Loader from "./loader"
+import Loader from "../loader"
 
 export default function ProfileHeader() {
   const dispatch = useDispatch()

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "./ui/button"; // adjust path
+import { Button } from "../ui/button"; // adjust path
 
 const PromoBanner = () => {
   return (

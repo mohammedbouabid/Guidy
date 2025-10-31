@@ -1,3 +1,4 @@
+import api from "@/api/axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from 'axios';
 
@@ -15,9 +16,6 @@ export const fetchUsers = createAsyncThunk(
     role = ""
   }, { rejectWithValue }) => {
     try {
-      const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZTI2YWVkNzA3OGY3ODM2ZGU5MzZkNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTUwODA1NCwiZXhwIjoxNzYxNTExNjU0fQ.2FzI5Fx4S_pZlkiMps56GG5CaricVYCZD6xkQ6TxDVw";
-      document.cookie = `accessToken=${accessToken}; path=/; samesite=lax`;
-      
       const params = { page, limit, search };
       if (sort) params.sort = sort;
       if (order) params.order = order;
@@ -25,7 +23,7 @@ export const fetchUsers = createAsyncThunk(
       if (profileCompletionFilter) params.profileCompletionFilter = profileCompletionFilter;
       if (role) params.role = role;
       
-      const response = await axios.get("http://localhost:3000/api/user", {
+      const response = await api.get("http://localhost:3000/api/user", {
         params,
         withCredentials: true,
       });
@@ -41,7 +39,7 @@ export const getUserById = createAsyncThunk(
   "users/getUserById",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/user/${userId}`, {
+      const response = await api.get(`http://localhost:3000/api/user/${userId}`, {
         withCredentials: true,
       });
       return response.data;
@@ -56,7 +54,7 @@ export const deleteUser = createAsyncThunk(
   "users/deleteUser",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/user/${userId}`, {
+      const response = await api.delete(`http://localhost:3000/api/user/${userId}`, {
         withCredentials: true,
       });
       return { userId, data: response.data };

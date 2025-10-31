@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+
 
 import {
   CircleGauge,
@@ -61,7 +62,7 @@ if (role === "admin") {
     { title: "Destinations", url: "destinations", icon: MapPinned },
     { title: "Tours", url: "#", icon: Route },
     { title: "Bookings", url: "#", icon: BookmarkCheck },
-    { title: "Ratings", url: "#", icon: MessageSquareHeart },
+    { title: "Ratings", url: "ratings", icon: MessageSquareHeart },
   ];
 } else if (role === "guide") {
   items = [
@@ -146,7 +147,9 @@ if (role === "admin") {
               <DropdownMenuContent className="w-53" align="center" side="top">
                 <DropdownMenuItem>
                   <UserRoundPen className="mr-2 h-4 w-4" />
+                  <Link to="/profile">
                   <span>Profile</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>

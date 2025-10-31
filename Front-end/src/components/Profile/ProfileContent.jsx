@@ -27,8 +27,15 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog"
-
-import { Trash2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Trash2, KeyRound, Eye, EyeOff } from "lucide-react"
 import { updateUserProfile } from "@/lib/updateUserProfile"
 import { hydrateUserFromCookie } from "@/store/slices/AuthSlice"
 import { toast } from "sonner"
@@ -53,6 +60,21 @@ export default function ProfileContent() {
   const [loading, setLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
+  // Password change states
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [showPasswordConfirmDialog, setShowPasswordConfirmDialog] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+  const [showPasswords, setShowPasswords] = useState({
+    old: false,
+    new: false,
+    confirm: false,
+  })
+
   useEffect(() => {
     const tab = searchParams.get("tab")
     if (tab) {
@@ -73,7 +95,7 @@ export default function ProfileContent() {
 
   const handleChange = (e) => {
     const { id, value } = e.target
-    
+
     // Phone validation: only numbers and symbols
     if (id === "phone") {
       const phoneRegex = /^[0-9+\-().\s]*$/
@@ -81,7 +103,7 @@ export default function ProfileContent() {
         return // Don't update if invalid characters
       }
     }
-    
+
     setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
@@ -89,9 +111,9 @@ export default function ProfileContent() {
     ? Object.keys(formData).some((key) => formData[key] !== (user[key] || ""))
     : false
 
-  const isFormValid = formData.name.trim() !== "" && 
-                      formData.email.trim() !== "" && 
-                      formData.phone.trim() !== ""
+  const isFormValid = formData.name.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.phone.trim() !== ""
 
 
   const handleSave = async () => {
@@ -134,13 +156,128 @@ export default function ProfileContent() {
 
   }
 
+  const handlePasswordChange = (e) => {
+    const { id, value } = e.target
+    setPasswordData((prev) => ({ ...prev, [id]: value }))
+  }
+
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }))
+  }
+
+  const isPasswordFormValid =
+    passwordData.oldPassword.trim() !== "" &&
+    passwordData.newPassword.trim() !== "" &&
+    passwordData.confirmPassword.trim() !== ""
+
+  // First dialog - validates client-side, shows errors here
+  const handlePasswordChangeSubmit = () => {
+    // Validate passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("New passwords don't match")
+      return
+    }
+
+    // Validate password length
+    if (passwordData.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters long")
+      return
+    }
+
+    // Check if new password is same as old (client-side check)
+    if (passwordData.oldPassword === passwordData.newPassword) {
+      toast.error("New password cannot be the same as old password")
+      return
+    }
+
+    // Check if all fields are filled
+    if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error("All fields are required")
+      return
+    }
+
+    // All client-side validations passed, show confirmation dialog
+    setShowPasswordDialog(false)
+    setShowPasswordConfirmDialog(true)
+  }
+
+  // Second dialog - actually changes password on confirmation
+  const handlePasswordChangeConfirm = async () => {
+    setPasswordLoading(true)
+
+    try {
+      // Call API to change password (only called here, on confirmation)
+      const response = await fetch('http://localhost:3000/api/change-password', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          oldPassword: passwordData.oldPassword,
+          password: passwordData.newPassword,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        // If old password is wrong from backend, show error and go back to first dialog
+        toast.error(data.message || "Failed to change password")
+        setShowPasswordConfirmDialog(false)
+        setShowPasswordDialog(true)
+        setPasswordLoading(false)
+        return
+      }
+
+      // Success - password changed
+      toast.success("Password changed successfully. You will be logged out.")
+
+      // Clear password form
+      setPasswordData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      })
+
+      setShowPasswordConfirmDialog(false)
+
+      // Wait a moment then logout
+      setTimeout(async () => {
+        try {
+          await fetch('http://localhost:3000/api/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          dispatch(hydrateUserFromCookie(null))
+          window.location.href = "/login"
+        } catch (err) {
+          console.error("Logout failed", err)
+          // Even if logout fails, redirect to login
+          window.location.href = "/login"
+        }
+      }, 1500)
+    } catch (err) {
+      console.error("Password change failed", err)
+      toast.error(err.message || "Failed to change password")
+      setShowPasswordConfirmDialog(false)
+      setShowPasswordDialog(true)
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
   const handleDeleteAccount = async () => {
     setDeleteLoading(true)
-    
+
     try {
       // Call API to soft delete account (set isDeleted = true)
       await updateUserProfile({ isDeleted: true })
-      
+
       // Call logout API to clear cookies and tokens
       const response = await fetch('http://localhost:3000/api/logout', {
         method: 'POST',
@@ -247,14 +384,14 @@ export default function ProfileContent() {
                     const oldValue = user[key] || ""
                     const newValue = formData[key]
                     if (oldValue === newValue) return null
-                    
+
                     const labels = {
                       name: "Full Name",
                       email: "Email",
                       phone: "Phone",
                       bio: "Bio"
                     }
-                    
+
                     return (
                       <div key={key} className="space-y-1 rounded-lg border p-3">
                         <Label className="text-xs text-muted-foreground">{labels[key]}</Label>
@@ -273,7 +410,7 @@ export default function ProfileContent() {
                   })}
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className={"cursor-pointer"}>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleSave} disabled={loading}>
                     {loading ? "Saving..." : "Confirm & Save"}
                   </AlertDialogAction>
@@ -314,6 +451,168 @@ export default function ProfileContent() {
               <Button variant="outline" className={"cursor-pointer"}>View Billing</Button>
             </div>
             <Separator />
+            {/* Password Change Section */}
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-base">Password</Label>
+                <p className="text-muted-foreground text-sm">
+                  Change your account password
+                </p>
+              </div>
+              <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="cursor-pointer">
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    Change Password
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Change Password</DialogTitle>
+                    <DialogDescription>
+                      Enter your current password and choose a new one.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="oldPassword">Current Password *</Label>
+                      <div className="relative">
+                        <Input
+                          id="oldPassword"
+                          type={showPasswords.old ? "text" : "password"}
+                          value={passwordData.oldPassword}
+                          onChange={handlePasswordChange}
+                          placeholder="Enter current password"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 "
+                          onClick={() => togglePasswordVisibility('old')}
+                        >
+                          {showPasswords.old ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password *</Label>
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type={showPasswords.new ? "text" : "password"}
+                          value={passwordData.newPassword}
+                          onChange={handlePasswordChange}
+                          placeholder="Enter new password"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 "
+                          onClick={() => togglePasswordVisibility('new')}
+                        >
+                          {showPasswords.new ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Must be at least 8 characters long
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password *</Label>
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showPasswords.confirm ? "text" : "password"}
+                          value={passwordData.confirmPassword}
+                          onChange={handlePasswordChange}
+                          placeholder="Confirm new password"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 "
+                          onClick={() => togglePasswordVisibility('confirm')}
+                        >
+                          {showPasswords.confirm ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 ">
+                    <Button
+                      variant="outline"
+                      className={"cursor-pointer"}
+                      onClick={() => {
+                        setShowPasswordDialog(false)
+                        setPasswordData({
+                          oldPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        })
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handlePasswordChangeSubmit}
+                      disabled={!isPasswordFormValid}
+                      className={"cursor-pointer"}
+                    >
+                      Change Password
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Password Change Confirmation Dialog */}
+            <AlertDialog open={showPasswordConfirmDialog} onOpenChange={setShowPasswordConfirmDialog}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Password Change</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to change your password? You will be logged out and need to log in again with your new password.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
+                  <p className="font-semibold">Important:</p>
+                  <ul className="mt-2 list-inside list-disc space-y-1">
+                    <li>You will be logged out immediately</li>
+                    <li>You'll need to log in with your new password</li>
+                    <li>Make sure you remember your new password</li>
+                  </ul>
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="cursor-pointer"> Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handlePasswordChangeConfirm}
+                    disabled={passwordLoading}
+                    className="cursor-pointer"
+                  >
+                    {passwordLoading ? "Changing..." : "Yes, Change Password"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <Label className="text-base">Account Visibility</Label>
@@ -363,8 +662,8 @@ export default function ProfileContent() {
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel className={"cursor-pointer"}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleDeleteAccount} 
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
                       disabled={deleteLoading}
                       className="bg-destructive hover:bg-destructive/90 cursor-pointer"
                     >

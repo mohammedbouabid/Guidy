@@ -222,7 +222,6 @@ const refreshAccessToken = async (req, res, next) => {
 // User Logout
 const logout = async (req, res, next) => {
   try {
-    
 
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");

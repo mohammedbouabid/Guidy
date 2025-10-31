@@ -1,9 +1,9 @@
 import React from "react"
 
-import flexibilityIcon from "../assets/icons/flexibilityIcon.png"
-import experiencesIcon from "../assets/icons/experiencesIcon.png"
-import qualityIcon from "../assets/icons/qualityIcon.png"
-import supportIcon from "../assets/icons/supportIcon.png"
+import flexibilityIcon from "../../assets/icons/flexibilityIcon.png"
+import experiencesIcon from "../../assets/icons/experiencesIcon.png"
+import qualityIcon from "../../assets/icons/qualityIcon.png"
+import supportIcon from "../../assets/icons/supportIcon.png"
 
 export default function Features() {
   const features = [

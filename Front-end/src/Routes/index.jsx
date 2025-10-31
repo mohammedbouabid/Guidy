@@ -6,10 +6,10 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
-
+import FilterPage from "@/pages/Home/FilterPage";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
-import { GuideRegister } from "@/components/GuideRegister";
+import { GuideRegister } from "@/components/AuthPages/GuideRegister";
 
 //import TestRoute from "../pages/testRoute";
 import AllPacks from "../pages/Home/AllPacks";
@@ -29,6 +29,8 @@ import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
 import Analtytics  from "@/pages/Guide/Analtytics";
+import PackDetailsPage from "@/pages/Home/PackDetailsPage";
+import RatingsPage from "@/pages/admin/Ratings";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +44,9 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
-      {path:"/profile", element:<ProfilePage/>}
+      {path:"/profile", element:<ProfilePage/>},
+      { path: "/packs/:id", element: <PackDetailsPage /> },
+      {path:"/filter", element:<FilterPage/>},
        ],
   },
   {
@@ -94,6 +98,7 @@ const router = createBrowserRouter([
       { path: "guides", element: <AllGuides /> },
       { path: "clients", element: <AllClients /> },
       { path: "destinations", element: <GuidePlacesPage /> },
+      { path: "ratings", element: <RatingsPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

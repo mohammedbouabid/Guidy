@@ -14,41 +14,34 @@ import {
 
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import { authorizeRoles } from "../Middlewares/authorizeRole.js";
-import { getPacksFiltered } from "../Controllers/packController.js"; // ← add this import
-import Pack from "../Models/Pack.js";
 
 
 const router = express.Router();
 
-// --- Public routes ---
+// --- Protected routes (require authentication) ---
 
 router.get("/", getAllPacks);
 router.get("/popular", getPopularPacks); // 👈 new endpoint
 
-// --- Protected routes (require authentication) ---
-router.use(verifyToken);
 
-router.get("/stats/monthly", authorizeRoles(["guide", "admin"]), getMonthlyPackStats);
-router.get("/all", getAllPacksForGuide);
+router.get("/stats/monthly",verifyToken, authorizeRoles(["guide", "admin"]), getMonthlyPackStats);
+router.get("/all",verifyToken , getAllPacksForGuide);
 router.get("/:id", getPackById);
 
 router.post(
-  "/",
+  "/",verifyToken ,
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
   createPack
 );
 
 router.put(
-  "/:id",
+  "/:id",verifyToken ,
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
   updatePack  
 );
 
-router.delete("/:id", authorizeRoles(["guide", "admin"]), deletePack);
-// in your routes file
-
-
+router.delete("/:id",verifyToken , authorizeRoles(["guide", "admin"]), deletePack);
 
 export default router;

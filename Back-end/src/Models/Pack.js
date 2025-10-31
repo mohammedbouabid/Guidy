@@ -58,6 +58,11 @@ const packSchema = mongoose.Schema({
         type: String,
         required: true
     },
+  categories: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Category",
+  required: false,
+}],
     avgRating: {
         type: Number,
     },

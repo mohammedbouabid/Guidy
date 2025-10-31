@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useLocation, Link } from "react-router-dom"
 import { hydrateUserFromCookie } from "@/store/slices/AuthSlice"
@@ -11,6 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../Components/ui/Alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ChevronDownIcon } from "@radix-ui/react-icons"
@@ -20,6 +30,7 @@ const Navbar = ({ onLogout }) => {
   const dispatch = useDispatch()
   const location = useLocation()
   const user = useSelector((state) => state.Auth.user)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   useEffect(() => {
     const userFromCookie = getUserFromCookie()
@@ -27,6 +38,15 @@ const Navbar = ({ onLogout }) => {
   }, [])
 
   const isActive = (path) => location.pathname === path
+
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true)
+  }
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutDialog(false)
+    onLogout()
+  }
 
   return (
     <>
@@ -133,7 +153,7 @@ const Navbar = ({ onLogout }) => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={onLogout}
+                      onClick={handleLogoutClick}
                       className="text-red-600 hover:text-white hover:bg-red-600 cursor-pointer"
                     >
                       Log out
@@ -260,7 +280,7 @@ const Navbar = ({ onLogout }) => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={onLogout}
+                    onClick={handleLogoutClick}
                     className="text-red-600 hover:text-white hover:bg-red-600 cursor-pointer"
                   >
                     Log out
@@ -271,6 +291,35 @@ const Navbar = ({ onLogout }) => {
           </DropdownMenu>
         </div>
       </nav>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out from the website? You will need to log in again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="rounded-lg bg-orange-50 border border-orange-200 p-4 text-sm text-orange-800">
+            <p className="font-semibold">Before you go:</p>
+            <ul className="mt-2 list-inside list-disc space-y-1">
+              <li>We are happy to have you with us</li>
+              <li>You'll be redirected to the login page</li>
+              <li>Your session will be ended securely</li>
+            </ul>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLogoutConfirm}
+              className="bg-red-600 hover:bg-red-700 cursor-pointer"
+            >
+              Yes, Log Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
