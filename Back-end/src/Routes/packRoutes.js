@@ -1,44 +1,45 @@
 // src/Routes/packRoutes.js
 import express from "express";
-import uploadPackImage from "../Middlewares/uploadPackImage.js"; // 🆕 new middleware
+import uploadPackImage from "../Middlewares/uploadPackImage.js";
 import {
   createPack,
   updatePack,
   getAllPacks,
+  getAllPacksForGuide,
+  getPacksFiltered,
   getPopularPacks,
   getPackById,
   deletePack,
-  getAllPacksForGuide,
 } from "../Controllers/packController.js";
-
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import { authorizeRoles } from "../Middlewares/authorizeRole.js";
-import { getPacksFiltered } from "../Controllers/packController.js"; // ← add this import
-import Pack from "../Models/Pack.js";
 
 const router = express.Router();
 
 // --- Protected routes (require authentication) ---
 
 router.get("/", getAllPacks);
-router.get("/popular", getPopularPacks); // 👈 new endpoint
-router.get("/all",verifyToken , getAllPacksForGuide);
+router.get("/filter", getPacksFiltered);
+router.get("/popular", getPopularPacks);
+router.get("/all", verifyToken, getAllPacksForGuide);
 router.get("/:id", getPackById);
 
 router.post(
-  "/",verifyToken ,
+  "/",
+  verifyToken,
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
   createPack
 );
 
 router.put(
-  "/:id",verifyToken ,
+  "/:id",
+  verifyToken,
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
-  updatePack  
+  updatePack
 );
 
-router.delete("/:id",verifyToken , authorizeRoles(["guide", "admin"]), deletePack);
+router.delete("/:id", verifyToken, authorizeRoles(["guide", "admin"]), deletePack);
 
 export default router;

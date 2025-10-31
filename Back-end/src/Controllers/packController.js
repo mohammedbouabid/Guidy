@@ -22,81 +22,59 @@ const computeAvgMap = async (packIds) => {
   }
   return map;
 };
+// helper
+const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const computeDurationDays = (start, end) => {
+  if (!start || !end) return 0;
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return 0;
+  }
+  const diffMs = endDate.getTime() - startDate.getTime();
+  if (diffMs <= 0) return 0;
+  const dayMs = 1000 * 60 * 60 * 24;
+  return Math.ceil(diffMs / dayMs);
+};
+
 
 export const getPacksFiltered = async (req, res) => {
   try {
     const {
-      id,
-      guideId,
-      title,
       priceMin,
       priceMax,
+      startLocation,
       startDateFrom,
       startDateTo,
-      endDateFrom,
-      endDateTo,
-      startLocation,
-      endLocation,
       avgRatingMin,
       avgRatingMax,
-      maxClientsMin,
-      maxClientsMax,
-      // NEW: CSV of category ObjectIds
-      categoryIds,
+      category, // CSV of category NAMES (e.g., "Hiking & Trekking,Water Sports")
+      page = "1",
+      limit = "10",
+      sort = "" // e.g. "price" or "-price"
     } = req.query;
 
-    // Build MongoDB filter object
+    // Build MongoDB filter using ONLY the requested fields
     const filter = {};
 
-    // If caller is a GUIDE, restrict to their packs automatically
-    if (req.user?.role?.toLowerCase() === "guide") {
-      filter.guideId = req.user.id;
-    }
-
-    // id/guideId (admin/client can pass guideId; guide already restricted)
-    if (id) {
-      try {
-        filter._id = new mongoose.Types.ObjectId(id);
-      } catch {}
-    }
-    if (guideId && req.user?.role?.toLowerCase() !== "guide") {
-      try {
-        filter.guideId = new mongoose.Types.ObjectId(guideId);
-      } catch {}
-    }
-
-    // title contains (case-insensitive)
-    if (title) {
-      filter.title = { $regex: title, $options: "i" };
-    }
-
-    // price range
+    // Price range
     if (priceMin || priceMax) {
       filter.price = {};
       if (priceMin) filter.price.$gte = Number(priceMin);
       if (priceMax) filter.price.$lte = Number(priceMax);
     }
 
-    // startDate / endDate ranges
+    // Start date range
     if (startDateFrom || startDateTo) {
       filter.startDate = {};
       if (startDateFrom) filter.startDate.$gte = new Date(startDateFrom);
       if (startDateTo) filter.startDate.$lte = new Date(startDateTo);
     }
-    if (endDateFrom || endDateTo) {
-      filter.endDate = {};
-      if (endDateFrom) filter.endDate.$gte = new Date(endDateFrom);
-      if (endDateTo) filter.endDate.$lte = new Date(endDateTo);
-    }
 
-    // locations (exact, case-insensitive)
-    if (startLocation) {
-      filter.startLocation = { $regex: `^${startLocation}$`, $options: "i" };
-    }
-    if (endLocation) {
-      filter.endLocation = { $regex: `^${endLocation}$`, $options: "i" };
-    }
-
+ if (startLocation) {
+  filter.startLocation = { $regex: escapeRegex(startLocation), $options: "i" };
+}
     // avgRating range (uses stored avgRating on Pack)
     if (avgRatingMin || avgRatingMax) {
       filter.avgRating = {};
@@ -104,74 +82,48 @@ export const getPacksFiltered = async (req, res) => {
       if (avgRatingMax) filter.avgRating.$lte = Number(avgRatingMax);
     }
 
-    // maxClients range
-    if (maxClientsMin || maxClientsMax) {
-      filter.maxClients = {};
-      if (maxClientsMin) filter.maxClients.$gte = Number(maxClientsMin);
-      if (maxClientsMax) filter.maxClients.$lte = Number(maxClientsMax);
-    }
 
-// Support three cases in priority order:
-// 1) raw extraction from req.originalUrl to tolerate unencoded ampersands/spaces
-// 2) req.query.categoryValue parsed by Express (percent-encoded or normal)
-// 3) fallback to undefined
-{
-  // Try to extract raw value from originalUrl (handles unencoded ampersands like "Hiking & Trekking")
-  let categoryValueRaw = undefined;
-  try {
-    const rawUrl = String(req.originalUrl || req.url || "");
-    const match = rawUrl.match(/[?&]categoryValue=([\s\S]*?)(?=&[^=]+=|$)/);
-    if (match && match[1] !== undefined) {
-      // Replace + with space (common form-encoding) and trim
-      const plusNormalized = match[1].replace(/\+/g, " ");
-      try {
-        categoryValueRaw = decodeURIComponent(plusNormalized);
-      } catch (e) {
-        categoryValueRaw = plusNormalized;
+
+    // Category by NAME (CSV). If provided, map partial names -> IDs then filter packs that have ANY of them
+    if (category) {
+      // split CSV, trim empties
+      const values = String(category)
+        .split(",")
+        .map((s) => String(s || "").trim())
+        .filter(Boolean);
+
+      if (values.length) {
+        // ❗ Change: use "contains" regex (no ^$ anchors), case-insensitive
+        const categoriesFound = await Category.find({
+          name: { $in: values.map((v) => new RegExp(escapeRegex(v), "i")) },
+        }).select("_id");
+
+        const categoryIds = categoriesFound.map((c) => c._id);
+
+        if (categoryIds.length) {
+          filter.categories = { $in: categoryIds };
+        } else {
+          // No category matched -> return empty pagination
+          return res.status(200).json({
+            docs: [],
+            totalDocs: 0,
+            limit: Number(limit) || 10,
+            totalPages: 1,
+            page: Number(page) || 1,
+          });
+        }
       }
     }
-  } catch (e) {
-    // ignore and fallback
-  }
 
-  // If no raw extracted, use parsed query value
-  if (!categoryValueRaw && req.query && req.query.categoryValue) {
-    categoryValueRaw = req.query.categoryValue;
-  }
-
-  if (categoryValueRaw) {
-    // split CSV, trim and remove empties
-    const values = String(categoryValueRaw)
-      .split(",")
-      .map((s) => String(s || "").trim())
-      .filter(Boolean);
-
-    // Find categories whose name matches (case-insensitive, exact)
-    const categoriesFound = await Category.find({
-      name: { $in: values.map((v) => new RegExp(`^${v}$`, "i")) },
-    }).select("_id");
-
-    const categoryIds = categoriesFound.map((c) => c._id);
-
-    if (categoryIds.length) {
-      // Packs that have ANY of these categories
-      filter.categories = { $in: categoryIds };
-    } else {
-      // No category matched the provided names → force empty result
-      filter._id = { $in: [] };
-    }
-  }
-}
-
-
-    // pagination + sort
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const sortParam = req.query.sort || ""; // e.g. "price" or "-price"
-    const options = { page, limit };
-    if (sortParam) options.sort = sortParam;
+    // Pagination + sort
+    const options = {
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 10,
+    };
+    if (sort) options.sort = sort;
 
     const packs = await Pack.paginate(filter, options);
+
     return res.status(200).json(packs);
   } catch (error) {
     return res
@@ -205,7 +157,6 @@ const getAllPacks = async (req, res) => {
       const avg = avgMap.get(String(doc._id)) ?? 0;
       // attach to response
       doc.avgRating = avg;
-
       // If categories were populated, convert to array of names for consistency
       if (Array.isArray(doc.categories)) {
         try {
@@ -258,7 +209,6 @@ const getAllPacksForGuide = async (req, res) => {
     for (const doc of packs.docs) {
       const avg = avgMap.get(String(doc._id)) ?? 0;
       doc.avgRating = avg;
-
       bulkOps.push({
         updateOne: {
           filter: { _id: doc._id },
@@ -358,6 +308,7 @@ const createPack = async (req, res) => {
 
     const guideId = req.user.id;
     const profileImgUrl = req.file?.path; // e.g. https://res.cloudinary.com/...
+    const durationTime = computeDurationDays(startDate, endDate);
 
     const newPack = new Pack({
       guideId,
@@ -372,6 +323,7 @@ const createPack = async (req, res) => {
       startLocation,
       endLocation,
       maxClients,
+      durationTime,
       profileImg: profileImgUrl, // store the URL in MongoDB
       categories,                 // <-- ObjectId[] only
     });
@@ -514,15 +466,17 @@ const updatePack = async (req, res) => {
       updateData.profileImg = req.file.path;
     }
 
-    const updatedPack = await Pack.findOneAndUpdate(
-      { _id: req.params.id, guideId: req.user.id },
-      updateData,
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedPack) {
+    const existingPack = await Pack.findOne({ _id: req.params.id, guideId: req.user.id });
+    if (!existingPack) {
       return res.status(404).json({ message: "Pack not found" });
     }
+
+    const startSource = updateData.startDate ?? existingPack.startDate;
+    const endSource = updateData.endDate ?? existingPack.endDate;
+    updateData.durationTime = computeDurationDays(startSource, endSource);
+
+    existingPack.set(updateData);
+    const updatedPack = await existingPack.save();
 
     return res.status(200).json(updatedPack);
   } catch (error) {

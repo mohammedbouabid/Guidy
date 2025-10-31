@@ -119,7 +119,7 @@ export const FeaturedPacksSection = () => {
                         <div className="flex items-center gap-2">
                           <ClockIcon className="w-4 h-4 text-[#05073c]" />
                           <span className="text-xs text-[#05073c]">
-                            {pack.duration || "N/A"}
+                            {`${pack.durationTime} Days` || "N/A"}
                           </span>
                         </div>
 
