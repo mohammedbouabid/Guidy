@@ -6,6 +6,7 @@ import authRoutes from "./Routes/authRoutes.js";
 import userRoutes from "./Routes/userRoutes.js";
 import guideRoutes from "./Routes/guidePlaceRoutes.js";
 import packRouter from "./Routes/packRoutes.js";
+import categoryRoutes from "./Routes/categoryRoutes.js";
 import bookingRoutes from "./Routes/bookingRoutes.js";
 import ratingRoutes from "./Routes/ratingRoutes.js";
 import { errorHandler } from "./Middlewares/errorHandler.js";
@@ -44,6 +45,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api/guide-places", guideRoutes);
 app.use("/api", authRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/packs/", packRouter);
 app.use("/api", userRoutes);
 app.use("/api/bookings", bookingRoutes);
