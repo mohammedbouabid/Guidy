@@ -14,15 +14,13 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
 
   // Load Leaflet library
   useEffect(() => {
-    // Load CSS
     if (!document.querySelector(`link[href="${LEAFLET_CSS}"]`)) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = LEAFLET_CSS;
       document.head.appendChild(link);
     }
-
-    // Load JS
+  
     if (window.L) {
       setLeafletReady(true);
       return;
@@ -31,9 +29,7 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
     const script = document.createElement('script');
     script.src = LEAFLET_JS;
     script.async = true;
-    script.onload = () => {
-      setLeafletReady(true);
-    };
+    script.onload = () => setLeafletReady(true);
     script.onerror = () => {
       setError('Failed to load map library');
       setLoading(false);
@@ -41,14 +37,19 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
     document.head.appendChild(script);
   }, []);
 
-  // Initialize map when Leaflet is ready
+  // Initialize map
   useEffect(() => {
     if (!leafletReady || !mapContainerRef.current) return;
 
-    // Wait a tick to ensure DOM is fully ready
     const timer = setTimeout(() => {
       initMap();
     }, 100);
+
+    // Prevent auto-focus when component mounts
+    if (mapContainerRef.current) {
+      mapContainerRef.current.blur();
+      document.activeElement?.blur();
+    }
 
     return () => {
       clearTimeout(timer);
@@ -63,7 +64,7 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
     };
   }, [leafletReady]);
 
-  // Update markers when data changes
+  // Update markers
   useEffect(() => {
     if (mapInstanceRef.current && places.length > 0) {
       updateMapMarkers();
@@ -77,11 +78,7 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
         `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
         { headers: { 'User-Agent': 'PackDetailsApp' } }
       );
-      
-      if (!response.ok) {
-        throw new Error('Geocoding request failed');
-      }
-      
+      if (!response.ok) throw new Error('Geocoding request failed');
       const data = await response.json();
       if (data && data.length > 0) {
         return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
@@ -97,15 +94,19 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
     if (!window.L || !mapContainerRef.current || mapInstanceRef.current) return;
 
     try {
-      // Create map with default center (Morocco)
       const map = window.L.map(mapContainerRef.current, {
         center: [31.7917, -7.0926],
         zoom: 6,
         scrollWheelZoom: true,
-        zoomControl: true
+        zoomControl: true,
+        keyboard: false, // Disable keyboard navigation
+        scrollWheelZoom: true
       });
 
-      // Add tile layer
+      // Prevent auto-focus
+      map.getContainer().setAttribute('tabindex', '-1');
+      map.getContainer().blur();
+      
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19,
@@ -115,7 +116,6 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
       setLoading(false);
       setError(null);
 
-      // Load markers after map is ready
       if (places.length > 0) {
         setTimeout(() => updateMapMarkers(), 500);
       }
@@ -140,32 +140,28 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
 
       const bounds = [];
 
-      // Group places by city to handle multiple destinations in same location
+      // Group places by city
       const placesByLocation = {};
       for (const place of places) {
         if (!place.city || !place.country) continue;
         const key = `${place.city}, ${place.country}`;
-        if (!placesByLocation[key]) {
-          placesByLocation[key] = [];
-        }
+        if (!placesByLocation[key]) placesByLocation[key] = [];
         placesByLocation[key].push(place);
       }
 
-      // Add markers for each location
+      // Add markers
       for (const [locationKey, locationPlaces] of Object.entries(placesByLocation)) {
         const [city, country] = locationKey.split(', ');
         const coords = await geocodeLocation(city, country);
-        
+
         if (coords) {
-          // Add slight offset for multiple places in same city
           locationPlaces.forEach((place, idx) => {
-            const offset = idx * 0.002; // Small offset to prevent exact overlap
+            const offset = idx * 0.002;
             const lat = coords.lat + (idx % 2 === 0 ? offset : -offset);
             const lng = coords.lng + (idx < locationPlaces.length / 2 ? offset : -offset);
-            
+
             bounds.push([lat, lng]);
 
-            // Blue marker for destinations
             const markerIcon = window.L.divIcon({
               className: 'custom-marker-destination',
               html: `<div style="background-color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
@@ -174,70 +170,25 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
             });
 
             const marker = window.L.marker([lat, lng], { icon: markerIcon }).addTo(map);
-
-            const popupContent = `
-              <div style="min-width: 200px; max-width: 250px;">
-                <h3 style="font-weight: bold; margin-bottom: 8px; color: #05073c; font-size: 16px;">${place.name}</h3>
-                <p style="font-size: 14px; color: #666; margin-bottom: 4px;">${place.city}, ${place.country}</p>
-                ${place.images && place.images[0] ? `
-                  <img src="${place.images[0]}" alt="${place.name}" 
-                    style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-top: 8px;" />
-                ` : ''}
-                ${place.description ? `
-                  <p style="font-size: 13px; color: #444; margin-top: 8px; line-height: 1.4;">
-                    ${place.description.substring(0, 100)}${place.description.length > 100 ? '...' : ''}
-                  </p>
-                ` : ''}
-              </div>
-            `;
-            marker.bindPopup(popupContent, { maxWidth: 300 });
+            marker.bindPopup(`<div><strong>${place.name}</strong><br/>${place.city}, ${place.country}</div>`);
           });
         }
       }
 
-      // Add start location marker (green)
-      if (startLocation) {
-        const country = places[0]?.country || 'Morocco';
-        const startCoords = await geocodeLocation(startLocation, country);
-        if (startCoords) {
-          bounds.push([startCoords.lat, startCoords.lng]);
-          
-          const startIcon = window.L.divIcon({
-            className: 'custom-marker-start',
-            html: `<div style="background-color: #22c55e; width: 38px; height: 38px; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">S</div>`,
-            iconSize: [38, 38],
-            iconAnchor: [19, 19],
-          });
-
-          const startMarker = window.L.marker([startCoords.lat, startCoords.lng], { icon: startIcon }).addTo(map);
-          startMarker.bindPopup(`<div style="text-align: center; padding: 8px;"><strong style="color: #22c55e; font-size: 16px;">Start Location</strong><br/><span style="color: #666;">${startLocation}</span></div>`);
-        }
-      }
-
-      // Add end location marker (red)
-      if (endLocation) {
-        const country = places[places.length - 1]?.country || 'Morocco';
-        const endCoords = await geocodeLocation(endLocation, country);
-        if (endCoords) {
-          bounds.push([endCoords.lat, endCoords.lng]);
-          
-          const endIcon = window.L.divIcon({
-            className: 'custom-marker-end',
-            html: `<div style="background-color: #ef4444; width: 38px; height: 38px; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">E</div>`,
-            iconSize: [38, 38],
-            iconAnchor: [19, 19],
-          });
-
-          const endMarker = window.L.marker([endCoords.lat, endCoords.lng], { icon: endIcon }).addTo(map);
-          endMarker.bindPopup(`<div style="text-align: center; padding: 8px;"><strong style="color: #ef4444; font-size: 16px;">End Location</strong><br/><span style="color: #666;">${endLocation}</span></div>`);
-        }
-      }
-
-      // Fit map to show all markers with padding
+      // Fit map to bounds
       if (bounds.length > 0) {
-        map.fitBounds(bounds, { 
+        map.fitBounds(bounds, {
           padding: [50, 50],
-          maxZoom: 12 
+          maxZoom: 12,
+          animate: false,
+          pan: { animate: false }
+        });
+
+        // Prevent scroll jump
+        map.once('moveend', () => {
+          if (map.getContainer()) {
+            map.getContainer().blur();
+          }
         });
       }
     } catch (err) {
@@ -260,25 +211,12 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
     <Card>
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-[#05073c]">Tour Map</CardTitle>
-        <div className="flex gap-4 mt-2 text-sm flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow"></div>
-            <span className="text-gray-700">Start</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow"></div>
-            <span className="text-gray-700">Destinations</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow"></div>
-            <span className="text-gray-700">End</span>
-          </div>
-        </div>
       </CardHeader>
       <CardContent className="p-4">
         <div className="relative">
           <div
             ref={mapContainerRef}
+            tabIndex="-1"   // 👈 prevents auto-focus
             style={{ height: '500px', width: '100%', borderRadius: '8px', backgroundColor: '#e5e7eb' }}
           />
           {loading && (
