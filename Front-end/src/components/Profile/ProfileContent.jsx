@@ -356,6 +356,22 @@ export default function ProfileContent() {
                   required
                 />
               </div>
+              {user.role === "guide" && (
+                <div className="space-y-2">
+                  <Label htmlFor="cin">CIN</Label>
+                  <Input
+                    id="cin"
+                    value={user.cin || ""}
+                    disabled
+                    className="opacity-70 cursor-not-allowed"
+                    placeholder="CIN"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    CIN is required only when creating the first pack. To update it, please contact support.
+                  </p>
+                </div>
+              )}
+
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
