@@ -20,14 +20,13 @@ const GuestLayout = () => {
 }
 
   return (
-    
-
-    <div className="h-screen">
+    <div className="min-h-screen">
       <div className="bg-white">
         <Navbar user={user} onLogout={handleLogout} />
-        
       </div>
-      <Outlet />
+      <div className="pt-16">
+        <Outlet />
+      </div>
     </div>
   )
 }

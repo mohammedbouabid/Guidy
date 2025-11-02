@@ -112,7 +112,9 @@ export const getBookingsByUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const bookings = await Booking.find({ userID }).populate('packID');
+    const bookings = await Booking.find({ userID })
+      .populate('userID', 'name email')
+      .populate('packID');
     res.status(200).json(bookings);
   } catch (error) {
     console.error('Get bookings by user error:', error);

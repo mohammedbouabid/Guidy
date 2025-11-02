@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,6 +15,7 @@ export default function ProfileHeader() {
   const dispatch = useDispatch()
   const { user, isHydrated } = useSelector((state) => state.Auth)
   const [uploading, setUploading] = useState(false)
+  const navigate = useNavigate()
 
   if (!isHydrated || !user) return <Loader />;
 
@@ -129,6 +131,11 @@ export default function ProfileHeader() {
                 Member Since {joinDate}
               </div>
             </div>
+            {user.role === 'client' && (
+              <div className="pt-2">
+                <Button className="cursor-pointer" onClick={() => navigate('/profile/billing')}>View Billing</Button>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

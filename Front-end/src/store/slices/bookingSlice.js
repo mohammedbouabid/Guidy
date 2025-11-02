@@ -46,6 +46,19 @@ export const fetchGuideBookings = createAsyncThunk(
   }
 );
 
+// Récupérer les bookings du client connecté
+export const fetchUserBookings = createAsyncThunk(
+  "booking/fetchUserBookings",
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+    try {
+      const res = await api.get("/bookings/user", { params: { page, limit } });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch user bookings");
+    }
+  }
+);
+
 // Récupérer un booking par ID
 export const fetchBookingById = createAsyncThunk(
   "booking/fetchById",
@@ -179,6 +192,33 @@ const bookingSlice = createSlice({
         }
       })
       .addCase(fetchGuideBookings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch User Bookings
+      .addCase(fetchUserBookings.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserBookings.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        if (payload && payload.data && Array.isArray(payload.data)) {
+          state.items = payload.data;
+          state.totalDocs = payload.count || payload.data.length;
+          state.page = 1;
+          state.totalPages = Math.ceil((payload.count || payload.data.length) / state.limit);
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+        }
+      })
+      .addCase(fetchUserBookings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

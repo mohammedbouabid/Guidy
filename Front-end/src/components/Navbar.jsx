@@ -51,7 +51,7 @@ const Navbar = ({ onLogout }) => {
   return (
     <>
       {/* Desktop / Tablet Top Navbar */}
-      <nav className="hidden md:block w-full sticky top-0 z-50 bg-white shadow-sm">
+      <nav className="hidden md:block w-full fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-2">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -149,7 +149,7 @@ const Navbar = ({ onLogout }) => {
                       <Link to="/profile?tab=account" className="cursor-pointer">Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/billing" className="cursor-pointer">Billing</Link>
+                      <Link to="/profile/billing" className="cursor-pointer">Billing</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -276,7 +276,7 @@ const Navbar = ({ onLogout }) => {
                     <Link to="/profile?tab=account" className="cursor-pointer">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/billing" className="cursor-pointer">Billing</Link>
+                    <Link to="/profile/billing" className="cursor-pointer">Billing</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
