@@ -215,11 +215,11 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
         <CardTitle className="text-2xl font-bold text-[#05073c]">Tour Map</CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="relative">
+        <div className="relative z-0">
           <div
             ref={mapContainerRef}
             tabIndex="-1"   // 👈 prevents auto-focus
-            style={{ height: '500px', width: '100%', borderRadius: '8px', backgroundColor: '#e5e7eb' }}
+            style={{ height: '500px', width: '100%', borderRadius: '8px', backgroundColor: '#e5e7eb', zIndex: 0 }}
           />
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-[1000]">

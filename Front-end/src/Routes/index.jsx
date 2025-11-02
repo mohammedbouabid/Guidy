@@ -30,7 +30,6 @@ import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
 import PackDetailsPage from "@/pages/Home/PackDetailsPage";
 import RatingsPage from "@/pages/admin/Ratings";
-// Removed client bookings page in favor of profile billing popout
 
 const router = createBrowserRouter([
   {

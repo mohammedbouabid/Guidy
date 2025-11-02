@@ -18,9 +18,9 @@ export const addRating = async (req, res, next) => {
       throw error;
     }
 
-    // Check if the user already booked this pack
+    // Check if the user already booked this pack (Booking model uses userID)
     const booking = await Booking.findOne({
-      clientID: userId,
+      userID: userId,
       packID: packID,
       isCancelled: false,
       isCompleted: true,
@@ -337,17 +337,12 @@ export const getRatingsByPack = async (req, res, next) => {
 
     const ratings = await Rating.find({ packID: packId })
       .populate("clientID", "name email")
-      .populate("packId", "profileImg")
+      .populate("packID", "profileImg")
       .select("stars comment createdAt")
       .skip(skip)
       .limit(limitNum)
       .sort(sortOption);
-
-    if (ratings.length === 0) {
-      const error = new Error("no rating yet for this pack");
-      error.statusCode = 404;
-      throw error;
-    }
+    // Return empty list gracefully when there are no ratings
 
     const total = await Rating.countDocuments({ packID: packId });
 
