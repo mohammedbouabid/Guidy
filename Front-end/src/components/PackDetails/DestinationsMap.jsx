@@ -186,6 +186,8 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
 
         // Prevent scroll jump
         map.once('moveend', () => {
+
+
           if (map.getContainer()) {
             map.getContainer().blur();
           }

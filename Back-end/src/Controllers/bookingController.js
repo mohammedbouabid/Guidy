@@ -50,9 +50,24 @@ export const createBooking = async (req, res) => {
       return res.status(403).json({ message: 'Not enough spots available for this booking.' });
     }
 
+    // Only clients are allowed to book
+    const bookingUser = await User.findById(userID).select('role');
+    if (!bookingUser || bookingUser.role !== 'client') {
+      return res.status(403).json({ message: 'Only clients are allowed to book.' });
+    }
+
+    // Prevent duplicate booking by the same user for this trip
     const alreadyBooked = existingBookings.find(b => b.userID.toString() === userID);
     if (alreadyBooked) {
       return res.status(409).json({ message: 'You have already booked this trip.' });
+    }
+
+    // VIP booking not available if already VIP booked for this trip
+    if (isVip) {
+      const vipExists = existingBookings.some(b => b.isVip === true);
+      if (vipExists) {
+        return res.status(409).json({ message: 'VIP booking is no longer available for this trip.' });
+      }
     }
 
     const newBooking = new Booking({ userID, packID, isVip, spotsBooked });
@@ -232,6 +247,42 @@ export const getAllBookings = async (req, res) => {
     });
   } catch (error) {
     console.error('Get all bookings error:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+// Public pack status for disabling VIP on the frontend
+// Roles allowed: client, guide, admin
+export const getPackBookingStatus = async (req, res) => {
+  try {
+    const { packId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(packId)) {
+      return res.status(400).json({ message: 'Invalid pack ID.' });
+    }
+
+    const trip = await Pack.findById(packId);
+    if (!trip) {
+      return res.status(404).json({ message: 'Trip not found.' });
+    }
+
+    const bookings = await Booking.find({ packID: packId, isCancelled: false });
+
+    const vipExists = bookings.some(b => b.isVip === true);
+    const totalActiveBookings = bookings.length;
+    const totalSpotsBooked = bookings.reduce((sum, b) => sum + (b.spotsBooked || 1), 0);
+    const remainingSpots = Math.max(0, (trip.maxClients || 0) - totalSpotsBooked);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        vipExists,
+        totalActiveBookings,
+        remainingSpots,
+      }
+    });
+  } catch (error) {
+    console.error('Get pack booking status error:', error);
     res.status(500).json({ message: 'Server error.' });
   }
 };

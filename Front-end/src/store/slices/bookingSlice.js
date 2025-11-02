@@ -20,6 +20,19 @@ export const fetchAllBookings = createAsyncThunk(
   }
 );
 
+// Récupérer le statut d'un pack (clients/guides/admin)
+export const fetchPackBookingStatus = createAsyncThunk(
+  "booking/fetchPackStatus",
+  async (packId, { rejectWithValue }) => {
+    try {
+      const res = await api.get(`/bookings/pack/${packId}/status`);
+      return { packId, ...(res.data || {}) };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch pack status");
+    }
+  }
+);
+
 // Récupérer les bookings d'un guide
 export const fetchGuideBookings = createAsyncThunk(
   "booking/fetchGuideBookings",
@@ -82,6 +95,7 @@ const initialState = {
   totalPages: 1,
   totalDocs: 0,
   limit: 10,
+  packStatus: {},
 };
 
 const bookingSlice = createSlice({
@@ -121,6 +135,23 @@ const bookingSlice = createSlice({
         }
       })
       .addCase(fetchAllBookings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch Pack Booking Status
+      .addCase(fetchPackBookingStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPackBookingStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const { packId, data } = action.payload || {};
+        if (packId) {
+          state.packStatus[packId] = data || { vipExists: false, totalActiveBookings: 0, remainingSpots: 0 };
+        }
+      })
+      .addCase(fetchPackBookingStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -177,6 +208,15 @@ const bookingSlice = createSlice({
         state.success = true;
         if (Array.isArray(state.items)) {
           state.items.unshift(action.payload.booking || action.payload);
+        }
+        // Mettre à jour packStatus si possible
+        const booking = action.payload.booking || action.payload;
+        const packId = booking?.packID?._id || booking?.packID;
+        const spots = booking?.spotsBooked || 0;
+        if (packId && state.packStatus[packId]) {
+          state.packStatus[packId].totalActiveBookings = (state.packStatus[packId].totalActiveBookings || 0) + 1;
+          state.packStatus[packId].remainingSpots = Math.max(0, (state.packStatus[packId].remainingSpots || 0) - spots);
+          if (booking?.isVip) state.packStatus[packId].vipExists = true;
         }
       })
       .addCase(createBooking.rejected, (state, action) => {
