@@ -9,8 +9,22 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar" // your custom Calendar
 import { cn } from "@/lib/utils"
 
-export function DateRangePicker() {
-  const [range, setRange] = React.useState(undefined)
+export function DateRangePicker({ value, onChange }) {
+  const [internalRange, setInternalRange] = React.useState(value);
+  const range = value ?? internalRange;
+
+  const handleSelect = (nextRange) => {
+    if (onChange) {
+      onChange(nextRange);
+    } else {
+      setInternalRange(nextRange);
+    }
+  };
+
+  React.useEffect(() => {
+    if (value === undefined) return;
+    setInternalRange(value);
+  }, [value]);
 
   return (
     <Popover>
@@ -44,7 +58,7 @@ export function DateRangePicker() {
           mode="range"
           numberOfMonths={2}
           selected={range}
-          onSelect={setRange}
+          onSelect={handleSelect}
           initialFocus
         />
       </PopoverContent>
