@@ -217,7 +217,7 @@ export const getAllRatings = async (req, res, next) => {
     // First, get all ratings with population for search
     let query = Rating.find(filterQuery)
       .populate("packID", "title price profileImg")
-      .populate("clientID", "name email");
+      .populate("clientID", "name email phone profileImg");
 
     // If search exists, we need to filter after population
     if (search) {
@@ -253,8 +253,8 @@ export const getAllRatings = async (req, res, next) => {
 
     // No search - use normal query with pagination
     const ratings = await Rating.find(filterQuery)
-      .populate("packID", "title price")
-      .populate("clientID", "name email")
+      .populate("packID", "title price profileImg")
+      .populate("clientID", "name email phone profileImage")
       .select("stars comment createdAt")
       .skip(skip)
       .limit(limitNum)
@@ -288,8 +288,8 @@ export const getRatingById = async (req, res, next) => {
     }
 
     const rating = await Rating.findById(id)
-      .populate("packID", "title price images")
-      .populate("clientID", "name email");
+      .populate("packID", "title price images startLocation endLocation startDate endDate")
+      .populate("clientID", "name email phone");
 
     if (!rating) {
       const error = new Error("rating not found");

@@ -30,6 +30,7 @@ import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
 import PackDetailsPage from "@/pages/Home/PackDetailsPage";
 import RatingsPage from "@/pages/admin/Ratings";
+import BookingsPage from "@/pages/admin/Booking";
 
 const router = createBrowserRouter([
   {
@@ -98,6 +99,7 @@ const router = createBrowserRouter([
       { path: "clients", element: <AllClients /> },
       { path: "destinations", element: <GuidePlacesPage /> },
       { path: "ratings", element: <RatingsPage /> },
+      { path: "bookings", element: <BookingsPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

@@ -190,7 +190,7 @@ export function DataTable({
                     </TableHead>
                   ))}
                   {showActions && (onDelete || onView) && (
-                    <TableHead className="uppercase text-[12px] text-gray-600 w-32 pl-6">
+                    <TableHead className="uppercase text-[12px] text-gray-600 w-32 pl-10">
                       action
                     </TableHead>
                   )}
@@ -234,7 +234,7 @@ export function DataTable({
                       ))}
                       {showActions && (onDelete || onView) && (
                         <TableCell className="py-4 w-32">
-                          <div className="flex justify-left gap-2">
+                          <div className="flex justify-center gap-2">
                             {onView && (
                               <Button
                                 variant="ghost"
