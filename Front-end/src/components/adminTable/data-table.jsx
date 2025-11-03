@@ -156,10 +156,10 @@ export function DataTable({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="pl-4">
+                    <TableHead key={header.id}>
                       {header.isPlaceholder ? null : (
                         <div
-                          className={`flex items-center font-semibold text-gray-600 uppercase text-[12px] ${
+                          className={`flex items-center font-semibold text-gray-600 uppercase text-[12px] pl-2 ${
                             header.column.columnDef.enableSorting !== false
                               ? "cursor-pointer select-none"
                               : ""
