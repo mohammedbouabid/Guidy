@@ -514,19 +514,38 @@ const getPopularPacks = async (req, res) => {
   }
 };
 
-
-// Get monthly pack creation stats
 const getMonthlyPackStats = async (req, res) => {
   try {
     const guideId = req.user?.id;
     const userRole = req.user?.role;
 
-    // Get year from query or use current year
+    // Paramètres de filtrage
     const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+    const filterType = req.query.filterType || 'year';
+    const month = req.query.month ? parseInt(req.query.month) : null;
+    const week = req.query.week ? parseInt(req.query.week) : null;
 
-    // Define date range for the year
-    const startDate = new Date(year, 0, 1);
-    const endDate = new Date(year, 11, 31, 23, 59, 59);
+    let startDate, endDate;
+    
+    // Définir les dates selon le type de filtre
+    if (filterType === 'year') {
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
+    } else if (filterType === 'month' && month) {
+      startDate = new Date(year, month - 1, 1);
+      endDate = new Date(year, month, 0, 23, 59, 59);
+    } else if (filterType === 'week' && week) {
+      const firstDay = new Date(year, 0, 1);
+      const dayOfWeek = firstDay.getDay();
+      const daysToAdd = (week - 1) * 7 - dayOfWeek + 1;
+      startDate = new Date(year, 0, 1 + daysToAdd);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+      endDate.setHours(23, 59, 59);
+    } else {
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
+    }
 
     let matchCondition = {};
 
@@ -539,60 +558,94 @@ const getMonthlyPackStats = async (req, res) => {
     const samplePack = await Pack.findOne(matchCondition);
     const hasCreatedAt = samplePack && samplePack.createdAt;
 
-    console.log("📊 Sample pack:", samplePack);
-    console.log("📊 Has createdAt:", hasCreatedAt);
+    console.log("📊 Filter params:", { year, filterType, month, week });
+    console.log("📊 Date range:", { startDate, endDate });
 
     let stats;
+    let result;
     
-    if (hasCreatedAt) {
-      // If packs have createdAt, filter by year
-      matchCondition.createdAt = { $gte: startDate, $lte: endDate };
-      
-      stats = await Pack.aggregate([
-        { $match: matchCondition },
-        {
-          $group: {
-            _id: { $month: "$createdAt" },
-            count: { $sum: 1 }
-          }
-        },
-        { $sort: { _id: 1 } }
-      ]);
-    } else {
-      // If no createdAt, distribute all packs across months evenly or use startDate
-      stats = await Pack.aggregate([
-        { $match: matchCondition },
-        {
-          $group: {
-            _id: { $month: "$startDate" }, // Use startDate as fallback
-            count: { $sum: 1 }
-          }
-        },
-        { $sort: { _id: 1 } }
-      ]);
+    if (filterType === 'year') {
+      // Agrégation par mois pour l'année
+      if (hasCreatedAt) {
+        matchCondition.createdAt = { $gte: startDate, $lte: endDate };
+        stats = await Pack.aggregate([
+          { $match: matchCondition },
+          { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
+          { $sort: { _id: 1 } }
+        ]);
+      } else {
+        matchCondition.startDate = { $gte: startDate, $lte: endDate };
+        stats = await Pack.aggregate([
+          { $match: matchCondition },
+          { $group: { _id: { $month: "$startDate" }, count: { $sum: 1 } } },
+          { $sort: { _id: 1 } }
+        ]);
+      }
+
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      result = monthNames.map((monthName, index) => {
+        const monthData = stats.find(s => s._id === index + 1);
+        return { month: monthName, packs: monthData ? monthData.count : 0 };
+      });
+
+    } else if (filterType === 'month') {
+      // Agrégation par jour du mois
+      if (hasCreatedAt) {
+        matchCondition.createdAt = { $gte: startDate, $lte: endDate };
+        stats = await Pack.aggregate([
+          { $match: matchCondition },
+          { $group: { _id: { $dayOfMonth: "$createdAt" }, count: { $sum: 1 } } },
+          { $sort: { _id: 1 } }
+        ]);
+      } else {
+        matchCondition.startDate = { $gte: startDate, $lte: endDate };
+        stats = await Pack.aggregate([
+          { $match: matchCondition },
+          { $group: { _id: { $dayOfMonth: "$startDate" }, count: { $sum: 1 } } },
+          { $sort: { _id: 1 } }
+        ]);
+      }
+
+      const daysInMonth = new Date(year, month, 0).getDate();
+      result = Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1;
+        const dayData = stats.find(s => s._id === day);
+        return { month: day.toString(), packs: dayData ? dayData.count : 0 };
+      });
+
+    } else if (filterType === 'week') {
+      // Agrégation par jour de la semaine
+      if (hasCreatedAt) {
+        matchCondition.createdAt = { $gte: startDate, $lte: endDate };
+        stats = await Pack.aggregate([
+          { $match: matchCondition },
+          { $group: { _id: { $dayOfWeek: "$createdAt" }, count: { $sum: 1 } } },
+          { $sort: { _id: 1 } }
+        ]);
+      } else {
+        matchCondition.startDate = { $gte: startDate, $lte: endDate };
+        stats = await Pack.aggregate([
+          { $match: matchCondition },
+          { $group: { _id: { $dayOfWeek: "$startDate" }, count: { $sum: 1 } } },
+          { $sort: { _id: 1 } }
+        ]);
+      }
+
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      result = dayNames.map((day, index) => {
+        const dayData = stats.find(s => s._id === index + 1);
+        return { month: day, packs: dayData ? dayData.count : 0 };
+      });
     }
-
-    console.log("📊 Stats from DB:", stats);
-
-    // Create array with all 12 months
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-
-    const result = monthNames.map((month, index) => {
-      const monthData = stats.find(s => s._id === index + 1);
-      return {
-        month: month,
-        packs: monthData ? monthData.count : 0
-      };
-    });
 
     console.log("📊 Final result:", result);
 
     res.status(200).json({
       success: true,
       year: year,
+      filterType: filterType,
+      month: month,
+      week: week,
       data: result
     });
   } catch (error) {

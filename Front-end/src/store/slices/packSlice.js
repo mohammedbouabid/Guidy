@@ -78,11 +78,14 @@ export const deletePack = createAsyncThunk(
 
 export const fetchMonthlyPackStats = createAsyncThunk(
   "pack/fetchMonthlyStats",
-  async ({ year } = {}, { rejectWithValue }) => {
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
     try {
       const params = {};
       if (year) params.year = year;
-      console.log("🔄 Fetching pack stats for year:", year);
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      console.log("🔄 Fetching pack stats with params:", params);
       const res = await api.get("/packs/stats/monthly", { params });
       console.log("✅ Pack stats response:", res.data);
       return res.data;

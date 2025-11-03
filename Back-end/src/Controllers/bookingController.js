@@ -369,3 +369,77 @@ export const getMonthlyBookingStats = async (req, res) => {
     });
   }
 };
+
+// Get booking status distribution stats for guide
+export const getBookingStatusStats = async (req, res) => {
+  try {
+    const guideID = req.user?.id;
+    const userRole = req.user?.role;
+    
+    // Paramètres de filtrage
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+    const filterType = req.query.filterType || 'year';
+    const month = req.query.month ? parseInt(req.query.month) : null;
+    const week = req.query.week ? parseInt(req.query.week) : null;
+
+    let matchCondition = {};
+
+    // Si c'est un guide, filtrer par ses packs
+    if (userRole === 'guide') {
+      const packs = await Pack.find({ guideId: guideID });
+      const packIDs = packs.map(pack => pack._id);
+      matchCondition.packID = { $in: packIDs };
+    }
+
+    // Ajouter le filtre de date
+    let startDate, endDate;
+    
+    if (filterType === 'year') {
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
+    } else if (filterType === 'month' && month) {
+      startDate = new Date(year, month - 1, 1);
+      endDate = new Date(year, month, 0, 23, 59, 59);
+    } else if (filterType === 'week' && week) {
+      const firstDay = new Date(year, 0, 1);
+      const dayOfWeek = firstDay.getDay();
+      const daysToAdd = (week - 1) * 7 - dayOfWeek + 1;
+      startDate = new Date(year, 0, 1 + daysToAdd);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+      endDate.setHours(23, 59, 59);
+    } else {
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
+    }
+
+    matchCondition.createdAt = { $gte: startDate, $lte: endDate };
+
+    // Récupérer toutes les réservations filtrées
+    const allBookings = await Booking.find(matchCondition);
+
+    // Calculer les statuts
+    const completed = allBookings.filter(b => b.isCompleted === true).length;
+    const cancelled = allBookings.filter(b => b.isCancelled === true).length;
+    const inProgress = allBookings.filter(b => !b.isCompleted && !b.isCancelled).length;
+
+    const stats = [
+      { status: "Completed", count: completed },
+      { status: "Cancelled", count: cancelled },
+      { status: "In Progress", count: inProgress }
+    ].filter(s => s.count > 0); // Ne retourner que les statuts avec des données
+
+
+    res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('❌ Error in getBookingStatusStats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching booking status stats',
+      error: error.message
+    });
+  }
+};

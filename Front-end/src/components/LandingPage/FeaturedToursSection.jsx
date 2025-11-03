@@ -7,8 +7,8 @@ import {
   StarIcon,
   ChevronRightIcon,
 } from "lucide-react"
-import { Button } from "../ui/button"
-import { Card, CardContent } from "../ui/card"
+import { Button } from "@/components/ui/components/ui/button"
+import { Card, CardContent } from "@/components/ui/components/ui/card"
 import {
   Carousel,
   CarouselContent,

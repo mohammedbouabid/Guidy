@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/components/ui/button"
 import { Calendar } from "@/components/ui/calendar" // your custom Calendar
 import { cn } from "@/lib/utils"
 

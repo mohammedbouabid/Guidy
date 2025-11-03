@@ -31,6 +31,7 @@ import GuideDashboard from "@/pages/Guide/GuideDashboard";
 import Analtytics  from "@/pages/Guide/Analtytics";
 import PackDetailsPage from "@/pages/Home/PackDetailsPage";
 import RatingsPage from "@/pages/admin/Ratings";
+import CalenderPacks from "@/pages/Guide/CalenderPacks";
 
 const router = createBrowserRouter([
   {
@@ -82,6 +83,7 @@ const router = createBrowserRouter([
       { path: "places/edit/:id", element: <UpdateGuidePlaceForm /> },
       { path: "bookingsGuide", element: <GuideBookings /> },
       { path: "bookingsGuide/:id", element: <BookingDetailsModal /> },
+      { path: "CalenderPacks", element: <CalenderPacks /> },
       { path: "Analytics", element: <Analtytics /> },
     ],
   },

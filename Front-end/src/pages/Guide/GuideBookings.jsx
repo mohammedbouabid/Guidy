@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Eye, X } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchGuideBookings, cancelBooking } from "@/store/slices/bookingSlice";
-import ConfirmDialog from "@/components/ConfirmDialog";
-import { toast } from "react-hot-toast";
+import { fetchGuideBookings } from "@/store/slices/bookingSlice";
+
 import BookingDetailsModal from "../../Components/Bookings/BookingDetailsModal";
 
 const GuideBookings = () => {
   const dispatch = useDispatch();
   const { items, loading, error } = useSelector((state) => state.booking);
   
-  const [cancelDialog, setCancelDialog] = useState({ 
-    isOpen: false, 
-    bookingId: null, 
-    bookingTitle: '' 
-  });
+
   
   const [detailsModal, setDetailsModal] = useState({ 
     isOpen: false, 
@@ -26,32 +21,16 @@ const GuideBookings = () => {
     dispatch(fetchGuideBookings({}));
   }, [dispatch]);
 
-  // Ouvrir le modal de détails
+  // Ouvrir leodal de détails
   const openDetailsModal = (booking) => {
     setDetailsModal({ isOpen: true, booking });
   };
 
   // Ouvrir le modal de confirmation d'annulation
-  const openCancelDialog = (booking) => {
-    setCancelDialog({ 
-      isOpen: true, 
-      bookingId: booking._id, 
-      bookingTitle: `Booking de ${booking.userID?.name || 'Utilisateur'} pour ${booking.packID?.title || 'Pack'}` 
-    });
-  };
+ 
 
   // Annuler un booking
-  const handleCancelBooking = () => {
-    dispatch(cancelBooking(cancelDialog.bookingId))
-      .unwrap()
-      .then(() => {
-        toast.success('Booking annulé avec succès');
-        dispatch(fetchGuideBookings({})); // Recharger la liste
-      })
-      .catch((err) => {
-        toast.error(err?.message || 'Erreur lors de l\'annulation');
-      });
-  };
+ 
 
   return (
     <div className="w-full bg-gradient-to-br to-gray-50 p-4 overflow-x-hidden">
@@ -173,15 +152,7 @@ const GuideBookings = () => {
                         >
                           <Eye size={16} className="text-blue-600" />
                         </button>
-                        {!booking.isCancelled && (
-                          <button
-                            onClick={() => openCancelDialog(booking)}
-                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 transition cursor-pointer"
-                            title="Annuler"
-                          >
-                            <X size={16} className="text-red-500" />
-                          </button>
-                        )}
+                        
                       </div>
                     </td>
                   </tr>
@@ -207,17 +178,7 @@ const GuideBookings = () => {
         </div>
       </div>
 
-      {/* Modal de confirmation d'annulation */}
-      <ConfirmDialog
-        isOpen={cancelDialog.isOpen}
-        onClose={() => setCancelDialog({ isOpen: false, bookingId: null, bookingTitle: '' })}
-        onConfirm={handleCancelBooking}
-        title="Annuler la réservation"
-        message={`Êtes-vous sûr de vouloir annuler "${cancelDialog.bookingTitle}" ? Cette action est irréversible.`}
-        confirmText="Annuler la réservation"
-        cancelText="Fermer"
-        type="danger"
-      />
+     
 
       {/* Modal de détails */}
       <BookingDetailsModal

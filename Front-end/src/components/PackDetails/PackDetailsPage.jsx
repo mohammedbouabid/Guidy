@@ -10,8 +10,8 @@ import {
   ArrowLeftIcon,
   DollarSignIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/components/ui/button";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 import { fetchPackById } from "@/store/slices/packSlice"; // Adjust path as needed
 
 const PackDetailsPage = () => {

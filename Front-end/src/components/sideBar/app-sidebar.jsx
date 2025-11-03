@@ -70,7 +70,7 @@ if (role === "admin") {
     { title: "My Places", url: "places", icon: Route },
     { title: "My Packs", url: "PacksGuide", icon: MapPinned },
     { title: "Bokking", url: "bookingsGuide", icon: BookIcon },
-    { title: "Calendar", url: "#", icon: CalendarRange },
+    { title: "Calendar", url: "CalenderPacks", icon: CalendarRange },
     { title: "Analytics", url: "Analytics", icon: ChartArea },
   ];
 }

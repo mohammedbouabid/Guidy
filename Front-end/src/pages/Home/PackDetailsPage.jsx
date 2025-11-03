@@ -1,7 +1,7 @@
 // src/pages/PackDetailsPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 
 // Components
 import ImageGallery from "@/components/PackDetails/ImageGallery";

@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -34,17 +34,36 @@ const chartConfig = {
   },
 };
 
-export function PacksCharts() {
+// Noms des mois pour affichage
+const monthNames = [
+  { value: 1, label: "January" }, { value: 2, label: "February" }, { value: 3, label: "March" },
+  { value: 4, label: "April" }, { value: 5, label: "May" }, { value: 6, label: "June" },
+  { value: 7, label: "July" }, { value: 8, label: "August" }, { value: 9, label: "September" },
+  { value: 10, label: "October" }, { value: 11, label: "November" }, { value: 12, label: "December" }
+];
+
+export function PacksCharts({ selectedYear = new Date().getFullYear(), filterType = 'year', selectedMonth, selectedWeek }) {
   const dispatch = useDispatch();
   const { monthlyStats, statsLoading } = useSelector((state) => state.pack);
-  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
-    dispatch(fetchMonthlyPackStats({ year: currentYear }));
-  }, [dispatch, currentYear]);
+    const params = {
+      year: selectedYear,
+      filterType: filterType
+    };
+    
+    if (filterType === 'month') {
+      params.month = selectedMonth;
+    } else if (filterType === 'week') {
+      params.week = selectedWeek;
+    }
+    
+    console.log("🔄 PacksCharts - Fetching data with params:", params);
+    dispatch(fetchMonthlyPackStats(params));
+  }, [dispatch, selectedYear, filterType, selectedMonth, selectedWeek]);
 
-  console.log(" PacksCharts - monthlyStats:", monthlyStats);
-  console.log(" PacksCharts - statsLoading:", statsLoading);
+  console.log("📊 PacksCharts - monthlyStats:", monthlyStats);
+  console.log("📊 PacksCharts - statsLoading:", statsLoading);
 
   // Calculer le total des packs créés
   const totalPacks = Array.isArray(monthlyStats) 
@@ -59,15 +78,22 @@ export function PacksCharts() {
   const trend = avgPacks > 0 ? (((lastMonthPacks - avgPacks) / avgPacks) * 100).toFixed(1) : 0;
 
   return (
-    <Card className="w-full">
+    <Card className="w-full max-w-full min-w-0">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">Packs Activity {currentYear}</CardTitle>
+        <CardTitle className="text-xl font-semibold">
+          Packs Activity {selectedYear}
+          {filterType === 'month' && ` - ${monthNames.find(m => m.value === selectedMonth)?.label}`}
+          {filterType === 'week' && ` - Week ${selectedWeek}`}
+        </CardTitle>
         <CardDescription>
-          Total packs created: {totalPacks} | Year {currentYear}
+          Total packs created: {totalPacks}
+          {filterType === 'year' && ` | Year ${selectedYear}`}
+          {filterType === 'month' && ` | ${monthNames.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+          {filterType === 'week' && ` | Week ${selectedWeek}, ${selectedYear}`}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="w-full h-[300px]">
+      <CardContent className="min-w-0">
+        <ChartContainer config={chartConfig} className="w-full h-[250px] max-w-full">
           {statsLoading ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-muted-foreground">Loading data...</p>
@@ -134,7 +160,9 @@ export function PacksCharts() {
           )}
         </div>
         <div className="text-muted-foreground leading-none">
-          Showing total packs created for {currentYear}
+          {filterType === 'year' && `Showing total packs created for ${selectedYear}`}
+          {filterType === 'month' && `Showing packs for ${monthNames.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+          {filterType === 'week' && `Showing packs for Week ${selectedWeek}, ${selectedYear}`}
         </div>
       </CardFooter>
     </Card>

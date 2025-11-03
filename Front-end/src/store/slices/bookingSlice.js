@@ -91,11 +91,35 @@ export const fetchMonthlyStats = createAsyncThunk(
   }
 );
 
+// Récupérer les statistiques de statut des réservations
+export const fetchStatusStats = createAsyncThunk(
+  "booking/fetchStatusStats",
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      
+      console.log("🔄 Fetching booking status stats with params:", params);
+      const res = await api.get("/bookings/stats/status", { params });
+      console.log("✅ Booking status stats response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error fetching booking status stats:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to fetch status stats");
+    }
+  }
+);
+
 const initialState = {
   items: [],
   current: null,
   monthlyStats: [],
+  statusStats: [],
   loading: false,
+  statusLoading: false,
   error: null,
   success: false,
   page: 1,
@@ -237,6 +261,20 @@ const bookingSlice = createSlice({
       })
       .addCase(fetchMonthlyStats.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch Status Stats
+      .addCase(fetchStatusStats.pending, (state) => {
+        state.statusLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchStatusStats.fulfilled, (state, action) => {
+        state.statusLoading = false;
+        state.statusStats = action.payload.data || [];
+      })
+      .addCase(fetchStatusStats.rejected, (state, action) => {
+        state.statusLoading = false;
         state.error = action.payload;
       });
   },

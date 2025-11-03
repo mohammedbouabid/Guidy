@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.fc .fc-daygrid-day-frame {
+  cursor: pointer;
+}
+
 
 @custom-variant dark (&:is(.dark *));
 

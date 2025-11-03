@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 import { CalendarIcon, ClockIcon, UsersIcon } from "lucide-react";
 
 const formatDate = (dateString) => {
