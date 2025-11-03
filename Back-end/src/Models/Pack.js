@@ -52,6 +52,11 @@ const packSchema = mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  durationTime: {
+    type: Number,
+    min: 0,
+    default: 0,
+  },
   startLocation: {
     type: String,
     required: true,

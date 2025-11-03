@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarIcon, ClockIcon, UsersIcon } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPackBookingStatus } from "@/store/slices/bookingSlice";
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -21,6 +23,19 @@ const calculateDuration = (startDate, endDate) => {
 };
 
 export default function PackDetails({ pack }) {
+  const dispatch = useDispatch();
+  const packStatus = useSelector((state) => state.booking?.packStatus?.[pack?._id] || null);
+
+  useEffect(() => {
+    if (pack?._id) {
+      dispatch(fetchPackBookingStatus(pack._id));
+    }
+  }, [dispatch, pack?._id]);
+
+  const remainingSpots = typeof packStatus?.remainingSpots === 'number'
+    ? packStatus.remainingSpots
+    : (pack?.maxClients || 0);
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -57,9 +72,9 @@ export default function PackDetails({ pack }) {
           <div className="flex items-start gap-3">
             <UsersIcon className="w-5 h-5 text-[#05073c] mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-[#05073c]">Max Clients</p>
+              <p className="text-sm font-medium text-[#05073c]">Available Spots to Book</p>
               <p className="text-sm text-[#717171]">
-                {pack.maxClients || "N/A"} people
+                {remainingSpots} {remainingSpots === 1 ? 'spot' : 'spots'}
               </p>
             </div>
           </div>

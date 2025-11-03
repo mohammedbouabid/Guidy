@@ -39,6 +39,18 @@ export const fetchGuidePacks = createAsyncThunk(
   }
 );
 
+export const fetchFilteredPacks = createAsyncThunk(
+  "pack/fetchFiltered",
+  async (filters = {}, { rejectWithValue }) => {
+    try {
+      const res = await api.get("/packs/filter", { params: filters });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to filter packs");
+    }
+  }
+);
+
 export const fetchPackById = createAsyncThunk(
   "pack/fetchById",
   async (id, { rejectWithValue }) => {
@@ -148,6 +160,32 @@ const packSlice = createSlice({
         }
       })
       .addCase(fetchGuidePacks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchFilteredPacks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchFilteredPacks.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        if (payload && Array.isArray(payload.docs)) {
+          state.items = payload.docs;
+          state.page = payload.page ?? 1;
+          state.totalPages = payload.totalPages ?? 1;
+          state.totalDocs = payload.totalDocs ?? payload.total ?? payload.docs.length ?? 0;
+          state.limit = payload.limit ?? state.limit;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+        }
+      })
+      .addCase(fetchFilteredPacks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
