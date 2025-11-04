@@ -10,8 +10,8 @@ export default function SortDropdown({ sort, handleSortChange }) {
     { value: "-price", label: "Price: High to Low" },
     { value: "-avgRating", label: "Rating: High to Low" },
     { value: "avgRating", label: "Rating: Low to High" },
-    { value: "-startDate", label: "Most Recent Start Date" },
-    { value: "startDate", label: "Start Date Soonest" },
+    { value: "-startDate", label: "Latest start dates" },
+    { value: "startDate", label: "Earliest start dates" },
   ];
 
   return (

@@ -306,10 +306,10 @@ function FilterControls({
   <div className="bg-white/95 rounded-lg shadow-md px-3 sm:px-4 py-5 grid grid-cols-1 gap-3 lg:grid-cols-12 w-full">
     {/* Destination */}
     <div className="flex flex-col gap-1 lg:col-span-4">
-      <label className="text-xs font-medium text-gray-600">Destination</label>
+      <label className="text-xs font-medium text-gray-600">Start location</label>
       <input
         type="text"
-        placeholder="Search destinations"
+        placeholder="Search Start location"
         value={destination}
         onChange={(e) => setDestination(e.target.value)}
         className="border border-gray-300 rounded-md px-2.5 py-1.5 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
@@ -630,7 +630,7 @@ const FilterPage = () => {
                             </div>
 
                             <div className="flex items-baseline gap-1 mt-3">
-                              <span className="text-xs text-[#05073c]">From</span>
+                              <span className="text-xs text-[#05073c]">Price:</span>
                               <span className="text-sm font-medium text-[#05073c]">${pack.price}</span>
                             </div>
                           </div>
