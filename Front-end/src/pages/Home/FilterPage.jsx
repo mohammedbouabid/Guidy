@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ClockIcon, MapPinIcon } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as solidStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
-
+import SortDropdown from "@/components/SortDropdown";
 const DEFAULT_LIMIT = 8;
 
 /**
@@ -35,6 +35,7 @@ const parseQueryParams = (search) => {
   const priceMax = params.get("priceMax") || "";
   const avgRatingMin = params.get("avgRatingMin") || "";
   const avgRatingMax = params.get("avgRatingMax") || "";
+  const sort = params.get("sort") || "";
   const pageParam = Number(params.get("page") || 1);
   const limitParam = Number(params.get("limit") || DEFAULT_LIMIT);
   const page = Number.isNaN(pageParam) || pageParam <= 0 ? 1 : pageParam;
@@ -49,6 +50,7 @@ const parseQueryParams = (search) => {
     maxPrice: priceMax,
     minRating: avgRatingMin,
     maxRating: avgRatingMax,
+    sort,
     page,
     limit,
   };
@@ -76,6 +78,7 @@ const buildApiPayload = (filters) => {
     const value = Number(filters.maxRating);
     if (!Number.isNaN(value)) payload.avgRatingMax = value;
   }
+  if (filters.sort) payload.sort = filters.sort;
   if (filters.page) payload.page = filters.page;
   if (filters.limit) payload.limit = filters.limit;
   return payload;
@@ -100,6 +103,7 @@ const buildQueryString = (filters) => {
     params.set("avgRatingMax", String(filters.maxRating));
   }
   if (filters.page) params.set("page", String(filters.page));
+  if (filters.sort) params.set("sort", String(filters.sort));
   if (filters.limit && filters.limit !== DEFAULT_LIMIT) {
     params.set("limit", String(filters.limit));
   }
@@ -172,6 +176,7 @@ function FilterControls({
   initialMaxPrice = "",
   initialMinRating = "",
   initialMaxRating = "",
+  initialSort = "",
   limitValue = DEFAULT_LIMIT,
   onSearch = () => {},
 }) {
@@ -182,6 +187,7 @@ function FilterControls({
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
   const [minRating, setMinRating] = useState(initialMinRating);
   const [maxRating, setMaxRating] = useState(initialMaxRating);
+  const [sort, setSort] = useState(initialSort);
 
   useEffect(() => {
     setDestination(initialDestination);
@@ -211,6 +217,10 @@ function FilterControls({
     setMaxRating(initialMaxRating);
   }, [initialMaxRating]);
 
+  useEffect(() => {
+    setSort(initialSort);
+  }, [initialSort]);
+
   const errors = useMemo(() => {
     const result = {};
     const minPriceNumber = minPrice === "" ? null : Number(minPrice);
@@ -239,20 +249,24 @@ function FilterControls({
 
   const hasErrors = Object.keys(errors).length > 0;
 
+  const buildSearchValues = (overrides = {}) => ({
+    destination: destination?.trim() || "",
+    dateRange,
+    tourType,
+    minPrice: minPrice === "" ? null : Number(minPrice),
+    maxPrice: maxPrice === "" ? null : Number(maxPrice),
+    minRating: minRating === "" ? null : Number(minRating),
+    maxRating: maxRating === "" ? null : Number(maxRating),
+    sort,
+    limit: limitValue,
+    ...overrides,
+  });
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (hasErrors) return;
 
-    onSearch({
-      destination,
-      dateRange,
-      tourType,
-      minPrice: minPrice === "" ? null : Number(minPrice),
-      maxPrice: maxPrice === "" ? null : Number(maxPrice),
-      minRating: minRating === "" ? null : Number(minRating),
-      maxRating: maxRating === "" ? null : Number(maxRating),
-      limit: limitValue,
-    });
+    onSearch(buildSearchValues({ page: 1 }));
   };
 
   const handleReset = () => {
@@ -263,6 +277,7 @@ function FilterControls({
     setMaxPrice("");
     setMinRating("");
     setMaxRating("");
+    setSort("");
     onSearch({
       destination: "",
       dateRange: null,
@@ -271,62 +286,89 @@ function FilterControls({
       maxPrice: null,
       minRating: null,
       maxRating: null,
+      sort: "",
       limit: limitValue,
+      page: 1,
     });
   };
 
+  const handleSortChange = (value) => {
+    setSort(value);
+    if (hasErrors) return;
+    onSearch(buildSearchValues({ sort: value, page: 1 }));
+  };
+
   return (
-    <form onSubmit={handleSubmit} className={`relative z-20 w-full max-w-5xl px-6 ${className}`}>
-      <div className="bg-white rounded-lg shadow-md p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
-        <input
-          type="text"
-          placeholder="Search destinations"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          className="lg:col-span-2 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
-          aria-label="Destination"
-        />
+ <form
+  onSubmit={handleSubmit}
+  className={`relative z-20 w-full px-2 sm:px-3 lg:px-4 ${className}`}
+>
+  <div className="bg-white/95 rounded-lg shadow-md px-3 sm:px-4 py-5 grid grid-cols-1 gap-3 lg:grid-cols-12 w-full">
+    {/* Destination */}
+    <div className="flex flex-col gap-1 lg:col-span-4">
+      <label className="text-xs font-medium text-gray-600">Destination</label>
+      <input
+        type="text"
+        placeholder="Search destinations"
+        value={destination}
+        onChange={(e) => setDestination(e.target.value)}
+        className="border border-gray-300 rounded-md px-2.5 py-1.5 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
+        aria-label="Destination"
+      />
+    </div>
 
-        <div className="lg:col-span-2">
-          <DateRangePicker value={dateRange} onChange={setDateRange} />
+    {/* Date Range */}
+    <div className="flex flex-col gap-1 lg:col-span-4">
+      <label className="text-xs font-medium text-gray-600">Date range</label>
+      <DateRangePicker value={dateRange} onChange={setDateRange} />
+    </div>
+
+    {/* Tour Type */}
+    <div className="flex flex-col gap-1 lg:col-span-4">
+      <label className="text-xs font-medium text-gray-600">Tour type</label>
+      <TourTypeSelect value={tourType} onChange={setTourType} className="w-full" />
+    </div>
+
+    {/* Filters row */}
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:col-span-12">
+      <div className="flex flex-wrap items-center gap-3 lg:gap-5 w-full">
+        <SortDropdown sort={sort} handleSortChange={handleSortChange} />
+
+
+        {/* Price Inputs */}
+        <div className="flex gap-2 sm:gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600">Min price</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-24 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600">Max price</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="Any"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-24 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
+            />
+          </div>
         </div>
 
-        <div className="lg:col-span-2">
-          <TourTypeSelect value={tourType} onChange={setTourType} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 lg:col-span-2">
-          <input
-            inputMode="numeric"
-            type="number"
-            min="0"
-            placeholder="Min price"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
-            aria-label="Minimum price"
-          />
-          <input
-            inputMode="numeric"
-            type="number"
-            min="0"
-            placeholder="Max price"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
-            aria-label="Maximum price"
-          />
-        </div>
-
-        <div className="lg:col-span-2">
+        {/* Rating */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:gap-3">
           <StarRating
             label="Min rating"
             value={minRating}
             onChange={setMinRating}
             defaultWhenEmpty={0}
           />
-        </div>
-        <div className="lg:col-span-2">
           <StarRating
             label="Max rating"
             value={maxRating}
@@ -334,38 +376,43 @@ function FilterControls({
             defaultWhenEmpty={5}
           />
         </div>
-
-        <div className="flex items-center gap-2 lg:col-span-2">
-          <button
-            type="submit"
-            disabled={hasErrors}
-            className={`bg-[#eb662b] text-white px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-              hasErrors ? "opacity-60 cursor-not-allowed" : "hover:bg-[#d9551f]"
-            }`}
-          >
-            {buttonText}
-          </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-50"
-          >
-            Reset
-          </button>
-        </div>
-
-        {hasErrors && (
-          <div className="md:col-span-2 lg:col-span-6 text-sm text-red-600">
-            {errors.minPrice && <div>• {errors.minPrice}</div>}
-            {errors.maxPrice && <div>• {errors.maxPrice}</div>}
-            {errors.priceRange && <div>• {errors.priceRange}</div>}
-            {errors.minRating && <div>• {errors.minRating}</div>}
-            {errors.maxRating && <div>• {errors.maxRating}</div>}
-            {errors.ratingRange && <div>• {errors.ratingRange}</div>}
-          </div>
-        )}
       </div>
-    </form>
+
+      {/* Buttons */}
+      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+        <button
+          type="submit"
+          disabled={hasErrors}
+          className={`bg-[#eb662b] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            hasErrors ? "opacity-60 cursor-not-allowed" : "hover:bg-[#d9551f]"
+          }`}
+        >
+          {buttonText}
+        </button>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-sm hover:bg-gray-50"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+
+    {/* Error Messages */}
+    {hasErrors && (
+      <div className="lg:col-span-12 text-sm text-red-600 space-y-0.5">
+        {errors.minPrice && <div>• {errors.minPrice}</div>}
+        {errors.maxPrice && <div>• {errors.maxPrice}</div>}
+        {errors.priceRange && <div>• {errors.priceRange}</div>}
+        {errors.minRating && <div>• {errors.minRating}</div>}
+        {errors.maxRating && <div>• {errors.maxRating}</div>}
+        {errors.ratingRange && <div>• {errors.ratingRange}</div>}
+      </div>
+    )}
+  </div>
+</form>
+
   );
 }
 
@@ -441,7 +488,13 @@ const FilterPage = () => {
     if (hasFilterParams) {
       dispatch(fetchFilteredPacks(payload));
     } else {
-      dispatch(fetchPacks({ page: payload.page ?? 1, limit: payload.limit ?? DEFAULT_LIMIT }));
+      dispatch(
+        fetchPacks({
+          page: payload.page ?? 1,
+          limit: payload.limit ?? DEFAULT_LIMIT,
+          sort: payload.sort,
+        })
+      );
     }
   }, [dispatch, initialFilters, hasFilterParams]);
 
@@ -454,6 +507,7 @@ const FilterPage = () => {
       maxPrice: values.maxPrice,
       minRating: values.minRating,
       maxRating: values.maxRating,
+      sort: values.sort || "",
       limit: values.limit ?? activeLimit,
       page: 1,
     };
@@ -480,9 +534,10 @@ const FilterPage = () => {
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 pb-12 sm:pt-16 sm:pb-16 bg-gray-50 min-h-screen">
-      <div className="max-w-screen-2xl mx-auto flex flex-col items-center gap-10">
-        <div className="w-full flex justify-center sticky top-16 sm:top-20 z-20 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/75 py-2">
+      <div className="max-w-screen-2xl mx-auto flex flex-col items-center gap-8">
+        <div className="w-full flex justify-center">
           <FilterControls
+            className="mx-auto"
             initialDestination={initialFilters.destination}
             initialDateRange={initialFilters.dateRange}
             initialTourType={initialFilters.tourType}
@@ -490,6 +545,7 @@ const FilterPage = () => {
             initialMaxPrice={initialFilters.maxPrice}
             initialMinRating={initialFilters.minRating}
             initialMaxRating={initialFilters.maxRating}
+            initialSort={initialFilters.sort}
             limitValue={initialFilters.limit}
             onSearch={handleSearch}
           />

@@ -29,7 +29,7 @@ const TOUR_OPTIONS = [
   { value: "Shopping Tours", group: "Urban", label: "Shopping Tours" },
 ];
 
-export function TourTypeSelect({ value, onChange, placeholder = "Select tour type" }) {
+export function TourTypeSelect({ value, onChange, placeholder = "Select tour type", className = "" }) {
   const grouped = React.useMemo(() => {
     return TOUR_OPTIONS.reduce((acc, option) => {
       acc[option.group] = acc[option.group] ? [...acc[option.group], option] : [option];
@@ -40,14 +40,7 @@ export function TourTypeSelect({ value, onChange, placeholder = "Select tour typ
   return (
     <Select value={value ?? undefined} onValueChange={onChange}>
       <SelectTrigger
-        className="
-          w-[220px]
-          border border-gray-300
-          rounded-md px-3 py-2
-          text-sm text-gray-800
-          focus:outline-none focus:ring-2 focus:ring-[#eb662b]
-          data-[placeholder]:text-gray-400
-        "
+        className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b] cursor-pointer data-[placeholder]:text-gray-400 ${className}`}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

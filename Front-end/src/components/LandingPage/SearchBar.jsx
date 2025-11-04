@@ -30,13 +30,13 @@ export default function SearchBar() {
           placeholder="Search destinations"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
+          className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b] hover:cursor-text"
         />
         <DateRangePicker value={dateRange} onChange={setDateRange} />
-        <TourTypeSelect value={tourType} onChange={setTourType} />
+        <TourTypeSelect value={tourType} onChange={setTourType} className="md:w-[220px]" />
         <button
           type="submit"
-          className="bg-[#eb662b] text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-[#d9551f] transition-colors"
+          className="bg-[#eb662b] text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-[#d9551f] transition-colors cursor-pointer"
         >
           Search
         </button>
