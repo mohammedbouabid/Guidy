@@ -9,59 +9,53 @@ import {
   SelectItem,
 } from "@/components/ui/select"
 
-export function TourTypeSelect() {
+const TOUR_OPTIONS = [
+  { value: "Hiking & Trekking", group: "Adventure", label: "Hiking & Trekking" },
+  { value: "Safari & Wildlife", group: "Adventure", label: "Safari & Wildlife" },
+  { value: "Water Sports", group: "Adventure", label: "Water Sports" },
+  { value: "Extreme Sports", group: "Adventure", label: "Extreme Sports" },
+  { value: "Beach Holidays", group: "Relaxation", label: "Beach Holidays" },
+  { value: "Spa & Wellness", group: "Relaxation", label: "Spa & Wellness" },
+  { value: "Cruises", group: "Relaxation", label: "Cruises" },
+  { value: "Historical Tours", group: "Cultural", label: "Historical Tours" },
+  { value: "Art & Museums", group: "Cultural", label: "Art & Museums" },
+  { value: "Food & Culinary", group: "Cultural", label: "Food & Culinary" },
+  { value: "Festivals & Events", group: "Cultural", label: "Festivals & Events" },
+  { value: "Eco Tours", group: "Nature", label: "Eco Tours" },
+  { value: "Mountains & Landscapes", group: "Nature", label: "Mountains & Landscapes" },
+  { value: "National Parks", group: "Nature", label: "National Parks" },
+  { value: "City Breaks", group: "Urban", label: "City Breaks" },
+  { value: "Nightlife & Entertainment", group: "Urban", label: "Nightlife & Entertainment" },
+  { value: "Shopping Tours", group: "Urban", label: "Shopping Tours" },
+];
+
+export function TourTypeSelect({ value, onChange, placeholder = "Select tour type", className = "" }) {
+  const grouped = React.useMemo(() => {
+    return TOUR_OPTIONS.reduce((acc, option) => {
+      acc[option.group] = acc[option.group] ? [...acc[option.group], option] : [option];
+      return acc;
+    }, {});
+  }, []);
+
   return (
-    <Select>
+    <Select value={value ?? undefined} onValueChange={onChange}>
       <SelectTrigger
-        className="
-          w-[220px]
-          border border-gray-300
-          rounded-md px-3 py-2
-          text-sm text-gray-800
-          focus:outline-none focus:ring-2 focus:ring-[#eb662b]
-          data-[placeholder]:text-gray-400
-        "
+        className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b] cursor-pointer data-[placeholder]:text-gray-400 ${className}`}
       >
-        <SelectValue placeholder="Select tour type" />
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
 
       <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Adventure</SelectLabel>
-          <SelectItem value="hiking">Hiking & Trekking</SelectItem>
-          <SelectItem value="safari">Safari & Wildlife</SelectItem>
-          <SelectItem value="water">Water Sports</SelectItem>
-          <SelectItem value="extreme">Extreme Sports</SelectItem>
-        </SelectGroup>
-
-        <SelectGroup>
-          <SelectLabel>Relaxation</SelectLabel>
-          <SelectItem value="beach">Beach Holidays</SelectItem>
-          <SelectItem value="spa">Spa & Wellness</SelectItem>
-          <SelectItem value="cruise">Cruises</SelectItem>
-        </SelectGroup>
-
-        <SelectGroup>
-          <SelectLabel>Cultural</SelectLabel>
-          <SelectItem value="history">Historical Tours</SelectItem>
-          <SelectItem value="art">Art & Museums</SelectItem>
-          <SelectItem value="food">Food & Culinary</SelectItem>
-          <SelectItem value="festival">Festivals & Events</SelectItem>
-        </SelectGroup>
-
-        <SelectGroup>
-          <SelectLabel>Nature</SelectLabel>
-          <SelectItem value="eco">Eco Tours</SelectItem>
-          <SelectItem value="mountain">Mountains & Landscapes</SelectItem>
-          <SelectItem value="parks">National Parks</SelectItem>
-        </SelectGroup>
-
-        <SelectGroup>
-          <SelectLabel>Urban</SelectLabel>
-          <SelectItem value="city">City Breaks</SelectItem>
-          <SelectItem value="nightlife">Nightlife & Entertainment</SelectItem>
-          <SelectItem value="shopping">Shopping Tours</SelectItem>
-        </SelectGroup>
+        {Object.entries(grouped).map(([groupLabel, options]) => (
+          <SelectGroup key={groupLabel}>
+            <SelectLabel>{groupLabel}</SelectLabel>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        ))}
       </SelectContent>
     </Select>
   )

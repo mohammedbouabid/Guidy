@@ -54,7 +54,7 @@ export const FeaturedPacksSection = () => {
   }
 
   const handleSeeAllClick = () => {
-    navigate("/packs")
+    navigate("/filter")
   }
 
   if (loading) return <p className="text-center py-10">Loading tours...</p>

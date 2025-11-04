@@ -17,9 +17,11 @@ export const createPack = createAsyncThunk(
 
 export const fetchPacks = createAsyncThunk(
   "pack/fetchAll",
-  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, sort } = {}, { rejectWithValue }) => {
     try {
-      const res = await api.get("/packs", { params: { page, limit } });
+      const params = { page, limit };
+      if (sort) params.sort = sort;
+      const res = await api.get("/packs", { params });
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch packs");

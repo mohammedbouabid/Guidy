@@ -144,6 +144,9 @@ const getAllPacks = async (req, res) => {
         { path: "categories", select: "name" },
       ],
     };
+    if (req.query.sort) {
+      options.sort = req.query.sort;
+    }
 
     const packs = await Pack.paginate({}, options);
 
@@ -343,8 +346,9 @@ const getPackById = async (req, res) => {
   try {
     // For public access, always fetch the pack
     // Only apply guide restriction if user is authenticated AND is a guide
+    const role = req.user?.role ? String(req.user.role).toLowerCase() : null;
     let pack;
-    if (req.user.role.toLowerCase() === "guide") {
+    if (role === "guide" && req.user?.id) {
       pack = await Pack.findOne({
         _id: req.params.id,
         guideId: req.user.id,
