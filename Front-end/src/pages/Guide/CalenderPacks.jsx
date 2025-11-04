@@ -24,16 +24,17 @@ const CalenderPacks = () => {
   const [selectedPack, setSelectedPack] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Fonction pour ouvrir le popup avec les détails du pack
-  const handlePackClick = (pack) => {
+  // Fonction pour ouvrir le modal avec les détails du pack
+  const handlePackClick = (pack, event) => {
     setSelectedPack(pack);
+    console.log(pack);
     setShowPopup(true);
   };
 
-  // Fonction pour fermer le popup
+  // Fonction pour fermer le modal
   const closePopup = () => {
     setShowPopup(false);
-    setTimeout(() => setSelectedPack(null), 300);
+    setTimeout(() => setSelectedPack(null), 200);
   };
 
   useEffect(() => {
@@ -231,7 +232,7 @@ const CalenderPacks = () => {
                 <div
                   key={pack._id}
                   className="text-sm px-3 py-3 cursor-pointer font-semibold hover:opacity-90 transition-opacity"
-                  onClick={() => handlePackClick(pack)}
+                  onClick={(e) => handlePackClick(pack, e)}
                   style={{
                     background: `linear-gradient(to bottom, ${pack.color.bg}e5 0%, ${pack.color.bg}f8 100%)`,
                     borderLeft: isStart ? `4px solid ${pack.color.border}` : 'none',
@@ -324,7 +325,7 @@ const CalenderPacks = () => {
                 <div
                   key={pack._id}
                   className="text-sm px-3 py-4 cursor-pointer font-semibold hover:opacity-90 transition-opacity"
-                  onClick={() => handlePackClick(pack)}
+                  onClick={(e) => handlePackClick(pack, e)}
                   style={{
                     background: `linear-gradient(to bottom, ${pack.color.bg}e5 0%, ${pack.color.bg}f8 100%)`,
                     borderLeft: isStart ? `4px solid ${pack.color.border}` : 'none',
@@ -385,8 +386,13 @@ const CalenderPacks = () => {
   }
 
   return (
-    <div className="p-6 bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+    <div className="p-6 bg-white min-h-screen relative">
+      {/* Overlay blur */}
+      {showPopup && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 z-30" onClick={closePopup} />
+      )}
+      
+      <div className="max-w-7xl mx-auto bg-white rounded-lg shadow border border-gray-200 overflow-hidden relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
           {/* Left: Today button */}
@@ -516,119 +522,95 @@ const CalenderPacks = () => {
         </div>
       </div>
 
-      {/* Popup Modal */}
-      {showPopup && selectedPack && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      {/* Modal Info */}
+{showPopup && selectedPack && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    
+    {/* Conteneur principal */}
+    <div className="relative w-full max-w-xl bg-white rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-50 duration-200">
+
+      {/* Image + bouton de fermeture */}
+      <div className="relative h-48">
+        <img
+          src={selectedPack.profileImg}
+          alt={selectedPack.title}
+          className="w-full h-full object-cover"
+        />
+
+        {/* Dégradé pour l’effet luxe */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+
+        {/* Bouton fermer */}
+        <button
           onClick={closePopup}
+          className="absolute top-3 right-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white"
         >
-          <div 
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all"
-            onClick={(e) => e.stopPropagation()}
+          <X className="w-4 h-4 text-gray-700" />
+        </button>
+      </div>
+
+      {/* Contenu */}
+      <div className="p-5 space-y-4">
+
+        {/* Titre */}
+        <h2 className="text-xl font-extrabold tracking-wide" style={{ color: selectedPack.color.text }}>
+          {selectedPack.title}
+        </h2>
+
+        {/* Description */}
+        {selectedPack.description && (
+          <p className="text-sm text-gray-600">{selectedPack.description}</p>
+        )}
+
+        {/* Informations du pack */}
+        <div className="grid grid-cols-2 gap-4">
+
+          {/* Dates */}
+          <div className="p-3 rounded-xl bg-gray-50">
+            <p className="text-xs text-gray-500">Dates</p>
+            <p className="font-semibold text-gray-800">
+              {new Date(selectedPack.startDate).toLocaleDateString("fr-FR")}
+              {" → "}
+              {new Date(selectedPack.endDate).toLocaleDateString("fr-FR")}
+            </p>
+          </div>
+
+          {/* Prix */}
+          <div
+            className="p-3 rounded-xl text-white font-semibold"
+            style={{ background: selectedPack.color.border }}
           >
-            {/* Image de couverture */}
-            <div 
-              className="h-48 bg-gradient-to-br from-orange-200 via-amber-100 to-orange-200 relative"
-              style={{
-                background: `linear-gradient(135deg, ${selectedPack.color.bg} 0%, ${selectedPack.color.bg}dd 100%)`
-              }}
-            >
-              <button
-                onClick={closePopup}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-lg"
-              >
-                <X className="w-5 h-5 text-gray-700" />
-              </button>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-white rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg">
-                    <span className="text-3xl font-bold" style={{ color: selectedPack.color.border }}>
-                      {selectedPack.title.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="text-xs opacity-70">Prix</p>
+            {selectedPack.price} MAD
+          </div>
 
-            {/* Contenu du popup */}
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {selectedPack.title}
-              </h2>
-              <p className="text-gray-600 mb-4">{selectedPack.description || "Aucune description disponible"}</p>
+          {/* Départ */}
+          <div className="p-3 rounded-xl bg-gray-50">
+            <p className="text-xs text-gray-500">Départ</p>
+            <p className="font-semibold text-gray-800">{selectedPack.startLocation}</p>
+          </div>
 
-              {/* Informations */}
-              <div className="space-y-3 mb-6">
-                <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-gray-500 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Date</p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(selectedPack.startDate).toLocaleDateString('fr-FR', { 
-                        day: 'numeric', 
-                        month: 'long', 
-                        year: 'numeric' 
-                      })}
-                      {selectedPack.endDate && selectedPack.startDate !== selectedPack.endDate && (
-                        <> - {new Date(selectedPack.endDate).toLocaleDateString('fr-FR', { 
-                          day: 'numeric', 
-                          month: 'long', 
-                          year: 'numeric' 
-                        })}</>
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedPack.location && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Lieu</p>
-                      <p className="text-sm text-gray-600">{selectedPack.location}</p>
-                    </div>
-                  </div>
-                )}
-
-                {selectedPack.participants && selectedPack.participants.length > 0 && (
-                  <div className="flex items-start gap-3">
-                    <Users className="w-5 h-5 text-gray-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Participants</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        {selectedPack.participants.slice(0, 3).map((participant, index) => (
-                          <div
-                            key={index}
-                            className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white text-xs font-semibold"
-                          >
-                            {participant.name ? participant.name.charAt(0).toUpperCase() : 'U'}
-                          </div>
-                        ))}
-                        {selectedPack.participants.length > 3 && (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-semibold">
-                            +{selectedPack.participants.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bouton d'action */}
-              <button
-                className="w-full py-3 rounded-lg font-semibold text-white transition-colors"
-                style={{ 
-                  backgroundColor: selectedPack.color.border,
-                }}
-                onClick={closePopup}
-              >
-                Fermer
-              </button>
-            </div>
+          {/* Arrivée */}
+          <div className="p-3 rounded-xl bg-gray-50">
+            <p className="text-xs text-gray-500">Destination</p>
+            <p className="font-semibold text-gray-800">{selectedPack.endLocation}</p>
           </div>
         </div>
-      )}
+
+        {/* Max Clients */}
+        <div className="flex items-center justify-between bg-gray-100 rounded-xl p-3">
+          <span className="text-sm font-medium text-gray-700">Places disponibles :</span>
+          <span className="text-lg font-bold" style={{ color: selectedPack.color.text }}>
+            {selectedPack.maxClients}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };
