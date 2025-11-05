@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom"
 import Footer from "@/components/Footer"
 
 const GuestLayout = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch() 
   const { user } = useSelector((state) => state.Auth)
 
   const navigate = useNavigate()
