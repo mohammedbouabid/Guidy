@@ -1,17 +1,18 @@
 // src/Routes/packRoutes.js
 import express from "express";
-import uploadPackImage from "../Middlewares/uploadPackImage.js"; // 🆕 new middleware
+import uploadPackImage from "../Middlewares/uploadPackImage.js";
 import {
   createPack,
   updatePack,
   getAllPacks,
+
+  getPacksFiltered,
   getPopularPacks,
   getPackById,
   deletePack,
   getAllPacksForGuide,
   getMonthlyPackStats,
 } from "../Controllers/packController.js";
-
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import { authorizeRoles } from "../Middlewares/authorizeRole.js";
 
@@ -26,22 +27,26 @@ router.get("/popular", getPopularPacks); // 👈 new endpoint
 
 router.get("/stats/monthly",verifyToken, authorizeRoles(["guide", "admin"]), getMonthlyPackStats);
 router.get("/all",verifyToken , getAllPacksForGuide);
+router.get("/filter", getPacksFiltered);
+router.get("/all", verifyToken, getAllPacksForGuide);
 router.get("/:id", getPackById);
 
 router.post(
-  "/",verifyToken ,
+  "/",
+  verifyToken,
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
   createPack
 );
 
 router.put(
-  "/:id",verifyToken ,
+  "/:id",
+  verifyToken,
   authorizeRoles(["guide", "admin"]),
   uploadPackImage.single("profileImg"),
-  updatePack  
+  updatePack
 );
 
-router.delete("/:id",verifyToken , authorizeRoles(["guide", "admin"]), deletePack);
+router.delete("/:id", verifyToken, authorizeRoles(["guide", "admin"]), deletePack);
 
 export default router;

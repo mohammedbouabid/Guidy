@@ -7,7 +7,8 @@ import {
   cancelBooking,
   getAllBookings,
   getMonthlyBookingStats,
-  getBookingStatusStats
+  getBookingStatusStats,
+  getPackBookingStatus
 } from '../Controllers/bookingController.js';
 import { verifyToken } from '../Middlewares/verifyJwtToken.js';
 import { authorizeRoles } from '../Middlewares/authorizeRole.js';
@@ -22,5 +23,6 @@ router.get('/all', verifyToken , authorizeRoles(["admin"]), getAllBookings);
 router.post('/', verifyToken, authorizeRoles(["client","admin"]), createBooking);
 router.get('/:id', verifyToken, authorizeRoles(["client" ,"guide","admin"]), getBookingById);
 router.patch('/cancel/:bookingID', verifyToken, authorizeRoles(["client","admin"]), cancelBooking);
+router.get('/pack/:packId/status', verifyToken, authorizeRoles(["client","guide","admin"]), getPackBookingStatus);
 
 export default router;

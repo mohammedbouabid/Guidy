@@ -3,6 +3,7 @@ import { Navigate, Outlet } from "react-router-dom"
 import Navbar from "@/components/Navbar"
 import { LogoutUser } from "@/store/slices/AuthSlice"
 import { useNavigate } from "react-router-dom"
+import Footer from "@/components/Footer"
 
 const GuestLayout = () => {
   const dispatch = useDispatch()
@@ -20,14 +21,12 @@ const GuestLayout = () => {
 }
 
   return (
-    
-
-    <div className="h-screen">
+    <div className="min-h-screen">
       <div className="bg-white">
         <Navbar user={user} onLogout={handleLogout} />
-        
       </div>
       <Outlet />
+      <div><Footer/></div>
     </div>
   )
 }

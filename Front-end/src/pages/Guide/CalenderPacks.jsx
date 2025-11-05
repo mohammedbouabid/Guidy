@@ -543,7 +543,7 @@ const CalenderPacks = () => {
         {/* Bouton fermer */}
         <button
           onClick={closePopup}
-          className="absolute top-3 right-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white"
+          className="absolute cursor-pointer top-3 right-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white"
         >
           <X className="w-4 h-4 text-gray-700" />
         </button>

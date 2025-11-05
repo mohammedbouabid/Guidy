@@ -14,7 +14,7 @@ import {
   setDateFilter,
   clearSelectedRating,
 } from "@/store/slices/ratingSlice";
-import { Star, User, Package, Calendar, Clock } from "lucide-react";
+import { Star, User, Package, Calendar, Clock, Route } from "lucide-react";
 import Swal from "sweetalert2";
 import RatingDetailsModal from "@/components/adminHelpers/RatingDetailsModal";
 
@@ -209,10 +209,10 @@ export default function RatingsPage() {
     },
     {
       accessorKey: "packID",
-      header: "Pack",
+      header: "Tour",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <Route className="w-4 h-4 text-gray-500 flex-shrink-0" />
           <span className="truncate max-w-[200px]">
             {row.original.packID?.title || "N/A"}
           </span>

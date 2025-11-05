@@ -17,6 +17,14 @@ import {
   CarouselPrevious,
 } from "../ui/carousel"
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import {
+  faStar as fullStar,
+  faStarHalfAlt as halfStar,
+  faStar as emptyStar,
+} from "@fortawesome/free-solid-svg-icons"
+
+
 export const FeaturedPacksSection = () => {
   const navigate = useNavigate()
   const [packs, setPacks] = useState([])
@@ -42,6 +50,7 @@ export const FeaturedPacksSection = () => {
 
   const handlePackClick = (packId) => {
     navigate(`/packs/${packId}`)
+    window.scrollTo(0, 0) // Scroll to top when navigating
   }
 
   const handleSeeAllClick = () => {
@@ -106,19 +115,27 @@ export const FeaturedPacksSection = () => {
                         <p className="text-sm font-medium text-[#05073c] truncate mb-2">
                           {pack.description}
                         </p>
-
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex gap-1">
-                            {[...Array(5)].map((_, index) => (
-                              <StarIcon
-                                key={index}
-                                className={`w-3 h-3 ${typeof pack.avgRating === "number" &&
-                                    index < Math.round(pack.avgRating)
-                                    ? "fill-[#e2ad64] text-[#e2ad64]"
-                                    : "text-gray-300"
-                                  }`}
-                              />
-                            ))}
+                            {[...Array(5)].map((_, index) => {
+                              const rating = pack.avgRating || 0
+                              const fullStars = Math.floor(rating)
+                              const hasHalfStar = rating - fullStars >= 0.25 && rating - fullStars < 0.75
+                              const isFull = index < fullStars
+                              const isHalf = index === fullStars && hasHalfStar
+
+                              const icon = isFull ? fullStar : isHalf ? halfStar : fullStar
+                              const color = isFull || isHalf ? "#e2ad64" : "#d1d5db" // Tailwind gray-300
+
+                              return (
+                                <FontAwesomeIcon
+                                  key={index}
+                                  icon={icon}
+                                  style={{ color }}
+                                  className="w-4 h-4"
+                                />
+                              )
+                            })}
                           </div>
                           <span className="text-xs text-[#05073c]">
                             {typeof pack.avgRating === "number"

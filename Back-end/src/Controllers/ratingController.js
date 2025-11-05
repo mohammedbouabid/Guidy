@@ -18,9 +18,9 @@ export const addRating = async (req, res, next) => {
       throw error;
     }
 
-    // Check if the user already booked this pack
+    // Check if the user already booked this pack (Booking model uses userID)
     const booking = await Booking.findOne({
-      clientID: userId,
+      userID: userId,
       packID: packID,
       isCancelled: false,
       isCompleted: true,
@@ -217,7 +217,7 @@ export const getAllRatings = async (req, res, next) => {
     // First, get all ratings with population for search
     let query = Rating.find(filterQuery)
       .populate("packID", "title price profileImg")
-      .populate("clientID", "name email");
+      .populate("clientID", "name email phone profileImg");
 
     // If search exists, we need to filter after population
     if (search) {
@@ -253,8 +253,8 @@ export const getAllRatings = async (req, res, next) => {
 
     // No search - use normal query with pagination
     const ratings = await Rating.find(filterQuery)
-      .populate("packID", "title price")
-      .populate("clientID", "name email")
+      .populate("packID", "title price profileImg")
+      .populate("clientID", "name email phone profileImage")
       .select("stars comment createdAt")
       .skip(skip)
       .limit(limitNum)
@@ -288,8 +288,8 @@ export const getRatingById = async (req, res, next) => {
     }
 
     const rating = await Rating.findById(id)
-      .populate("packID", "title price images")
-      .populate("clientID", "name email");
+      .populate("packID", "title price images startLocation endLocation startDate endDate")
+      .populate("clientID", "name email phone");
 
     if (!rating) {
       const error = new Error("rating not found");
@@ -337,17 +337,12 @@ export const getRatingsByPack = async (req, res, next) => {
 
     const ratings = await Rating.find({ packID: packId })
       .populate("clientID", "name email")
-      .populate("packId", "profileImg")
+      .populate("packID", "profileImg")
       .select("stars comment createdAt")
       .skip(skip)
       .limit(limitNum)
       .sort(sortOption);
-
-    if (ratings.length === 0) {
-      const error = new Error("no rating yet for this pack");
-      error.statusCode = 404;
-      throw error;
-    }
+    // Return empty list gracefully when there are no ratings
 
     const total = await Rating.countDocuments({ packID: packId });
 

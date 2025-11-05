@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   MapPinIcon,
   CalendarIcon,
   UsersIcon,
   ClockIcon,
   StarIcon,
-  ArrowLeftIcon,
-  DollarSignIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/components/ui/button";
 import { Card, CardContent } from "@/components/ui/components/ui/card";
