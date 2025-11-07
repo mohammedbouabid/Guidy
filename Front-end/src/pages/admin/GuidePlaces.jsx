@@ -14,7 +14,7 @@ import {
   setCountryFilter,
   clearSelectedPlace,
 } from "@/store/slices/guidePlaceSlice";
-import { Globe, Building2, User } from "lucide-react";
+import { Globe, Building2, User, Calendar } from "lucide-react";
 import Swal from "sweetalert2";
 import GuidePlaceDetailsModal from "@/components/adminHelpers/GuidePlaceDetailsModal";
 
@@ -38,19 +38,30 @@ export default function GuidePlacesPage() {
     placeLoading,
   } = useSelector((state) => state.guidePlace);
 
-  // Fetch places when filters change
+  // Set default sorting on mount
   useEffect(() => {
-    dispatch(
-      fetchGuidePlaces({
-        page: currentPage,
-        limit,
-        search: searchValue,
-        sortField,
-        sortOrder,
-        city: cityFilter,
-        country: countryFilter,
-      })
-    );
+    if (!sortField) {
+      dispatch(setSortConfig({ field: "createdAt", order: "desc" }));
+    }
+  }, []);
+
+  // Single useEffect with debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(
+        fetchGuidePlaces({
+          page: currentPage,
+          limit,
+          search: searchValue,
+          sortField,
+          sortOrder,
+          city: cityFilter,
+          country: countryFilter,
+        })
+      );
+    }, searchValue);
+
+    return () => clearTimeout(timer);
   }, [
     dispatch,
     currentPage,
@@ -62,29 +73,12 @@ export default function GuidePlacesPage() {
     countryFilter,
   ]);
 
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchValue !== undefined) {
-        dispatch(
-          fetchGuidePlaces({
-            page: 1,
-            limit,
-            search: searchValue,
-            sortField,
-            sortOrder,
-            city: cityFilter,
-            country: countryFilter,
-          })
-        );
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchValue]);
-
   const handleSearchChange = (value) => {
     dispatch(setSearchValue(value));
+    // Reset to page 1 when searching
+    if (currentPage !== 1) {
+      dispatch(setCurrentPage(1));
+    }
   };
 
   const handlePageChange = (page) => {
@@ -215,7 +209,7 @@ export default function GuidePlacesPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="flex gap-1">
-          {row.original.images?.slice(0, 3).map((img, idx) => (
+          {row.original.images?.slice(0, 2).map((img, idx) => (
             <img
               key={idx}
               src={img}
@@ -223,9 +217,9 @@ export default function GuidePlacesPage() {
               className="w-10 h-10 rounded object-cover"
             />
           ))}
-          {row.original.images?.length > 3 && (
+          {row.original.images?.length > 2 && (
             <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-600">
-              +{row.original.images.length - 3}
+              +{row.original.images.length - 2}
             </div>
           )}
         </div>
@@ -256,11 +250,18 @@ export default function GuidePlacesPage() {
       header: "Created On",
       cell: ({ row }) => {
         const date = new Date(row.original.createdAt);
-        return date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
+        return (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <span>
+              {date.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        );
       },
     },
   ];

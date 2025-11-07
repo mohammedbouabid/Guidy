@@ -29,6 +29,8 @@ import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
 import GuideDashboard from "@/pages/Guide/GuideDashboard";
 import PackDetailsPage from "@/pages/Home/PackDetailsPage";
+import RatingsPage from "@/pages/admin/Ratings";
+import BookingsPage from "@/pages/admin/Booking";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +45,7 @@ const router = createBrowserRouter([
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
       {path:"/profile", element:<ProfilePage/>},
+      {path:"/profile/billing", element:<ProfilePage/>},
       { path: "/packs/:id", element: <PackDetailsPage /> },
       {path:"/filter", element:<FilterPage/>},
        ],
@@ -57,7 +60,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "packs", element: <AllPacks /> },
-      // { path: "bookings", element: <ClientBookings /> },
+      // Removed: { path: "bookings", element: <ClientBookings /> },
       // { path: "profile", element: <ClientProfile /> },
     ],
   },
@@ -95,6 +98,8 @@ const router = createBrowserRouter([
       { path: "guides", element: <AllGuides /> },
       { path: "clients", element: <AllClients /> },
       { path: "destinations", element: <GuidePlacesPage /> },
+      { path: "ratings", element: <RatingsPage /> },
+      { path: "bookings", element: <BookingsPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

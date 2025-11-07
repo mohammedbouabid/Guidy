@@ -51,7 +51,7 @@ const Navbar = ({ onLogout }) => {
   return (
     <>
       {/* Desktop / Tablet Top Navbar */}
-      <nav className="hidden md:block w-full sticky top-0 z-50 bg-white shadow-sm">
+      <nav className="hidden md:block w-full stinky top-0 left-0 right-0 z-[10000] bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-2">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -112,7 +112,7 @@ const Navbar = ({ onLogout }) => {
                       <span className="sr-only">User menu</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 z-[11001]">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -149,7 +149,7 @@ const Navbar = ({ onLogout }) => {
                       <Link to="/profile?tab=account" className="cursor-pointer">Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/billing" className="cursor-pointer">Billing</Link>
+                      <Link to="/profile/billing" className="cursor-pointer">Billing</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -167,7 +167,7 @@ const Navbar = ({ onLogout }) => {
       </nav>
 
       {/* Mobile Bottom Navbar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-md z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-md z-[10000]">
         <div className="flex justify-around items-center h-16">
           <Link
             to="/"
@@ -218,7 +218,7 @@ const Navbar = ({ onLogout }) => {
                 Profile
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 mb-2">
+            <DropdownMenuContent align="end" className="w-56 mb-2 z-[11001]">
               {!user ? (
                 <>
                   <DropdownMenuItem asChild>
@@ -276,7 +276,7 @@ const Navbar = ({ onLogout }) => {
                     <Link to="/profile?tab=account" className="cursor-pointer">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/billing" className="cursor-pointer">Billing</Link>
+                    <Link to="/profile/billing" className="cursor-pointer">Billing</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

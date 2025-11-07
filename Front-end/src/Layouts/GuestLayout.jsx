@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom"
 import Footer from "@/components/Footer"
 
 const GuestLayout = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch() 
   const { user } = useSelector((state) => state.Auth)
 
   const navigate = useNavigate()
@@ -21,12 +21,9 @@ const GuestLayout = () => {
 }
 
   return (
-    
-
-    <div className="h-screen">
+    <div className="min-h-screen">
       <div className="bg-white">
         <Navbar user={user} onLogout={handleLogout} />
-        
       </div>
       <Outlet />
       <div><Footer/></div>

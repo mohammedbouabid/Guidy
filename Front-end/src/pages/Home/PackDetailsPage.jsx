@@ -12,6 +12,8 @@ import PackDetails from "@/components/PackDetails/PackDetails";
 import Destinations from "@/components/PackDetails/Destinations";
 import BookingCard from "@/components/PackDetails/BookingCard";
 import DestinationsMap from "@/components/PackDetails/DestinationsMap";
+import FaqSection from "@/components/PackDetails/FaqSection";
+import ReviewSection from "@/components/PackDetails/ReviewSection";
 
 export default function PackDetailsPage() {
     const { id } = useParams();
@@ -91,6 +93,8 @@ export default function PackDetailsPage() {
                         startLocation={pack.startLocation}
                         endLocation={pack.endLocation}
                     />
+                    <ReviewSection pack={pack} />
+                    <FaqSection/>
                 </div>
 
                 {/* Right Column */}

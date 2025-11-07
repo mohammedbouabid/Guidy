@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/axios";
 
+// ========== EXISTING ACTIONS - KEEP AS IS ==========
 // Récupérer tous les bookings (Admin)
 export const fetchAllBookings = createAsyncThunk(
   "booking/fetchAll",
@@ -20,6 +21,19 @@ export const fetchAllBookings = createAsyncThunk(
   }
 );
 
+// Récupérer le statut d'un pack (clients/guides/admin)
+export const fetchPackBookingStatus = createAsyncThunk(
+  "booking/fetchPackStatus",
+  async (packId, { rejectWithValue }) => {
+    try {
+      const res = await api.get(`/bookings/pack/${packId}/status`);
+      return { packId, ...(res.data || {}) };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch pack status");
+    }
+  }
+);
+
 // Récupérer les bookings d'un guide
 export const fetchGuideBookings = createAsyncThunk(
   "booking/fetchGuideBookings",
@@ -29,6 +43,19 @@ export const fetchGuideBookings = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch guide bookings");
+    }
+  }
+);
+
+// Récupérer les bookings du client connecté
+export const fetchUserBookings = createAsyncThunk(
+  "booking/fetchUserBookings",
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+    try {
+      const res = await api.get("/bookings/user", { params: { page, limit } });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch user bookings");
     }
   }
 );
@@ -72,6 +99,61 @@ export const cancelBooking = createAsyncThunk(
   }
 );
 
+// ========== NEW ACTIONS FOR ADMIN PAGE ==========
+
+// Fetch bookings with advanced filters for admin
+export const fetchBookingsAdmin = createAsyncThunk(
+  "booking/fetchAdmin",
+  async ({ 
+    page = 1, 
+    limit = 10, 
+    search = "", 
+    sortField = "", 
+    sortOrder = "",
+    isVip = "",
+    statusFilter = "", // Combined status filter
+    dateFilter = ""
+  } = {}, { rejectWithValue }) => {
+    try {
+      const params = { page, limit };
+      if (search) params.search = search;
+      if (sortField) params.sortField = sortField;
+      if (sortOrder) params.sortOrder = sortOrder;
+      if (isVip !== "") params.isVip = isVip;
+      
+      // Convert statusFilter to isCancelled and isCompleted params
+      if (statusFilter === "cancelled") {
+        params.isCancelled = "true";
+      } else if (statusFilter === "completed") {
+        params.isCompleted = "true";
+      } else if (statusFilter === "active") {
+        params.isCancelled = "false";
+        params.isCompleted = "false";
+      }
+      
+      if (dateFilter) params.dateFilter = dateFilter;
+      
+      const res = await api.get("/bookings/all", { params });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch bookings");
+    }
+  }
+);
+
+// Delete booking (admin only)
+export const deleteBooking = createAsyncThunk(
+  "booking/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/bookings/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to delete booking");
+    }
+  }
+);
+
 const initialState = {
   items: [],
   current: null,
@@ -82,6 +164,17 @@ const initialState = {
   totalPages: 1,
   totalDocs: 0,
   limit: 10,
+  // Admin page specific state
+  searchValue: "",
+  sortField: "",
+  sortOrder: "",
+  isVipFilter: "",
+  statusFilter: "", // Combined: "active", "completed", "cancelled", or ""
+  dateFilter: "",
+  deleteLoading: {},
+  selectedBooking: null,
+  bookingLoading: false,
+  packStatus: {},
 };
 
 const bookingSlice = createSlice({
@@ -94,6 +187,32 @@ const bookingSlice = createSlice({
     },
     clearCurrent: (state) => {
       state.current = null;
+    },
+    // Admin page reducers
+    setSearchValue: (state, action) => {
+      state.searchValue = action.payload;
+    },
+    setCurrentPage: (state, action) => {
+      state.page = action.payload;
+    },
+    setSortConfig: (state, action) => {
+      state.sortField = action.payload.field;
+      state.sortOrder = action.payload.order;
+    },
+    setIsVipFilter: (state, action) => {
+      state.isVipFilter = action.payload;
+      state.page = 1;
+    },
+    setStatusFilter: (state, action) => {
+      state.statusFilter = action.payload;
+      state.page = 1;
+    },
+    setDateFilter: (state, action) => {
+      state.dateFilter = action.payload;
+      state.page = 1;
+    },
+    clearSelectedBooking: (state) => {
+      state.selectedBooking = null;
     },
   },
   extraReducers: (builder) => {
@@ -109,8 +228,9 @@ const bookingSlice = createSlice({
         if (payload && payload.data && Array.isArray(payload.data)) {
           state.items = payload.data;
           state.totalDocs = payload.count || payload.data.length;
-          state.page = 1;
-          state.totalPages = Math.ceil((payload.count || payload.data.length) / state.limit);
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
         } else if (Array.isArray(payload)) {
           state.items = payload;
           state.totalDocs = payload.length;
@@ -124,6 +244,23 @@ const bookingSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+      // Fetch Pack Booking Status
+      .addCase(fetchPackBookingStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPackBookingStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const { packId, data } = action.payload || {};
+        if (packId) {
+          state.packStatus[packId] = data || { vipExists: false, totalActiveBookings: 0, remainingSpots: 0 };
+        }
+      })
+      .addCase(fetchPackBookingStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       
       // Fetch Guide Bookings
       .addCase(fetchGuideBookings.pending, (state) => {
@@ -131,6 +268,34 @@ const bookingSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchGuideBookings.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        if (payload && payload.data && Array.isArray(payload.data)) {
+          state.items = payload.data;
+          state.totalDocs = payload.count || payload.data.length;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+        }
+      })
+      .addCase(fetchGuideBookings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch User Bookings
+      .addCase(fetchUserBookings.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserBookings.fulfilled, (state, action) => {
         state.loading = false;
         const payload = action.payload;
         if (payload && payload.data && Array.isArray(payload.data)) {
@@ -147,7 +312,7 @@ const bookingSlice = createSlice({
           state.items = [];
         }
       })
-      .addCase(fetchGuideBookings.rejected, (state, action) => {
+      .addCase(fetchUserBookings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -178,6 +343,15 @@ const bookingSlice = createSlice({
         if (Array.isArray(state.items)) {
           state.items.unshift(action.payload.booking || action.payload);
         }
+        // Mettre à jour packStatus si possible
+        const booking = action.payload.booking || action.payload;
+        const packId = booking?.packID?._id || booking?.packID;
+        const spots = booking?.spotsBooked || 0;
+        if (packId && state.packStatus[packId]) {
+          state.packStatus[packId].totalActiveBookings = (state.packStatus[packId].totalActiveBookings || 0) + 1;
+          state.packStatus[packId].remainingSpots = Math.max(0, (state.packStatus[packId].remainingSpots || 0) - spots);
+          if (booking?.isVip) state.packStatus[packId].vipExists = true;
+        }
       })
       .addCase(createBooking.rejected, (state, action) => {
         state.loading = false;
@@ -204,9 +378,77 @@ const bookingSlice = createSlice({
       .addCase(cancelBooking.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ========== ADMIN PAGE CASES ==========
+      
+      // Fetch Bookings Admin (with filters)
+      .addCase(fetchBookingsAdmin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBookingsAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        
+        if (payload && payload.success) {
+          state.items = payload.data || [];
+          state.totalDocs = payload.count || 0;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (payload && payload.data && Array.isArray(payload.data)) {
+          state.items = payload.data;
+          state.totalDocs = payload.count || payload.data.length;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.limit = 10;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+          state.totalDocs = 0;
+          state.page = 1;
+          state.totalPages = 1;
+        }
+      })
+      .addCase(fetchBookingsAdmin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.items = [];
+      })
+
+      // Delete Booking
+      .addCase(deleteBooking.pending, (state, action) => {
+        state.deleteLoading[action.meta.arg] = true;
+        state.error = null;
+      })
+      .addCase(deleteBooking.fulfilled, (state, action) => {
+        state.deleteLoading[action.payload] = false;
+        state.items = state.items.filter(booking => booking._id !== action.payload);
+        state.success = true;
+      })
+      .addCase(deleteBooking.rejected, (state, action) => {
+        state.deleteLoading[action.meta.arg] = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { resetStatus, clearCurrent } = bookingSlice.actions;
+export const { 
+  resetStatus, 
+  clearCurrent,
+  setSearchValue,
+  setCurrentPage,
+  setSortConfig,
+  setIsVipFilter,
+  setStatusFilter,
+  setDateFilter,
+  clearSelectedBooking
+} = bookingSlice.actions;
+
 export default bookingSlice.reducer;

@@ -18,9 +18,9 @@ export const addRating = async (req, res, next) => {
       throw error;
     }
 
-    // Check if the user already booked this pack
+    // Check if the user already booked this pack (Booking model uses userID)
     const booking = await Booking.findOne({
-      clientID: userId,
+      userID: userId,
       packID: packID,
       isCancelled: false,
       isCompleted: true,
@@ -64,7 +64,7 @@ export const addRating = async (req, res, next) => {
 export const updateRating = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { stars } = req.body;
+    const { stars, comment } = req.body;
 
     const userId = req.user?.id;
 
@@ -95,9 +95,12 @@ export const updateRating = async (req, res, next) => {
       throw error;
     }
 
+    const updateData = { stars };
+    if (comment !== undefined) updateData.comment = comment;
+
     const rating = await Rating.findByIdAndUpdate(
       id,
-      { stars },
+      updateData,
       {
         new: true,
         runValidators: true,
@@ -128,6 +131,12 @@ export const deleteRating = async (req, res, next) => {
     const userRole = req.user?.role;
     const ratingToDelete = await Rating.findById(id);
 
+    if (!ratingToDelete) {
+      const error = new Error("rating not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
     // Check if the logged in client is the rating owner
     if (userRole === "client" && ratingToDelete.clientID.toString() !== userId) {
       const error = new Error("you are not allowed to delete this rating");
@@ -135,13 +144,7 @@ export const deleteRating = async (req, res, next) => {
       throw error;
     }
 
-    const rating = await Rating.findByIdAndDelete(id);
-
-    if (!rating) {
-      const error = new Error("rating not found");
-      error.statusCode = 404;
-      throw error;
-    }
+    await Rating.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,
@@ -152,46 +155,149 @@ export const deleteRating = async (req, res, next) => {
   }
 };
 
-// Get All Ratings
+// Get All Ratings (Enhanced for Admin)
 export const getAllRatings = async (req, res, next) => {
   try {
-    const { page, limit, stars = "stars", order } = req.query;
+    const { 
+      page, 
+      limit, 
+      search = "",
+      sortField = "createdAt", 
+      sortOrder = "desc",
+      stars: starsFilter,
+      dateFilter = ""
+    } = req.query;
 
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 10;
     const skip = (pageNum - 1) * limitNum;
 
+    // Build filter query
+    let filterQuery = {};
+    
+    // Date filter
+    if (dateFilter) {
+      const now = new Date();
+      let startDate;
+
+      switch (dateFilter) {
+        case "today":
+          startDate = new Date(now.setHours(0, 0, 0, 0));
+          break;
+        case "week":
+          startDate = new Date(now.setDate(now.getDate() - 7));
+          break;
+        case "month":
+          startDate = new Date(now.setMonth(now.getMonth() - 1));
+          break;
+        case "year":
+          startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+          break;
+      }
+
+      if (startDate) {
+        filterQuery.createdAt = { $gte: startDate };
+      }
+    }
+
+    // Filter by stars
+    if (starsFilter) {
+      filterQuery.stars = parseInt(starsFilter);
+    }
+
+    // Build sort option
     let sortOption = {};
-    if (stars) {
-      const sortOrder = order === "asc" ? 1 : -1;
-      sortOption["stars"] = sortOrder;
+    if (sortField) {
+      const sortOrderValue = sortOrder === "asc" ? 1 : -1;
+      sortOption[sortField] = sortOrderValue;
     } else {
       sortOption = { createdAt: -1 };
     }
 
-    const ratings = await Rating.find()
-      .populate("packID", "title")
-      .populate("clientID", "name email")
+    // First, get all ratings with population for search
+    let query = Rating.find(filterQuery)
+      .populate("packID", "title price profileImg")
+      .populate("clientID", "name email phone profileImg");
+
+    // If search exists, we need to filter after population
+    if (search) {
+      const allRatings = await query
+        .select("stars comment createdAt packID clientID")
+        .sort(sortOption);
+
+      // Filter in memory based on populated fields
+      const filteredRatings = allRatings.filter(rating => {
+        const searchLower = search.toLowerCase();
+        const commentMatch = rating.comment?.toLowerCase().includes(searchLower);
+        const packTitleMatch = rating.packID?.title?.toLowerCase().includes(searchLower);
+        const clientNameMatch = rating.clientID?.name?.toLowerCase().includes(searchLower);
+        const clientEmailMatch = rating.clientID?.email?.toLowerCase().includes(searchLower);
+        
+        return commentMatch || packTitleMatch || clientNameMatch || clientEmailMatch;
+      });
+
+      // Apply pagination to filtered results
+      const paginatedRatings = filteredRatings.slice(skip, skip + limitNum);
+      const total = filteredRatings.length;
+      const totalPages = Math.ceil(total / limitNum);
+
+      return res.status(200).json({
+        success: true,
+        count: total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: totalPages,
+        ratings: paginatedRatings,
+      });
+    }
+
+    // No search - use normal query with pagination
+    const ratings = await Rating.find(filterQuery)
+      .populate("packID", "title price profileImg")
+      .populate("clientID", "name email phone profileImage")
       .select("stars comment createdAt")
       .skip(skip)
-      .limit(limit)
+      .limit(limitNum)
       .sort(sortOption);
 
-    if (!ratings) {
-      const error = new Error("no rating found");
+    const total = await Rating.countDocuments(filterQuery);
+    const totalPages = Math.ceil(total / limitNum);
+
+    res.status(200).json({
+      success: true,
+      count: total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: totalPages,
+      ratings: ratings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get Rating By ID (New)
+export const getRatingById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error = new Error("rating not found");
       error.statusCode = 404;
       throw error;
     }
 
-    const total = await Rating.countDocuments();
+    const rating = await Rating.findById(id)
+      .populate("packID", "title price images startLocation endLocation startDate endDate")
+      .populate("clientID", "name email phone");
 
-    res.status(200).json({
-      success: true,
-      totalRatings: total,
-      page: pageNum,
-      limit: limitNum,
-      ratings: ratings,
-    });
+    if (!rating) {
+      const error = new Error("rating not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    res.status(200).json(rating);
   } catch (err) {
     next(err);
   }
@@ -231,16 +337,12 @@ export const getRatingsByPack = async (req, res, next) => {
 
     const ratings = await Rating.find({ packID: packId })
       .populate("clientID", "name email")
+      .populate("packID", "profileImg")
       .select("stars comment createdAt")
       .skip(skip)
-      .limit(limit)
+      .limit(limitNum)
       .sort(sortOption);
-
-    if (ratings.length === 0) {
-      const error = new Error("no rating yet for this pack");
-      error.statusCode = 404;
-      throw error;
-    }
+    // Return empty list gracefully when there are no ratings
 
     const total = await Rating.countDocuments({ packID: packId });
 
