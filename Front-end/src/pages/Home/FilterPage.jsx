@@ -5,12 +5,14 @@ import { format, parseISO } from "date-fns";
 import { fetchFilteredPacks, fetchPacks } from "@/store/slices/packSlice";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
 import { TourTypeSelect } from "@/components/TourTypeSelect";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
+import { Button } from "@/components/ui/components/ui/button";
 import { ClockIcon, MapPinIcon } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as solidStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
 import SortDropdown from "@/components/SortDropdown";
+import { RefreshCcw } from "lucide-react";
+
 const DEFAULT_LIMIT = 8;
 
 /**
@@ -45,7 +47,7 @@ const parseQueryParams = (search) => {
   return {
     destination: startLocation,
     dateRange: toDateRange(startDateFrom, startDateTo),
-    tourType: category || undefined,
+    tourType: category || "",
     minPrice: priceMin,
     maxPrice: priceMax,
     minRating: avgRatingMin,
@@ -142,7 +144,7 @@ function StarRating({ label, value, onChange, defaultWhenEmpty = 0, className = 
                 }
               }}
               aria-label={`${label}: ${n} star${n > 1 ? "s" : ""}`}
-              className="p-1 transition-transform hover:scale-110 focus:outline-none"
+        className="p-1 transition-transform hover:scale-110 focus:outline-none cursor-pointer"
             >
               <FontAwesomeIcon
                 icon={icon}
@@ -156,7 +158,7 @@ function StarRating({ label, value, onChange, defaultWhenEmpty = 0, className = 
       <button
         type="button"
         onClick={() => onChange("")}
-        className="ml-2 text-xs text-gray-600 underline hover:text-gray-800"
+        className="ml-2 text-xs text-gray-600 underline hover:text-gray-800 cursor-pointer"
         aria-label={`Clear ${label.toLowerCase()}`}
         title="Clear"
       >
@@ -171,7 +173,7 @@ function FilterControls({
   buttonText = "Search",
   initialDestination = "",
   initialDateRange = null,
-  initialTourType = undefined,
+  initialTourType = "",
   initialMinPrice = "",
   initialMaxPrice = "",
   initialMinRating = "",
@@ -326,7 +328,7 @@ function FilterControls({
     {/* Tour Type */}
     <div className="flex flex-col gap-1 lg:col-span-4">
       <label className="text-xs font-medium text-gray-600">Tour type</label>
-      <TourTypeSelect value={tourType} onChange={setTourType} className="w-full" />
+      <TourTypeSelect value={tourType} onChange={setTourType} className="w-full cursor-pointer" />
     </div>
 
     {/* Filters row */}
@@ -383,19 +385,23 @@ function FilterControls({
         <button
           type="submit"
           disabled={hasErrors}
-          className={`bg-[#eb662b] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-            hasErrors ? "opacity-60 cursor-not-allowed" : "hover:bg-[#d9551f]"
+              className={`bg-[#eb662b] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            hasErrors ? "opacity-60 cursor-not-allowed" : "hover:bg-[#d9551f] cursor-pointer"
           }`}
         >
           {buttonText}
         </button>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-sm hover:bg-gray-50"
-        >
-          Reset
-        </button>
+<button
+  type="button"
+  onClick={handleReset}
+  className="border border-[#eb662b] text-[#eb662b] px-4 py-1.5 rounded-md text-sm font-medium 
+             hover:bg-[#fff3ec] transition-colors cursor-pointer"
+>
+  <RefreshCcw className="w-4 h-4" />
+</button>
+
+
+
       </div>
     </div>
 
