@@ -182,7 +182,7 @@ function FilterControls({
 }) {
   const [destination, setDestination] = useState(initialDestination);
   const [dateRange, setDateRange] = useState(initialDateRange);
-  const [tourType, setTourType] = useState(initialTourType);
+  const [tourType, setTourType] = useState(initialTourType || "");
   const [minPrice, setMinPrice] = useState(initialMinPrice);
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
   const [minRating, setMinRating] = useState(initialMinRating);
@@ -198,7 +198,7 @@ function FilterControls({
   }, [initialDateRange]);
 
   useEffect(() => {
-    setTourType(initialTourType);
+    setTourType(initialTourType || "");
   }, [initialTourType]);
 
   useEffect(() => {
@@ -252,7 +252,7 @@ function FilterControls({
   const buildSearchValues = (overrides = {}) => ({
     destination: destination?.trim() || "",
     dateRange,
-    tourType,
+    tourType: tourType?.trim() || "",
     minPrice: minPrice === "" ? null : Number(minPrice),
     maxPrice: maxPrice === "" ? null : Number(maxPrice),
     minRating: minRating === "" ? null : Number(minRating),
@@ -272,7 +272,7 @@ function FilterControls({
   const handleReset = () => {
     setDestination("");
     setDateRange(null);
-    setTourType(undefined);
+    setTourType("");
     setMinPrice("");
     setMaxPrice("");
     setMinRating("");
@@ -281,7 +281,7 @@ function FilterControls({
     onSearch({
       destination: "",
       dateRange: null,
-      tourType: undefined,
+      tourType: "",
       minPrice: null,
       maxPrice: null,
       minRating: null,
@@ -502,7 +502,7 @@ const FilterPage = () => {
     const nextFilters = {
       destination: values.destination?.trim() || "",
       dateRange: values.dateRange,
-      tourType: values.tourType,
+      tourType: values.tourType?.trim() || "",
       minPrice: values.minPrice,
       maxPrice: values.maxPrice,
       minRating: values.minRating,
@@ -533,7 +533,7 @@ const FilterPage = () => {
   };
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 pb-12 sm:pt-16 sm:pb-16 bg-gray-50 min-h-screen">
+    <section className="w-full px-4 sm:px-6 lg:px-8 pt-0 pb-10 sm:pt-2 sm:pb-12 bg-gray-50 min-h-screen">
       <div className="max-w-screen-2xl mx-auto flex flex-col items-center gap-8">
         <div className="w-full flex justify-center">
           <FilterControls

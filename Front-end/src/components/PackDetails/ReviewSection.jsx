@@ -26,14 +26,20 @@ export default function ReviewSection({ pack }) {
   useEffect(() => {
     const loadRatings = async () => {
       if (!pack?._id) return;
+
+      // Guests cannot call the protected ratings endpoint: show message instead.
+      if (!authUser) {
+        setRatings([]);
+        setRatingsError("Please log in to view reviews.");
+        return;
+      }
+
       setRatingsLoading(true);
       setRatingsError(null);
       try {
         const res = await api.get(`/rating/pack/${pack._id}`);
-        // backend returns: { success, totalRatings, page, limit, ratings }
         setRatings(Array.isArray(res.data?.ratings) ? res.data.ratings : []);
       } catch (err) {
-        // Gracefully handle 404 (no rating yet) and 401 (not logged in)
         const status = err.response?.status;
         if (status === 404) {
           setRatings([]);
@@ -47,7 +53,7 @@ export default function ReviewSection({ pack }) {
       }
     };
     loadRatings();
-  }, [pack?._id]);
+  }, [pack?._id, authUser]);
 
   useEffect(() => {
     // Preload current user's bookings to determine eligibility
