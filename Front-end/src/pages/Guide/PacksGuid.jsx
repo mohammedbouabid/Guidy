@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Edit, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { deletePack, fetchGuidePacks } from "@/store/slices/packSlice";
+import { fetchGuideBookings } from "@/store/slices/bookingSlice";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { toast } from "react-hot-toast";
 
@@ -12,13 +13,38 @@ const PacksGuid = () => {
   const dispatch = useDispatch();
 
   const { items, loading, error, page, totalPages, limit } = useSelector((state) => state.pack);
+  const { items: bookings } = useSelector((state) => state.booking);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, packId: null, packTitle: '' });
 
-  // 🔄 Charger les packs du guide au montage du composant
+  // 🔄 Charger les packs et les bookings du guide au montage du composant
   useEffect(() => {
     dispatch(fetchGuidePacks({ page: currentPage, limit: limit || 10 }));
+    dispatch(fetchGuideBookings({ page: 1, limit: 1000 })); // Récupérer tous les bookings
   }, [dispatch, currentPage, limit]);
+
+  // 📊 Calculer les places disponibles pour chaque pack
+  const packsWithAvailableSpots = useMemo(() => {
+    if (!items || !bookings) return items;
+
+    return items.map(pack => {
+      // Calculer le nombre total de places réservées pour ce pack
+      const totalBooked = bookings
+        .filter(booking => 
+          String(booking.packID?._id || booking.packID) === String(pack._id) && 
+          !booking.isCancelled
+        )
+        .reduce((sum, booking) => sum + (booking.spotsBooked || 1), 0);
+
+      // Calculer les places disponibles
+      const availableSpots = pack.maxClients - totalBooked;
+
+      return {
+        ...pack,
+        availableSpots: Math.max(0, availableSpots) // Ne jamais afficher un nombre négatif
+      };
+    });
+  }, [items, bookings]);
 
   // 🗑️ Ouvrir le modal de confirmation de suppression
   const openDeleteDialog = (pack) => {
@@ -62,8 +88,9 @@ const PacksGuid = () => {
                 <th className="w-16 px-2 py-3 text-left font-semibold">Image</th>
                 <th className="px-3 py-3 text-left font-semibold">Titre</th>
                 <th className="w-20 px-2 py-3 text-left font-semibold">Prix</th>
-                <th className="w-16 px-2 py-3 text-left font-semibold">Places</th>
-                <th className="w-24 px-2 py-3 text-left font-semibold">Dispo.</th>
+                <th className="w-16 px-2 py-3 text-left font-semibold">Max</th>
+                <th className="w-20 px-2 py-3 text-left font-semibold">Dispo</th>
+                <th className="w-24 px-2 py-3 text-left font-semibold">Statut</th>
                 <th className="px-3 py-3 text-left font-semibold">Départ</th>
                 <th className="px-3 py-3 text-left font-semibold">Arrivée</th>
                 <th className="w-32 px-2 py-3 text-left font-semibold">Dates</th>
@@ -72,8 +99,8 @@ const PacksGuid = () => {
             </thead>
 
             <tbody className="divide-y divide-gray-200">
-              {items?.length > 0 ? (
-                items.map((pack) => (
+              {packsWithAvailableSpots?.length > 0 ? (
+                packsWithAvailableSpots.map((pack) => (
                   <tr
                     key={pack._id}
                     className="hover:bg-gray-50 transition duration-200"
@@ -93,7 +120,18 @@ const PacksGuid = () => {
                     <td className="px-2 py-4 text-gray-800 font-semibold whitespace-nowrap">
                       {pack.price}$
                     </td>
-                    <td className="px-2 py-4 text-center">{pack.maxClients}</td>
+                    <td className="px-2 py-4 text-center font-medium">{pack.maxClients}</td>
+                    <td className="px-2 py-4 text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        pack.availableSpots === 0 
+                          ? 'bg-red-100 text-red-700' 
+                          : pack.availableSpots <= pack.maxClients * 0.3
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}>
+                        {pack.availableSpots}
+                      </span>
+                    </td>
                     <td className="px-2 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${pack.availability ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {pack.availability ? "✓" : "✗"}
@@ -142,7 +180,7 @@ const PacksGuid = () => {
               ) : (
                 !loading && (
                   <tr>
-                    <td colSpan="9" className="text-center py-6 text-gray-500">
+                    <td colSpan="10" className="text-center py-6 text-gray-500">
                       Aucun pack trouvé.
                     </td>
                   </tr>
@@ -154,7 +192,7 @@ const PacksGuid = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-gray-50 border-t">
           <div className="text-sm text-gray-600">
-            {items?.length || 0} pack(s) affiché(s) — Page {page || currentPage} / {totalPages || 1}
+            {packsWithAvailableSpots?.length || 0} pack(s) affiché(s) — Page {page || currentPage} / {totalPages || 1}
           </div>
           <div className="flex items-center gap-2">
             <button

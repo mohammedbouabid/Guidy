@@ -6,8 +6,7 @@ const HeroSection = () => {
     <section
       className="relative mb-16 mx-6 h-[75vh] bg-cover bg-bottom flex flex-col items-center justify-center rounded-t-2xl"
       style={{
-        backgroundImage:
-          "url('https://i.postimg.cc/c13fHBB7/image-9.png')",
+        backgroundImage: "url('https://i.postimg.cc/c13fHBB7/image-9.png')",
       }}
     >
       {/* Overlay */}

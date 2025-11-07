@@ -67,8 +67,17 @@ const updateUser = async (req, res, next) => {
 
     if (update.phone) {
       const existingPhone = await User.findOne({ phone: update.phone });
-      if (existingPhone) {
+      if (existingPhone && existingPhone._id.toString() !== userId) {
         const error = new Error("phone already exists");
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    if (update.cin) {
+      const existingCIN = await User.findOne({ cin: update.cin });
+      if (existingCIN && existingCIN._id.toString() !== userId) {
+        const error = new Error("CIN already exists");
         error.statusCode = 400;
         throw error;
       }
@@ -79,7 +88,6 @@ const updateUser = async (req, res, next) => {
     }
 
     delete update.refreshToken;
-    delete update.cin;
     delete update.role;
 
     await User.findByIdAndUpdate(
@@ -94,6 +102,7 @@ const updateUser = async (req, res, next) => {
       name: updatedUser.name,
       email: updatedUser.email,
       phone: updatedUser.phone,
+      cin: updatedUser.cin,
       profileImage: updatedUser.profileImage,
       role: updatedUser.role,
       id: updatedUser._id
