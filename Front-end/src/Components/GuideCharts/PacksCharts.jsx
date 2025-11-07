@@ -98,6 +98,18 @@ export function PacksCharts({ selectedYear = new Date().getFullYear(), filterTyp
             <div className="flex items-center justify-center h-full">
               <p className="text-muted-foreground">Loading data...</p>
             </div>
+          ) : !Array.isArray(monthlyStats) || monthlyStats.length === 0 || totalPacks === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full gap-2">
+              <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              <p className="text-muted-foreground font-medium">No data available</p>
+              <p className="text-xs text-gray-400">
+                {filterType === 'year' && `No packs found for ${selectedYear}`}
+                {filterType === 'month' && `No packs found for ${monthNames.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+                {filterType === 'week' && `No packs found for Week ${selectedWeek}, ${selectedYear}`}
+              </p>
+            </div>
           ) : (
           <BarChart
             accessibilityLayer

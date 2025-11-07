@@ -3,6 +3,14 @@ import { useDispatch, useSelector } from "react-redux"
 import { TrendingUp } from "lucide-react"
 import { Pie, PieChart, Cell, Legend } from "recharts"
 
+// Noms des mois pour affichage
+const monthNames = [
+  { value: 1, label: "January" }, { value: 2, label: "February" }, { value: 3, label: "March" },
+  { value: 4, label: "April" }, { value: 5, label: "May" }, { value: 6, label: "June" },
+  { value: 7, label: "July" }, { value: 8, label: "August" }, { value: 9, label: "September" },
+  { value: 10, label: "October" }, { value: 11, label: "November" }, { value: 12, label: "December" }
+]
+
 import {
   Card,
   CardContent,
@@ -95,8 +103,17 @@ export function ChartPieSimple({ filterType, selectedYear, selectedMonth, select
               <p className="text-muted-foreground">Loading data...</p>
             </div>
           ) : chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-muted-foreground">No booking data available</p>
+            <div className="flex flex-col items-center justify-center h-full gap-2">
+              <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+              <p className="text-muted-foreground font-medium">No data available</p>
+              <p className="text-xs text-gray-400">
+                {filterType === 'year' && `No booking status data for ${selectedYear}`}
+                {filterType === 'month' && `No booking status data for ${monthNames.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+                {filterType === 'week' && `No booking status data for Week ${selectedWeek}, ${selectedYear}`}
+              </p>
             </div>
           ) : (
             <PieChart>
