@@ -1,12 +1,5 @@
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+
 import {
   Field,
   FieldDescription,
@@ -25,6 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Button } from "../ui/components/ui/button"
+import { Card, CardContent,
+ CardDescription,
+ CardHeader,
+ CardTitle, } from "../ui/components/ui/card"
 
 export function SignupForm({ className, ...props }) {
   const dispatch = useDispatch()

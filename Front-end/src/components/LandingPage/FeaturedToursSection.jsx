@@ -7,8 +7,8 @@ import {
   StarIcon,
   ChevronRightIcon,
 } from "lucide-react"
-import { Button } from "../ui/button"
-import { Card, CardContent } from "../ui/card"
+import { Button } from "@/components/ui/components/ui/button"
+import { Card, CardContent } from "@/components/ui/components/ui/card"
 import {
   Carousel,
   CarouselContent,
@@ -153,7 +153,7 @@ export const FeaturedPacksSection = () => {
                           </div>
 
                           <div className="flex items-baseline gap-1">
-                            <span className="text-xs text-[#05073c]">From</span>
+                            <span className="text-xs text-[#05073c]">Price:</span>
                             <span className="text-sm font-medium text-[#05073c]">
                               ${pack.price}
                             </span>

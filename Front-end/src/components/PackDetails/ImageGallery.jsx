@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 
 export default function ImageGallery({ cover, images = [], altPrefix = "Pack" }) {
   // Build deduplicated gallery array

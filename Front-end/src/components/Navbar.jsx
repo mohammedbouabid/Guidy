@@ -20,9 +20,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "../Components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/components/ui/button"
 import { ChevronDownIcon } from "@radix-ui/react-icons"
 import { Home, Search, Store, ShoppingCart, User, LayoutDashboard } from "lucide-react"
 

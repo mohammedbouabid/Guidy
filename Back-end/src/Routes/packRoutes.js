@@ -5,22 +5,29 @@ import {
   createPack,
   updatePack,
   getAllPacks,
-  getAllPacksForGuide,
+
   getPacksFiltered,
   getPopularPacks,
   getPackById,
   deletePack,
+  getAllPacksForGuide,
+  getMonthlyPackStats,
 } from "../Controllers/packController.js";
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import { authorizeRoles } from "../Middlewares/authorizeRole.js";
+
 
 const router = express.Router();
 
 // --- Protected routes (require authentication) ---
 
 router.get("/", getAllPacks);
+router.get("/popular", getPopularPacks); // 👈 new endpoint
+
+
+router.get("/stats/monthly",verifyToken, authorizeRoles(["guide", "admin"]), getMonthlyPackStats);
+router.get("/all",verifyToken , getAllPacksForGuide);
 router.get("/filter", getPacksFiltered);
-router.get("/popular", getPopularPacks);
 router.get("/all", verifyToken, getAllPacksForGuide);
 router.get("/:id", getPackById);
 

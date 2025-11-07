@@ -38,11 +38,11 @@ export default function SortDropdown({ sort = "", handleSortChange }) {
     <div className="flex flex-col gap-1">
       <label className="text-xs font-medium text-gray-600">Sort</label>
       <div className="flex items-center gap-2">
-        <div className="relative min-w-[9rem]">
+        <div className="relative min-w-[9rem] cursor-pointer">
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className="flex justify-between items-center w-full border border-[#eb662b] rounded-md px-3 py-2 text-sm font-medium bg-gradient-to-r from-[#fff8f4] to-white text-[#05073c] shadow-sm hover:bg-[#fff2ea] focus:outline-none focus:ring-2 focus:ring-[#eb662b] transition-all"
+            className="flex justify-between items-center w-full border border-[#eb662b] rounded-md px-3 py-2 text-sm font-medium bg-gradient-to-r from-[#fff8f4] to-white text-[#05073c] shadow-sm hover:bg-[#fff2ea] focus:outline-none focus:ring-2 focus:ring-[#eb662b] transition-all cursor-pointer"
           >
             <span>{activeOption.label}</span>
             <ChevronDown
@@ -75,7 +75,7 @@ export default function SortDropdown({ sort = "", handleSortChange }) {
           disabled={!currentField}
           className={`border border-[#eb662b] rounded-md p-2 text-[#eb662b] bg-white shadow-sm transition-all ${
             currentField
-              ? "hover:bg-[#fff2ea] focus:outline-none focus:ring-2 focus:ring-[#eb662b]"
+              ? "hover:bg-[#fff2ea] focus:outline-none focus:ring-2 focus:ring-[#eb662b] cursor-pointer"
               : "opacity-40 cursor-not-allowed"
           }`}
         >

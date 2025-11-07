@@ -99,7 +99,59 @@ export const cancelBooking = createAsyncThunk(
   }
 );
 
-// ========== NEW ACTIONS FOR ADMIN PAGE ==========
+// Récupérer les statistiques mensuelles avec filtres
+export const fetchMonthlyStats = createAsyncThunk(
+  "booking/fetchMonthlyStats",
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      
+      const res = await api.get("/bookings/stats/monthly", { params });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch monthly stats");
+    }
+  }
+);
+
+// Récupérer les statistiques de statut des réservations
+export const fetchStatusStats = createAsyncThunk(
+  "booking/fetchStatusStats",
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      
+      console.log("🔄 Fetching booking status stats with params:", params);
+      const res = await api.get("/bookings/stats/status", { params });
+      console.log("✅ Booking status stats response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error fetching booking status stats:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to fetch status stats");
+    }
+  }
+);
+
+// Delete booking (admin only)
+export const deleteBooking = createAsyncThunk(
+  "booking/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/bookings/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to delete booking");
+    }
+  }
+);
 
 // Fetch bookings with advanced filters for admin
 export const fetchBookingsAdmin = createAsyncThunk(
@@ -141,23 +193,13 @@ export const fetchBookingsAdmin = createAsyncThunk(
   }
 );
 
-// Delete booking (admin only)
-export const deleteBooking = createAsyncThunk(
-  "booking/delete",
-  async (id, { rejectWithValue }) => {
-    try {
-      await api.delete(`/bookings/${id}`);
-      return id;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to delete booking");
-    }
-  }
-);
-
 const initialState = {
   items: [],
   current: null,
+  monthlyStats: [],
+  statusStats: [],
   loading: false,
+  statusLoading: false,
   error: null,
   success: false,
   page: 1,
@@ -377,6 +419,34 @@ const bookingSlice = createSlice({
       })
       .addCase(cancelBooking.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch Monthly Stats
+      .addCase(fetchMonthlyStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMonthlyStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.monthlyStats = action.payload.data || [];
+      })
+      .addCase(fetchMonthlyStats.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch Status Stats
+      .addCase(fetchStatusStats.pending, (state) => {
+        state.statusLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchStatusStats.fulfilled, (state, action) => {
+        state.statusLoading = false;
+        state.statusStats = action.payload.data || [];
+      })
+      .addCase(fetchStatusStats.rejected, (state, action) => {
+        state.statusLoading = false;
         state.error = action.payload;
       })
 
