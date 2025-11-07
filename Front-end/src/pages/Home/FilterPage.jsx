@@ -11,6 +11,8 @@ import { ClockIcon, MapPinIcon } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as solidStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
 import SortDropdown from "@/components/SortDropdown";
+import { RefreshCcw } from "lucide-react";
+
 const DEFAULT_LIMIT = 8;
 
 /**
@@ -45,7 +47,7 @@ const parseQueryParams = (search) => {
   return {
     destination: startLocation,
     dateRange: toDateRange(startDateFrom, startDateTo),
-    tourType: category || undefined,
+    tourType: category || "",
     minPrice: priceMin,
     maxPrice: priceMax,
     minRating: avgRatingMin,
@@ -142,7 +144,7 @@ function StarRating({ label, value, onChange, defaultWhenEmpty = 0, className = 
                 }
               }}
               aria-label={`${label}: ${n} star${n > 1 ? "s" : ""}`}
-              className="p-1 transition-transform hover:scale-110 focus:outline-none"
+        className="p-1 transition-transform hover:scale-110 focus:outline-none cursor-pointer"
             >
               <FontAwesomeIcon
                 icon={icon}
@@ -156,7 +158,7 @@ function StarRating({ label, value, onChange, defaultWhenEmpty = 0, className = 
       <button
         type="button"
         onClick={() => onChange("")}
-        className="ml-2 text-xs text-gray-600 underline hover:text-gray-800"
+        className="ml-2 text-xs text-gray-600 underline hover:text-gray-800 cursor-pointer"
         aria-label={`Clear ${label.toLowerCase()}`}
         title="Clear"
       >
@@ -171,7 +173,7 @@ function FilterControls({
   buttonText = "Search",
   initialDestination = "",
   initialDateRange = null,
-  initialTourType = undefined,
+  initialTourType = "",
   initialMinPrice = "",
   initialMaxPrice = "",
   initialMinRating = "",
@@ -182,7 +184,7 @@ function FilterControls({
 }) {
   const [destination, setDestination] = useState(initialDestination);
   const [dateRange, setDateRange] = useState(initialDateRange);
-  const [tourType, setTourType] = useState(initialTourType);
+  const [tourType, setTourType] = useState(initialTourType || "");
   const [minPrice, setMinPrice] = useState(initialMinPrice);
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
   const [minRating, setMinRating] = useState(initialMinRating);
@@ -198,7 +200,7 @@ function FilterControls({
   }, [initialDateRange]);
 
   useEffect(() => {
-    setTourType(initialTourType);
+    setTourType(initialTourType || "");
   }, [initialTourType]);
 
   useEffect(() => {
@@ -252,7 +254,7 @@ function FilterControls({
   const buildSearchValues = (overrides = {}) => ({
     destination: destination?.trim() || "",
     dateRange,
-    tourType,
+    tourType: tourType?.trim() || "",
     minPrice: minPrice === "" ? null : Number(minPrice),
     maxPrice: maxPrice === "" ? null : Number(maxPrice),
     minRating: minRating === "" ? null : Number(minRating),
@@ -272,7 +274,7 @@ function FilterControls({
   const handleReset = () => {
     setDestination("");
     setDateRange(null);
-    setTourType(undefined);
+    setTourType("");
     setMinPrice("");
     setMaxPrice("");
     setMinRating("");
@@ -281,7 +283,7 @@ function FilterControls({
     onSearch({
       destination: "",
       dateRange: null,
-      tourType: undefined,
+      tourType: "",
       minPrice: null,
       maxPrice: null,
       minRating: null,
@@ -326,7 +328,7 @@ function FilterControls({
     {/* Tour Type */}
     <div className="flex flex-col gap-1 lg:col-span-4">
       <label className="text-xs font-medium text-gray-600">Tour type</label>
-      <TourTypeSelect value={tourType} onChange={setTourType} className="w-full" />
+      <TourTypeSelect value={tourType} onChange={setTourType} className="w-full cursor-pointer" />
     </div>
 
     {/* Filters row */}
@@ -383,19 +385,23 @@ function FilterControls({
         <button
           type="submit"
           disabled={hasErrors}
-          className={`bg-[#eb662b] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-            hasErrors ? "opacity-60 cursor-not-allowed" : "hover:bg-[#d9551f]"
+              className={`bg-[#eb662b] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            hasErrors ? "opacity-60 cursor-not-allowed" : "hover:bg-[#d9551f] cursor-pointer"
           }`}
         >
           {buttonText}
         </button>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-sm hover:bg-gray-50"
-        >
-          Reset
-        </button>
+<button
+  type="button"
+  onClick={handleReset}
+  className="border border-[#eb662b] text-[#eb662b] px-4 py-1.5 rounded-md text-sm font-medium 
+             hover:bg-[#fff3ec] transition-colors cursor-pointer"
+>
+  <RefreshCcw className="w-4 h-4" />
+</button>
+
+
+
       </div>
     </div>
 
@@ -502,7 +508,7 @@ const FilterPage = () => {
     const nextFilters = {
       destination: values.destination?.trim() || "",
       dateRange: values.dateRange,
-      tourType: values.tourType,
+      tourType: values.tourType?.trim() || "",
       minPrice: values.minPrice,
       maxPrice: values.maxPrice,
       minRating: values.minRating,
@@ -533,7 +539,7 @@ const FilterPage = () => {
   };
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 pb-12 sm:pt-16 sm:pb-16 bg-gray-50 min-h-screen">
+    <section className="w-full px-4 sm:px-6 lg:px-8 pt-0 pb-10 sm:pt-2 sm:pb-12 bg-gray-50 min-h-screen">
       <div className="max-w-screen-2xl mx-auto flex flex-col items-center gap-8">
         <div className="w-full flex justify-center">
           <FilterControls

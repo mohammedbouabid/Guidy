@@ -24,13 +24,13 @@ const calculateDuration = (startDate, endDate) => {
 
 export default function PackDetails({ pack }) {
   const dispatch = useDispatch();
+  const authUser = useSelector((state) => state.Auth?.user);
   const packStatus = useSelector((state) => state.booking?.packStatus?.[pack?._id] || null);
 
   useEffect(() => {
-    if (pack?._id) {
-      dispatch(fetchPackBookingStatus(pack._id));
-    }
-  }, [dispatch, pack?._id]);
+    if (!pack?._id || !authUser) return;
+    dispatch(fetchPackBookingStatus(pack._id));
+  }, [dispatch, pack?._id, authUser]);
 
   const remainingSpots = typeof packStatus?.remainingSpots === 'number'
     ? packStatus.remainingSpots

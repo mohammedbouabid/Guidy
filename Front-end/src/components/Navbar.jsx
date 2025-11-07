@@ -51,7 +51,7 @@ const Navbar = ({ onLogout }) => {
   return (
     <>
       {/* Desktop / Tablet Top Navbar */}
-      <nav className="hidden md:block w-full fixed top-0 left-0 right-0 z-[10000] bg-white shadow-sm">
+      <nav className="hidden md:block w-full stinky top-0 left-0 right-0 z-[10000] bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-2">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}

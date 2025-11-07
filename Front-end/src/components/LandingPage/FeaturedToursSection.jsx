@@ -153,7 +153,7 @@ export const FeaturedPacksSection = () => {
                           </div>
 
                           <div className="flex items-baseline gap-1">
-                            <span className="text-xs text-[#05073c]">From</span>
+                            <span className="text-xs text-[#05073c]">Price:</span>
                             <span className="text-sm font-medium text-[#05073c]">
                               ${pack.price}
                             </span>
