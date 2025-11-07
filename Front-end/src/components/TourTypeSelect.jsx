@@ -36,9 +36,11 @@ export function TourTypeSelect({ value, onChange, placeholder = "Select tour typ
       return acc;
     }, {});
   }, []);
+  const normalizedValue = value === "" ? undefined : value ?? undefined;
+  const selectKey = normalizedValue ?? "empty";
 
   return (
-    <Select value={value ?? undefined} onValueChange={onChange}>
+    <Select key={`tour-select-${selectKey}`} value={normalizedValue} onValueChange={onChange}>
       <SelectTrigger
         className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#eb662b] cursor-pointer data-[placeholder]:text-gray-400 ${className}`}
       >

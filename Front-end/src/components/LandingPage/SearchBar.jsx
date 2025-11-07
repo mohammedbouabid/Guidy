@@ -27,7 +27,7 @@ export default function SearchBar() {
       <div className="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center gap-3">
         <input
           type="text"
-          placeholder="Search destinations"
+          placeholder="Search Start Location"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
           className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#eb662b] hover:cursor-text"
