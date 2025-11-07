@@ -29,7 +29,9 @@ app.use(cookieParser());
 
 // app.use("/static");
 app.use(cors({
-  origin: 'http://localhost:5123', // Your frontend URL
+
+  origin: 'http://localhost:7865', // Your frontend URL
+
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -50,7 +52,7 @@ app.use("/api/packs/", packRouter);
 app.use("/api", userRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api", ratingRoutes);
-
+    
 
 app.use(notFound);
 app.use(errorHandler);

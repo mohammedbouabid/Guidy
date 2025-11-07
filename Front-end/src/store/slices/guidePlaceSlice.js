@@ -23,7 +23,7 @@ export const fetchGuidePlaces = createAsyncThunk(
       if (city) params.city = city;
       if (country) params.country = country;
       
-      const response = await axios.get('http://localhost:3000/api/guide-places', {
+      const response = await api.get('/guide-places', {
         params,
         withCredentials: true,
       });
@@ -49,7 +49,7 @@ export const createGuidePlace = createAsyncThunk(
   'guidePlace/create',
   async (formData, { rejectWithValue }) => {   
     try {
-      const response = await axios.post('http://localhost:3000/api/guide-places', formData, {
+      const response = await api.post('/guide-places', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       });
@@ -78,7 +78,7 @@ export const getGuidePlaceById = createAsyncThunk(
   'guidePlace/getById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/guide-places/${id}`, {
+      const response = await api.get(`/guide-places/${id}`, {
         withCredentials: true,
       });
       return response.data;
@@ -95,7 +95,7 @@ export const deleteGuidePlace = createAsyncThunk(
   'guidePlace/delete',
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`http://localhost:3000/api/guide-places/${id}`, {
+      await api.delete(`/guide-places/${id}`, {
         withCredentials: true,
       });
       return id;

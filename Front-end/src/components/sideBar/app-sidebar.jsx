@@ -16,6 +16,7 @@ import {
   LogOut,
   MessageSquareHeart,
   BookIcon,
+  ChartArea,
 } from "lucide-react";
 
 import {
@@ -68,8 +69,9 @@ if (role === "admin") {
     { title: "Dashboard", url: "", icon: CircleGauge },
     { title: "My Places", url: "places", icon: Route },
     { title: "My Packs", url: "PacksGuide", icon: MapPinned },
-    { title: "Calendar", url: "#", icon: CalendarRange },
     { title: "Bokking", url: "bookingsGuide", icon: BookIcon },
+    { title: "Calendar", url: "CalenderPacks", icon: CalendarRange },
+    { title: "Analytics", url: "Analytics", icon: ChartArea },
   ];
 }
   useEffect(() => {
@@ -104,7 +106,7 @@ if (role === "admin") {
                     className={`flex items-center w-full gap-2 px-4 py-6 rounded-md transition-all duration-200 cursor-pointer
                       ${
                         activeItem === item.title
-                          ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] scale-[1.03]"
+                          ? "bg-[#EB662B] text-[var(--sidebar-accent-foreground)] scale-[1.03]"
                           : "hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
                       }`}
                   >

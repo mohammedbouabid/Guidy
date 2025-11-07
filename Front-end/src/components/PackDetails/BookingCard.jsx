@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
+import { Button } from "@/components/ui/components/ui/button";
+import  { useState, useEffect } from "react";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { useDispatch, useSelector } from "react-redux";

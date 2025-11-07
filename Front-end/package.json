@@ -47,6 +47,7 @@
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.3",
+    "recharts": "^2.15.4",
     "sonner": "^2.0.7",
     "sweetalert2": "^11.26.3",
     "swiper": "^12.0.2",
