@@ -28,7 +28,6 @@ router.get("/popular", getPopularPacks); // 👈 new endpoint
 router.get("/stats/monthly",verifyToken, authorizeRoles(["guide", "admin"]), getMonthlyPackStats);
 router.get("/all",verifyToken , getAllPacksForGuide);
 router.get("/filter", getPacksFiltered);
-router.get("/all", verifyToken, getAllPacksForGuide);
 router.get("/:id", getPackById);
 
 router.post(

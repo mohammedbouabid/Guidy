@@ -1,192 +1,402 @@
-import React, { useEffect, useState } from "react";
-import { Edit, Trash2, Eye } from "lucide-react";
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
+import { Edit, Trash2, Eye, Plus, MapPin, DollarSign, Users, Calendar, CheckCircle, XCircle, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { deletePack, fetchGuidePacks } from "@/store/slices/packSlice";
+import { deletePack, fetchGuidePacks, fetchPackById } from "@/store/slices/packSlice";
+import { DataTable } from "@/components/adminTable/data-table";
+import PackDetailsModal from "@/components/Packs/PackDetailsModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { toast } from "react-hot-toast";
-
 
 const PacksGuid = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { items, loading, error, page, totalPages, limit } = useSelector((state) => state.pack);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { items, loading, error } = useSelector((state) => state.pack);
+  const [currentPack, setCurrentPack] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, packId: null, packTitle: '' });
+  
+  // Client-side filters and search
+  const [searchValue, setSearchValue] = useState("");
+  const [sortField, setSortField] = useState("startDate");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [availabilityFilter, setAvailabilityFilter] = useState("");
+  const [priceFilter, setPriceFilter] = useState("");
+  
+  // Client-side pagination
+  const [clientPage, setClientPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // 🔄 Charger les packs du guide au montage du composant
+  // Fetch all packs once on mount
   useEffect(() => {
-    dispatch(fetchGuidePacks({ page: currentPage, limit: limit || 10 }));
-  }, [dispatch, currentPage, limit]);
+    dispatch(fetchGuidePacks({ page: 1, limit: 1000 }));
+  }, [dispatch]);
 
-  // 🗑️ Ouvrir le modal de confirmation de suppression
+  // Client-side filtering and sorting
+  const filteredAndSortedPacks = useMemo(() => {
+    let filtered = [...(items || [])];
+
+    // Apply search filter (ALL fields)
+    if (searchValue) {
+      const searchLower = searchValue.toLowerCase();
+      filtered = filtered.filter((pack) => {
+        const title = pack.title?.toLowerCase() || "";
+        const description = pack.description?.toLowerCase() || "";
+        const startLocation = pack.startLocation?.toLowerCase() || "";
+        const endLocation = pack.endLocation?.toLowerCase() || "";
+        const price = pack.price?.toString() || "";
+        const maxClients = pack.maxClients?.toString() || "";
+        const categories = pack.categories?.join(" ").toLowerCase() || "";
+        const startDate = pack.startDate
+          ? new Date(pack.startDate).toLocaleDateString("en-GB").toLowerCase()
+          : "";
+        const endDate = pack.endDate
+          ? new Date(pack.endDate).toLocaleDateString("en-GB").toLowerCase()
+          : "";
+        
+        return (
+          title.includes(searchLower) ||
+          description.includes(searchLower) ||
+          startLocation.includes(searchLower) ||
+          endLocation.includes(searchLower) ||
+          price.includes(searchLower) ||
+          maxClients.includes(searchLower) ||
+          categories.includes(searchLower) ||
+          startDate.includes(searchLower) ||
+          endDate.includes(searchLower)
+        );
+      });
+    }
+
+    // Apply availability filter
+    if (availabilityFilter === "available") {
+      filtered = filtered.filter((pack) => pack.availability === true);
+    } else if (availabilityFilter === "unavailable") {
+      filtered = filtered.filter((pack) => pack.availability === false);
+    }
+
+    // Apply price filter
+    if (priceFilter === "low") {
+      filtered = filtered.filter((pack) => pack.price < 500);
+    } else if (priceFilter === "medium") {
+      filtered = filtered.filter((pack) => pack.price >= 500 && pack.price <= 1500);
+    } else if (priceFilter === "high") {
+      filtered = filtered.filter((pack) => pack.price > 1500);
+    }
+
+    // Apply sorting
+    if (sortField && sortOrder) {
+      filtered.sort((a, b) => {
+        let aValue, bValue;
+
+        switch (sortField) {
+          case "startDate":
+            aValue = new Date(a.startDate);
+            bValue = new Date(b.startDate);
+            break;
+          case "title":
+            aValue = a.title || "";
+            bValue = b.title || "";
+            break;
+          case "price":
+            aValue = a.price || 0;
+            bValue = b.price || 0;
+            break;
+          case "maxClients":
+            aValue = a.maxClients || 0;
+            bValue = b.maxClients || 0;
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [items, searchValue, availabilityFilter, priceFilter, sortField, sortOrder]);
+
+  // Client-side pagination
+  const totalFilteredDocs = filteredAndSortedPacks.length;
+  const totalClientPages = Math.ceil(totalFilteredDocs / itemsPerPage);
+  const paginatedPacks = useMemo(() => {
+    const startIndex = (clientPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedPacks.slice(startIndex, endIndex);
+  }, [filteredAndSortedPacks, clientPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setClientPage(1);
+  }, [searchValue, availabilityFilter, priceFilter]);
+
+  // Handlers
+  const handleSearchChange = (value) => {
+    setSearchValue(value);
+  };
+
+  const handlePageChange = (page) => {
+    setClientPage(page);
+  };
+
+  const handleSortChange = (field, order) => {
+    setSortField(field);
+    setSortOrder(order);
+  };
+
+  const handleView = async (id) => {
+    const pack = items.find(p => p._id === id);
+    if (pack) {
+      setCurrentPack(pack);
+      setShowDetailsModal(true);
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/guide/packs/edit/${id}`);
+  };
+
   const openDeleteDialog = (pack) => {
     setDeleteDialog({ isOpen: true, packId: pack._id, packTitle: pack.title });
   };
 
-  // 🗑️ Supprimer un pack après confirmation
   const handleDelete = () => {
     dispatch(deletePack(deleteDialog.packId))
       .unwrap()
       .then(() => {
-        toast.success('Pack supprimé avec succès');
+        toast.success('Pack deleted successfully');
+        setDeleteDialog({ isOpen: false, packId: null, packTitle: '' });
       })
       .catch((err) => {
-        toast.error(err?.message || 'Erreur lors de la suppression');
+        toast.error(err?.message || 'Error deleting pack');
       });
   };
 
-  return (
-    <div className="w-full bg-gradient-to-br to-gray-50 p-4 overflow-x-hidden">
-      <div className="bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
-        <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-700">
-            Liste des Packs
-          </h2>
-          <button
-            onClick={() => navigate("/guide/packs/add")}
-            className="bg-[#EB662B] text-white px-4 py-2 rounded-md hover:bg-[#d55a25] transition cursor-pointer"
-          >
-            + Ajouter un Pack
-          </button>
+  // Columns definition
+  const columns = [
+    {
+      accessorKey: "profileImg",
+      header: "Image",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
+          <img
+            src={row.original.profileImg || "https://via.placeholder.com/80"}
+            alt={row.original.title}
+            className="w-full h-full object-cover"
+          />
         </div>
-
-        {loading && <p className="text-center py-4 text-gray-500">Chargement...</p>}
-        {error && <p className="text-center py-4 text-red-500">{error}</p>}
-
-        <div className="w-full overflow-hidden">
-          <table className="w-full text-sm text-gray-700 table-fixed">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="w-16 px-2 py-3 text-left font-semibold">Image</th>
-                <th className="px-3 py-3 text-left font-semibold">Titre</th>
-                <th className="w-20 px-2 py-3 text-left font-semibold">Prix</th>
-                <th className="w-16 px-2 py-3 text-left font-semibold">Places</th>
-                <th className="w-24 px-2 py-3 text-left font-semibold">Dispo.</th>
-                <th className="px-3 py-3 text-left font-semibold">Départ</th>
-                <th className="px-3 py-3 text-left font-semibold">Arrivée</th>
-                <th className="w-32 px-2 py-3 text-left font-semibold">Dates</th>
-                <th className="w-24 px-2 py-3 text-center font-semibold">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-200">
-              {items?.length > 0 ? (
-                items.map((pack) => (
-                  <tr
-                    key={pack._id}
-                    className="hover:bg-gray-50 transition duration-200"
-                  >
-                    <td className="px-2 py-4">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#EB662B]">
-                        <img
-                          src={pack.profileImg || "https://via.placeholder.com/80"}
-                          alt={pack.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </td>
-                    <td className="px-3 py-4 font-medium truncate" title={pack.title}>
-                      {pack.title}
-                    </td>
-                    <td className="px-2 py-4 text-gray-800 font-semibold whitespace-nowrap">
-                      {pack.price}$
-                    </td>
-                    <td className="px-2 py-4 text-center">{pack.maxClients}</td>
-                    <td className="px-2 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${pack.availability ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {pack.availability ? "✓" : "✗"}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4 truncate" title={pack.startLocation}>
-                      {pack.startLocation}
-                    </td>
-                    <td className="px-3 py-4 truncate" title={pack.endLocation}>
-                      {pack.endLocation}
-                    </td>
-                    <td className="px-2 py-4 text-gray-600 text-xs">
-                      <div className="truncate">
-                        {pack.startDate ? new Date(pack.startDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : "-"}
-                        <br />
-                        {pack.endDate ? new Date(pack.endDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : "-"}
-                      </div>
-                    </td>
-                    <td className="px-2 py-4">
-                      <div className="flex justify-center space-x-1">
-                        <button
-                          onClick={() => navigate(`/guide/packs/details/${pack._id}`)}
-                          className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 transition cursor-pointer"
-                          title="Voir détails"
-                        >
-                          <Eye size={16} className="text-blue-600" />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/guide/packs/edit/${pack._id}`)}
-                          className="p-1.5 rounded-lg bg-gray-100 hover:bg-orange-100 transition cursor-pointer"
-                          title="Modifier"
-                        >
-                          <Edit size={16} className="text-green-600" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteDialog(pack)}
-                          className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 transition cursor-pointer"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={16} className="text-red-500" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                !loading && (
-                  <tr>
-                    <td colSpan="9" className="text-center py-6 text-gray-500">
-                      Aucun pack trouvé.
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
+      ),
+    },
+    {
+      accessorKey: "title",
+      header: "Title",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <span className="font-medium text-gray-900 truncate max-w-[200px]">
+            {row.original.title || "N/A"}
+          </span>
         </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-gray-50 border-t">
-          <div className="text-sm text-gray-600">
-            {items?.length || 0} pack(s) affiché(s) — Page {page || currentPage} / {totalPages || 1}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              className="px-3 py-1.5 rounded-md border text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={loading || (page || currentPage) <= 1}
-            >
-              Précédent
-            </button>
-            <span className="text-sm text-gray-600">
-              {page || currentPage} / {totalPages || 1}
+      ),
+    },
+    {
+      accessorKey: "price",
+      header: "Price",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <DollarSign className="w-4 h-4 text-green-600" />
+          <span className="font-semibold text-green-600">
+            {row.original.price || 0} MAD
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "maxClients",
+      header: "Capacity",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <Users className="w-4 h-4 text-gray-500" />
+          <span className="font-semibold text-gray-700">
+            {row.original.maxClients || 0}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "availability",
+      header: "Status",
+      enableSorting: false,
+      cell: ({ row }) => {
+        if (row.original.availability) {
+          return (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+              <CheckCircle className="w-3 h-3" />
+              Available
             </span>
-            <button
-              className="px-3 py-1.5 rounded-md border text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
-              onClick={() => setCurrentPage((p) => (totalPages ? Math.min(totalPages, p + 1) : p + 1))}
-              disabled={loading || (totalPages ? (page || currentPage) >= totalPages : false)}
-            >
-              Suivant
-            </button>
-          </div>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+            <XCircle className="w-3 h-3" />
+            Unavailable
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "startLocation",
+      header: "Route",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1 text-xs">
+          <MapPin className="w-3 h-3 text-blue-600" />
+          <span className="truncate max-w-[80px]">{row.original.startLocation || "N/A"}</span>
+          <span>→</span>
+          <MapPin className="w-3 h-3 text-red-600" />
+          <span className="truncate max-w-[80px]">{row.original.endLocation || "N/A"}</span>
         </div>
+      ),
+    },
+    {
+      accessorKey: "startDate",
+      header: "Start Date",
+      cell: ({ row }) => {
+        const date = row.original.startDate ? new Date(row.original.startDate) : null;
+        return date ? (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <span className="text-sm">
+              {date.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        ) : (
+          <span className="text-gray-400">N/A</span>
+        );
+      },
+    },
+  ];
+
+  // Filters definition
+  const filters = [
+    {
+      label: "Availability",
+      mobileLabel: "Status",
+      icon: CheckCircle,
+      value: availabilityFilter,
+      onChange: setAvailabilityFilter,
+      getLabel: () => {
+        if (availabilityFilter === "available") return "Available";
+        if (availabilityFilter === "unavailable") return "Unavailable";
+        return "All Status";
+      },
+      options: [
+        { label: "All Status", value: "" },
+        { label: "Available", value: "available" },
+        { label: "Unavailable", value: "unavailable" },
+      ],
+    },
+    {
+      label: "Price Range",
+      mobileLabel: "Price",
+      icon: DollarSign,
+      value: priceFilter,
+      onChange: setPriceFilter,
+      getLabel: () => {
+        switch(priceFilter) {
+          case "low": return "< 500 MAD";
+          case "medium": return "500-1500 MAD";
+          case "high": return "> 1500 MAD";
+          default: return "All Prices";
+        }
+      },
+      options: [
+        { label: "All Prices", value: "" },
+        { label: "< 500 MAD", value: "low" },
+        { label: "500-1500 MAD", value: "medium" },
+        { label: "> 1500 MAD", value: "high" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">My Packs</h1>
+          <p className="text-gray-600 mt-2">
+            Manage your tour packages ({totalFilteredDocs} total)
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/guide/packs/add")}
+          className="flex items-center gap-2 bg-[#EB662B] text-white px-6 py-3 rounded-lg hover:bg-[#d55a25] transition cursor-pointer font-semibold shadow-lg"
+        >
+          <Plus className="w-5 h-5" />
+          Add Pack
+        </button>
       </div>
 
-      {/* Modal de confirmation de suppression */}
+      <DataTable
+        columns={columns}
+        data={paginatedPacks}
+        searchValue={searchValue}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Search by title, location, price, dates..."
+        loading={loading}
+        deleteLoading={{}}
+        currentPage={clientPage}
+        totalPages={totalClientPages}
+        onPageChange={handlePageChange}
+        onSortChange={handleSortChange}
+        currentSort={{ field: sortField, order: sortOrder }}
+        filters={filters}
+        onView={handleView}
+        onDelete={(id) => {
+          const pack = items.find(p => p._id === id);
+          if (pack) openDeleteDialog(pack);
+        }}
+        emptyMessage="No packs found"
+        showActions={true}
+      />
+
+      {/* Pack Details Modal */}
+      {showDetailsModal && (
+        <PackDetailsModal
+          pack={currentPack}
+          loading={false}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setCurrentPack(null);
+          }}
+          onEdit={handleEdit}
+          onDelete={(pack) => {
+            setShowDetailsModal(false);
+            openDeleteDialog(pack);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false, packId: null, packTitle: '' })}
         onConfirm={handleDelete}
-        title="Supprimer le pack"
-        message={`Êtes-vous sûr de vouloir supprimer le pack "${deleteDialog.packTitle}" ? Cette action est irréversible.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title="Delete Pack"
+        message={`Are you sure you want to delete "${deleteDialog.packTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
         type="danger"
       />
     </div>

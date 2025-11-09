@@ -47,6 +47,46 @@ export const fetchGuideBookings = createAsyncThunk(
   }
 );
 
+// Fetch guide bookings with advanced filters
+export const fetchGuideBookingsAdvanced = createAsyncThunk(
+  "booking/fetchGuideAdvanced",
+  async ({ 
+    page = 1, 
+    limit = 10, 
+    search = "", 
+    sortField = "", 
+    sortOrder = "",
+    isVip = "",
+    statusFilter = "", // Combined status filter
+    dateFilter = ""
+  } = {}, { rejectWithValue }) => {
+    try {
+      const params = { page, limit };
+      if (search) params.search = search;
+      if (sortField) params.sortField = sortField;
+      if (sortOrder) params.sortOrder = sortOrder;
+      if (isVip !== "") params.isVip = isVip;
+      
+      // Convert statusFilter to isCancelled and isCompleted params
+      if (statusFilter === "cancelled") {
+        params.isCancelled = "true";
+      } else if (statusFilter === "completed") {
+        params.isCompleted = "true";
+      } else if (statusFilter === "active") {
+        params.isCancelled = "false";
+        params.isCompleted = "false";
+      }
+      
+      if (dateFilter) params.dateFilter = dateFilter;
+      
+      const res = await api.get("/bookings/guide", { params });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch guide bookings");
+    }
+  }
+);
+
 // Récupérer les bookings du client connecté
 export const fetchUserBookings = createAsyncThunk(
   "booking/fetchUserBookings",
@@ -330,6 +370,46 @@ const bookingSlice = createSlice({
       .addCase(fetchGuideBookings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // Fetch Guide Bookings Advanced (with filters)
+      .addCase(fetchGuideBookingsAdvanced.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGuideBookingsAdvanced.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        
+        if (payload && payload.success) {
+          state.items = payload.data || [];
+          state.totalDocs = payload.count || 0;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (payload && payload.data && Array.isArray(payload.data)) {
+          state.items = payload.data;
+          state.totalDocs = payload.count || payload.data.length;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.limit = 10;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+          state.totalDocs = 0;
+          state.page = 1;
+          state.totalPages = 1;
+        }
+      })
+      .addCase(fetchGuideBookingsAdvanced.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.items = [];
       })
 
       // Fetch User Bookings

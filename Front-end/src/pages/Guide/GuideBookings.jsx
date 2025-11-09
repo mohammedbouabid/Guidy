@@ -1,193 +1,441 @@
-import React, { useEffect, useState } from "react";
-import { Eye } from "lucide-react";
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchGuideBookings } from "@/store/slices/bookingSlice";
+import { DataTable } from "@/components/adminTable/data-table";
+import {
+  fetchGuideBookings,
+  fetchBookingById,
+  setSearchValue,
+  setCurrentPage,
+  setSortConfig,
+  setIsVipFilter,
+  setStatusFilter,
+  setDateFilter,
+  clearSelectedBooking,
+} from "@/store/slices/bookingSlice";
+import { User, Calendar, Clock, Crown, XCircle, CheckCircle, Users, Bolt, Route } from "lucide-react";
+import BookingDetailsModal from "@/components/adminHelpers/BokingDetailsModal";
 
-import BookingDetailsModal from "../../Components/Bookings/BookingDetailsModal";
-
-const GuideBookings = () => {
+export default function GuideBookings() {
   const dispatch = useDispatch();
-  const { items, loading, error } = useSelector((state) => state.booking);
-  
+  const [showModal, setShowModal] = useState(false);
 
-  
-  const [detailsModal, setDetailsModal] = useState({ 
-    isOpen: false, 
-    booking: null 
-  });
+  const {
+    items,
+    loading,
+    deleteLoading,
+    searchValue,
+    sortField,
+    sortOrder,
+    isVipFilter,
+    statusFilter,
+    dateFilter,
+    current: selectedBooking,
+    bookingLoading,
+  } = useSelector((state) => state.booking);
 
-  // Charger les bookings du guide au montage
+  // Client-side pagination state
+  const [clientPage, setClientPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Fetch all bookings once on mount (no filters sent to backend)
   useEffect(() => {
-    dispatch(fetchGuideBookings({}));
+    dispatch(fetchGuideBookings({ page: 1, limit: 1000 })); // Fetch all bookings
   }, [dispatch]);
 
-  // Ouvrir leodal de détails
-  const openDetailsModal = (booking) => {
-    setDetailsModal({ isOpen: true, booking });
+  // Set default sorting on mount
+  useEffect(() => {
+    if (!sortField) {
+      dispatch(setSortConfig({ field: "createdAt", order: "desc" }));
+    }
+  }, []);
+
+  // Client-side filtering and sorting
+  const filteredAndSortedBookings = useMemo(() => {
+    let filtered = [...(items || [])];
+
+    // Apply search filter (includes ALL fields displayed in table)
+    if (searchValue) {
+      const searchLower = searchValue.toLowerCase();
+      filtered = filtered.filter((booking) => {
+        // Client fields
+        const userName = booking.userID?.name?.toLowerCase() || "";
+        const userEmail = booking.userID?.email?.toLowerCase() || "";
+        const userPhone = booking.userID?.phone?.toLowerCase() || "";
+        
+        // Pack/Tour fields
+        const packTitle = booking.packID?.title?.toLowerCase() || "";
+        const startLocation = booking.packID?.startLocation?.toLowerCase() || "";
+        const endLocation = booking.packID?.endLocation?.toLowerCase() || "";
+        const packPrice = booking.packID?.price?.toString() || "";
+        
+        // Booking fields
+        const spots = booking.spotsBooked?.toString() || "";
+        const vipStatus = booking.isVip ? "vip" : "regular";
+        const status = booking.isCancelled ? "cancelled" : booking.isCompleted ? "completed" : "active";
+        
+        // Date fields
+        const createdDate = booking.createdAt 
+          ? new Date(booking.createdAt).toLocaleDateString("en-GB").toLowerCase()
+          : "";
+        const startDate = booking.packID?.startDate
+          ? new Date(booking.packID.startDate).toLocaleDateString("en-GB").toLowerCase()
+          : "";
+        const endDate = booking.packID?.endDate
+          ? new Date(booking.packID.endDate).toLocaleDateString("en-GB").toLowerCase()
+          : "";
+        
+        return (
+          userName.includes(searchLower) ||
+          userEmail.includes(searchLower) ||
+          userPhone.includes(searchLower) ||
+          packTitle.includes(searchLower) ||
+          startLocation.includes(searchLower) ||
+          endLocation.includes(searchLower) ||
+          packPrice.includes(searchLower) ||
+          spots.includes(searchLower) ||
+          vipStatus.includes(searchLower) ||
+          status.includes(searchLower) ||
+          createdDate.includes(searchLower) ||
+          startDate.includes(searchLower) ||
+          endDate.includes(searchLower)
+        );
+      });
+    }
+
+    // Apply VIP filter
+    if (isVipFilter === "true") {
+      filtered = filtered.filter((booking) => booking.isVip === true);
+    } else if (isVipFilter === "false") {
+      filtered = filtered.filter((booking) => !booking.isVip);
+    }
+
+    // Apply status filter
+    if (statusFilter === "cancelled") {
+      filtered = filtered.filter((booking) => booking.isCancelled === true);
+    } else if (statusFilter === "completed") {
+      filtered = filtered.filter((booking) => booking.isCompleted === true);
+    } else if (statusFilter === "active") {
+      filtered = filtered.filter((booking) => !booking.isCancelled && !booking.isCompleted);
+    }
+
+    // Apply date filter
+    if (dateFilter) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      filtered = filtered.filter((booking) => {
+        const bookingDate = new Date(booking.createdAt);
+        
+        switch (dateFilter) {
+          case "today":
+            return bookingDate >= today;
+          case "week":
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return bookingDate >= weekAgo;
+          case "month":
+            const monthAgo = new Date(today);
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            return bookingDate >= monthAgo;
+          case "year":
+            const yearAgo = new Date(today);
+            yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+            return bookingDate >= yearAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting
+    if (sortField && sortOrder) {
+      filtered.sort((a, b) => {
+        let aValue, bValue;
+
+        switch (sortField) {
+          case "createdAt":
+            aValue = new Date(a.createdAt);
+            bValue = new Date(b.createdAt);
+            break;
+          case "userID":
+            aValue = a.userID?.name || "";
+            bValue = b.userID?.name || "";
+            break;
+          case "packID":
+            aValue = a.packID?.title || "";
+            bValue = b.packID?.title || "";
+            break;
+          case "spotsBooked":
+            aValue = a.spotsBooked || 0;
+            bValue = b.spotsBooked || 0;
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [items, searchValue, isVipFilter, statusFilter, dateFilter, sortField, sortOrder]);
+
+  // Client-side pagination
+  const totalFilteredDocs = filteredAndSortedBookings.length;
+  const totalClientPages = Math.ceil(totalFilteredDocs / itemsPerPage);
+  const paginatedBookings = useMemo(() => {
+    const startIndex = (clientPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedBookings.slice(startIndex, endIndex);
+  }, [filteredAndSortedBookings, clientPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setClientPage(1);
+  }, [searchValue, isVipFilter, statusFilter, dateFilter]);
+
+  const handleSearchChange = (value) => {
+    dispatch(setSearchValue(value));
   };
 
-  // Ouvrir le modal de confirmation d'annulation
- 
+  const handlePageChange = (page) => {
+    setClientPage(page);
+  };
 
-  // Annuler un booking
- 
+  const handleSortChange = (field, order) => {
+    dispatch(setSortConfig({ field, order }));
+  };
+
+  const handleView = async (id) => {
+    setShowModal(true);
+    await dispatch(fetchBookingById(id));
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    dispatch(clearSelectedBooking());
+  };
+
+  const columns = [
+    {
+      accessorKey: "userID",
+      header: "Client",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <div className="flex flex-col">
+            <span className="font-medium text-gray-900">
+              {row.original.userID?.name || "N/A"}
+            </span>
+            <span className="text-xs text-gray-500">
+              {row.original.userID?.email || ""}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "packID",
+      header: "Tour",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Route className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <div className="flex flex-col truncate">
+            <span className="font-medium truncate max-w-[180px]">
+              {row.original.packID?.title || "N/A"}
+            </span>
+            <span className="text-xs text-green-600 font-semibold">
+              {row.original.packID?.price || 0} MAD
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "spotsBooked",
+      header: "Spots",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <Users className="w-4 h-4 text-gray-500" />
+          <span className="font-semibold text-gray-700">
+            {row.original.spotsBooked || 1}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "isVip",
+      header: "Type",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          {row.original.isVip ? (
+            <>
+              <Crown className="w-4 h-4 text-yellow-500" />
+              <span className="text-xs font-bold text-yellow-600">VIP</span>
+            </>
+          ) : (
+            <>
+              <Bolt className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-600">Regular</span>
+            </>
+          )}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "isCancelled",
+      header: "Status",
+      enableSorting: false,
+      cell: ({ row }) => {
+        if (row.original.isCancelled) {
+          return (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+              <XCircle className="w-3 h-3" />
+              Cancelled
+            </span>
+          );
+        }
+        if (row.original.isCompleted) {
+          return (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+              <CheckCircle className="w-3 h-3" />
+              Completed
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+            <Clock className="w-3 h-3" />
+            Active
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Booked On",
+      cell: ({ row }) => {
+        const date = new Date(row.original.createdAt);
+        return (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <span className="text-sm">
+              {date.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const filters = [
+    {
+      label: "VIP Status",
+      mobileLabel: "VIP",
+      icon: Crown,
+      value: isVipFilter,
+      onChange: (value) => dispatch(setIsVipFilter(value)),
+      getLabel: () => {
+        if (isVipFilter === "true") return "VIP Only";
+        if (isVipFilter === "false") return "Regular Only";
+        return "All Types";
+      },
+      options: [
+        { label: "All Types", value: "" },
+        { label: "VIP Only", value: "true" },
+        { label: "Regular Only", value: "false" },
+      ],
+    },
+    {
+      label: "Status",
+      mobileLabel: "Status",
+      icon: CheckCircle,
+      value: statusFilter,
+      onChange: (value) => dispatch(setStatusFilter(value)),
+      getLabel: () => {
+        switch(statusFilter) {
+          case "active": return "Active";
+          case "completed": return "Completed";
+          case "cancelled": return "Cancelled";
+          default: return "All Status";
+        }
+      },
+      options: [
+        { label: "All Status", value: "" },
+        { label: "Active", value: "active" },
+        { label: "Completed", value: "completed" },
+        { label: "Cancelled", value: "cancelled" },
+      ],
+    },
+    {
+      label: "Date",
+      mobileLabel: "Period",
+      icon: Clock,
+      value: dateFilter,
+      onChange: (value) => dispatch(setDateFilter(value)),
+      getLabel: () => {
+        switch(dateFilter) {
+          case "today": return "Today";
+          case "week": return "This Week";
+          case "month": return "This Month";
+          case "year": return "This Year";
+          default: return "All Time";
+        }
+      },
+      options: [
+        { label: "All Time", value: "" },
+        { label: "Today", value: "today" },
+        { label: "This Week", value: "week" },
+        { label: "This Month", value: "month" },
+        { label: "This Year", value: "year" },
+      ],
+    },
+  ];
 
   return (
-    <div className="w-full bg-gradient-to-br to-gray-50 p-4 overflow-x-hidden">
-      <div className="bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
-        {/* Header */}
-        <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-700">
-            Mes Réservations
-          </h2>
-          <div className="text-sm text-gray-600">
-            {items?.length || 0} réservation(s)
-          </div>
-        </div>
-
-        {loading && <p className="text-center py-4 text-gray-500">Chargement...</p>}
-        {error && <p className="text-center py-4 text-red-500">{error}</p>}
-
-        {/* Table */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-sm text-gray-700">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-3 py-3 text-left font-semibold">Utilisateur</th>
-                <th className="px-3 py-3 text-left font-semibold">Pack</th>
-                <th className="px-3 py-3 text-left font-semibold">Prix</th>
-                <th className="px-3 py-3 text-left font-semibold">Places</th>
-                <th className="px-3 py-3 text-left font-semibold">Type</th>
-                <th className="px-3 py-3 text-left font-semibold">Statut</th>
-                <th className="px-3 py-3 text-left font-semibold">Date Réservation</th>
-                <th className="px-3 py-3 text-center font-semibold">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-200">
-              {items?.length > 0 ? (
-                items.map((booking) => (
-                  <tr
-                    key={booking._id}
-                    className={`table-row-transition hover:bg-gray-50 ${booking.isCancelled ? 'table-row-cancelled' : ''}`}
-                  >
-                    {/* Utilisateur */}
-                    <td className="px-3 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {booking.userID?.name || 'N/A'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {booking.userID?.email || '-'}
-                        </p>
-                      </div>
-                    </td>
-
-                    {/* Pack */}
-                    <td className="px-3 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {booking.packID?.title || 'N/A'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {booking.packID?.startLocation || '-'} → {booking.packID?.endLocation || '-'}
-                        </p>
-                      </div>
-                    </td>
-
-                    {/* Prix */}
-                    <td className="px-3 py-4 text-gray-800 font-semibold">
-                      {booking.packID?.price ? `${booking.packID.price}$` : '-'}
-                    </td>
-
-                    {/* Places réservées */}
-                    <td className="px-3 py-4 text-center">
-                      {booking.spotsBooked || 1}
-                    </td>
-
-                    {/* Type VIP */}
-                    <td className="px-3 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          booking.isVip
-                            ? 'bg-purple-100 text-purple-700'
-                            : 'bg-blue-100 text-blue-700'
-                        }`}
-                      >
-                        {booking.isVip ? 'VIP' : 'Normal'}
-                      </span>
-                    </td>
-
-                    {/* Statut */}
-                    <td className="px-3 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          booking.isCancelled
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-green-100 text-green-700'
-                        }`}
-                      >
-                        {booking.isCancelled ? 'Annulé' : 'Actif'}
-                      </span>
-                    </td>
-
-                    {/* Date de réservation */}
-                    <td className="px-3 py-4 text-gray-600 text-xs">
-                      {booking.createdAt
-                        ? new Date(booking.createdAt).toLocaleDateString('fr-FR', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })
-                        : '-'}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-3 py-4">
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          onClick={() => openDetailsModal(booking)}
-                          className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 transition cursor-pointer"
-                          title="Voir détails"
-                        >
-                          <Eye size={16} className="text-blue-600" />
-                        </button>
-                        
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                !loading && (
-                  <tr>
-                    <td colSpan="8" className="text-center py-6 text-gray-500">
-                      Aucune réservation trouvée pour vos packs.
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Footer avec compteur */}
-        <div className="flex items-center justify-between p-4 bg-gray-50 border-t">
-          <div className="text-sm text-gray-600">
-            {items?.length || 0} réservation(s) trouvée(s)
-          </div>
-        </div>
+    <div className="container mx-auto py-8 px-4">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+        <p className="text-gray-600 mt-2">
+          View and manage all your trip bookings ({totalFilteredDocs} total)
+        </p>
       </div>
 
-     
-
-      {/* Modal de détails */}
-      <BookingDetailsModal
-        isOpen={detailsModal.isOpen}
-        booking={detailsModal.booking}
-        onClose={() => setDetailsModal({ isOpen: false, booking: null })}
+      <DataTable
+        columns={columns}
+        data={paginatedBookings}
+        searchValue={searchValue}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Search by client, pack title, or location..."
+        loading={loading}
+        deleteLoading={deleteLoading}
+        currentPage={clientPage}
+        totalPages={totalClientPages}
+        onPageChange={handlePageChange}
+        onSortChange={handleSortChange}
+        currentSort={{ field: sortField, order: sortOrder }}
+        filters={filters}
+        onView={handleView}
+        emptyMessage="No bookings found"
+        showActions={true}
       />
+
+      {showModal && (
+        <BookingDetailsModal
+          booking={selectedBooking}
+          loading={bookingLoading}
+          onClose={handleCloseModal}
+          deleteLoading={deleteLoading}
+        />
+      )}
     </div>
   );
-};
-
-export default GuideBookings;
+}
