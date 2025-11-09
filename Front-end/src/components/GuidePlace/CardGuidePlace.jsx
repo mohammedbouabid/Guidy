@@ -87,9 +87,9 @@ function CardGuidePlace({ place }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 relative group">
+    <div className="bg-white p-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 relative group">
       {/* Image Container */}
-      <div className="relative mb-4 h-[280px] rounded-xl overflow-hidden bg-gray-100">
+      <div className="relative mb-3 h-[200px] rounded-lg overflow-hidden bg-gray-100">
         {/* Add safety check for images array */}
         {Array.isArray(place.images) && place.images.length > 0 ? (
           <Swiper
@@ -113,14 +113,14 @@ function CardGuidePlace({ place }) {
           </Swiper>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <Image className="w-12 h-12 text-gray-400" />
+            <Image className="w-10 h-10 text-gray-400" />
           </div>
         )}
       </div>
 
-      <div className="space-y-2 flex flex-col items-start">
-        <div className="flex mt-2 mb-0 w-full items-center justify-between">
-          <h3 className="font-semibold   text-lg mb-0 text-gray-800">
+      <div className="space-y-1.5 flex flex-col items-start">
+        <div className="flex mt-1.5 mb-0 w-full items-center justify-between">
+          <h3 className="font-semibold text-base mb-0 text-gray-800">
             {place.name}
           </h3>
 
@@ -128,9 +128,9 @@ function CardGuidePlace({ place }) {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setShowActions(!showActions)}
-              className="p-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
             >
-              <EllipsisVertical className="w-5 h-5 text-gray-600" />
+              <EllipsisVertical className="w-4 h-4 text-gray-600" />
             </button>
 
             {/* Dropdown Menu */}
@@ -162,7 +162,7 @@ function CardGuidePlace({ place }) {
           </div>
         </div>
         <div className="">
-          <span className="text-[#EB662B] font-bold text-lg mb-0">
+          <span className="text-[#EB662B] font-bold text-base mb-0">
             {place.city}
           </span>
         </div>
@@ -189,17 +189,17 @@ function CardGuidePlace({ place }) {
       </div>
 
       {/* Guide Information */}
-      <div className="flex items-center gap-3 mt-4 pt-3 border-t">
+      <div className="flex items-center gap-2 mt-3 pt-2.5 border-t">
         <img
           src={place.guideID.profileImage || "/default-avatar.png"}
           alt={`${place.guideID.firstName} ${place.guideID.lastName}`}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-8 h-8 rounded-full object-cover"
         />
         <div>
-          <h4 className="font-medium text-gray-800">
+          <h4 className="font-medium text-sm text-gray-800">
             {place.guideID.firstName} {place.guideID.lastName}
           </h4>
-          <p className="text-sm text-gray-500">{place.guideID.email}</p>
+          <p className="text-xs text-gray-500">{place.guideID.email}</p>
         </div>
       </div>
 
