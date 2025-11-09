@@ -16,11 +16,13 @@ function App() {
 
   if (!booted || !isHydrated) return <Loader />;
 
-  console.log("Booted:", booted)
-console.log("Hydrated:", isHydrated)
+
 
 
   return <RouterProvider router={router} />;
 }
 
 export default App;
+
+
+

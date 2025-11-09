@@ -87,7 +87,7 @@ const packSchema = mongoose.Schema(
     },
     startLocation: {
       type: String,
-      required: true,
+      required: true,    
     },
     endLocation: {
       type: String,

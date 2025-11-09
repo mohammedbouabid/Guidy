@@ -100,7 +100,6 @@ export default function DestinationsMap({ places = [], startLocation, endLocatio
         scrollWheelZoom: true,
         zoomControl: true,
         keyboard: false, // Disable keyboard navigation
-        scrollWheelZoom: true
       });
 
       // Prevent auto-focus

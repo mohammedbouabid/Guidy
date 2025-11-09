@@ -58,6 +58,7 @@ export default function ProfileContent() {
     name: "",
     email: "",
     phone: "",
+    cin: "",
     bio: "",
   })
   const [showDialog, setShowDialog] = useState(false)
@@ -108,6 +109,7 @@ export default function ProfileContent() {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
+        cin: user.cin || "",
         bio: user.bio || "",
       })
     }
@@ -120,6 +122,14 @@ export default function ProfileContent() {
     if (id === "phone") {
       const phoneRegex = /^[0-9+\-().\s]*$/
       if (!phoneRegex.test(value)) {
+        return // Don't update if invalid characters
+      }
+    }
+
+    // CIN validation: only alphanumeric characters
+    if (id === "cin") {
+      const cinRegex = /^[A-Za-z0-9]*$/
+      if (!cinRegex.test(value)) {
         return // Don't update if invalid characters
       }
     }
@@ -158,7 +168,6 @@ export default function ProfileContent() {
   const isFormValid = formData.name.trim() !== "" &&
     formData.email.trim() !== "" &&
     formData.phone.trim() !== ""
-
 
   const handleSave = async () => {
     // Validate required fields
@@ -405,13 +414,12 @@ export default function ProfileContent() {
                   <Label htmlFor="cin">CIN</Label>
                   <Input
                     id="cin"
-                    value={user.cin || ""}
-                    disabled
-                    className="opacity-70 cursor-not-allowed"
-                    placeholder="CIN"
+                    value={formData.cin}
+                    onChange={handleChange}
+                    placeholder="Enter your CIN"
                   />
                   <p className="text-xs text-muted-foreground">
-                    CIN is required only when creating the first pack. To update it, please contact support.
+                    Your National Identity Card number (CIN)
                   </p>
                 </div>
               )}
@@ -449,6 +457,7 @@ export default function ProfileContent() {
                       name: "Full Name",
                       email: "Email",
                       phone: "Phone",
+                      cin: "CIN",
                       bio: "Bio"
                     }
 

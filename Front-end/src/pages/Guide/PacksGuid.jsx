@@ -5,6 +5,7 @@ import { Edit, Trash2, Eye, Plus, MapPin, DollarSign, Users, Calendar, CheckCirc
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { deletePack, fetchGuidePacks, fetchPackById } from "@/store/slices/packSlice";
+import { fetchGuideBookings } from "@/store/slices/bookingSlice";
 import { DataTable } from "@/components/adminTable/data-table";
 import PackDetailsModal from "@/components/Packs/PackDetailsModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -30,14 +31,36 @@ const PacksGuid = () => {
   const [clientPage, setClientPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Fetch all packs once on mount
+  // Fetch all packs and bookings once on mount
   useEffect(() => {
     dispatch(fetchGuidePacks({ page: 1, limit: 1000 }));
+    dispatch(fetchGuideBookings({ page: 1, limit: 1000 }));
   }, [dispatch]);
+
+  // Get bookings to calculate available spots
+  const { items: bookingItems } = useSelector((state) => state.booking);
+
+  // Calculate available spots for each pack
+  const packsWithAvailableSpots = useMemo(() => {
+    return (items || []).map(pack => {
+      const bookedSpots = (bookingItems || [])
+        .filter(booking => 
+          booking.packID?._id === pack._id && 
+          !booking.isCancelled
+        )
+        .reduce((sum, booking) => sum + (booking.spotsBooked || 1), 0);
+      
+      return {
+        ...pack,
+        bookedSpots,
+        availableSpots: (pack.maxClients || 0) - bookedSpots
+      };
+    });
+  }, [items, bookingItems]);
 
   // Client-side filtering and sorting
   const filteredAndSortedPacks = useMemo(() => {
-    let filtered = [...(items || [])];
+    let filtered = [...(packsWithAvailableSpots || [])];
 
     // Apply search filter (ALL fields)
     if (searchValue) {
@@ -120,7 +143,7 @@ const PacksGuid = () => {
     }
 
     return filtered;
-  }, [items, searchValue, availabilityFilter, priceFilter, sortField, sortOrder]);
+  }, [packsWithAvailableSpots, searchValue, availabilityFilter, priceFilter, sortField, sortOrder]);
 
   // Client-side pagination
   const totalFilteredDocs = filteredAndSortedPacks.length;
@@ -229,6 +252,25 @@ const PacksGuid = () => {
           </span>
         </div>
       ),
+    },
+    {
+      accessorKey: "availableSpots",
+      header: "Available",
+      enableSorting: false,
+      cell: ({ row }) => {
+        const available = row.original.availableSpots || 0;
+        const isLow = available <= 3 && available > 0;
+        const isEmpty = available === 0;
+        
+        return (
+          <div className="flex items-center gap-1">
+            <Users className={`w-4 h-4 ${isEmpty ? 'text-red-500' : isLow ? 'text-orange-500' : 'text-blue-500'}`} />
+            <span className={`font-semibold ${isEmpty ? 'text-red-600' : isLow ? 'text-orange-600' : 'text-blue-600'}`}>
+              {available}
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "availability",

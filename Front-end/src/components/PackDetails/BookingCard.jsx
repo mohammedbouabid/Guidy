@@ -36,15 +36,13 @@ export default function BookingCard({ pack }) {
   
   // Load bookings for this pack (needed to compute remaining spots and VIP availability)
   useEffect(() => {
-    if (pack?._id) {
-      // For admins, they may use the global list; for clients, use pack status
-      if (userRole === 'admin') {
-        dispatch(fetchAllBookings({ packId: pack._id, limit: 100 }));
-      } else {
-        dispatch(fetchPackBookingStatus(pack._id));
-      }
+    if (!pack?._id || !user) return;
+    if (userRole === "admin") {
+      dispatch(fetchAllBookings({ packId: pack._id, limit: 100 }));
+    } else {
+      dispatch(fetchPackBookingStatus(pack._id));
     }
-  }, [dispatch, pack?._id, userRole]);
+  }, [dispatch, pack?._id, user, userRole]);
 
   // Compute user first-booking and remaining spots
   useEffect(() => {
@@ -134,9 +132,6 @@ export default function BookingCard({ pack }) {
         type: "success",
         text: "Your tour has been booked successfully!"
       });
-      
-      // Update remaining spots after successful booking
-      setRemainingSpots(prev => Math.max(0, prev - spotsBooked));
       setIsFirstBooking(false);
       
     } catch (error) {
