@@ -33,6 +33,7 @@ import PackDetailsPage from "@/pages/Home/PackDetailsPage";
 import RatingsPage from "@/pages/admin/Ratings";
 import CalenderPacks from "@/pages/Guide/CalenderPacks";
 import BookingsPage from "@/pages/admin/Booking";
+import PacksAdmin from "@/pages/admin/PacksAdmin";
 
 const router = createBrowserRouter([
   {
@@ -102,6 +103,7 @@ const router = createBrowserRouter([
       { path: "guides", element: <AllGuides /> },
       { path: "clients", element: <AllClients /> },
       { path: "destinations", element: <GuidePlacesPage /> },
+      { path: "packs", element: <PacksAdmin /> },
       { path: "ratings", element: <RatingsPage /> },
       { path: "bookings", element: <BookingsPage /> },
     ],
