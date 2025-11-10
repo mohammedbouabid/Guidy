@@ -6,7 +6,7 @@ const AdminLayout = () => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>
+      <main className="w-full flex-1 overflow-auto">
         <SidebarTrigger className="fixed"/>
         <Outlet />
       </main>
