@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -22,7 +22,7 @@ import {
   XCircle,
   Clock
 } from 'lucide-react';
-import { fetchUsers } from '@/store/slices/usersSlice';
+import { fetchUsers, fetchUserStats } from '@/store/slices/usersSlice';
 import { fetchGuidePlaces } from '@/store/slices/guidePlaceSlice';
 import { fetchPacks } from '@/store/slices/packSlice';
 import { fetchAllBookings } from '@/store/slices/bookingSlice';
@@ -30,7 +30,7 @@ import { fetchRatings } from '@/store/slices/ratingSlice';
 
 const DashboardHome = () => {
   const dispatch = useDispatch();
-  const { users, count: usersCount } = useSelector((state) => state.users);
+  const { users, guidesCount, clientsCount, totalUsersCount } = useSelector((state) => state.users);
   const { places, count: placesCount } = useSelector((state) => state.guidePlace);
   const { items: packItems, totalDocs: packsCount } = useSelector((state) => state.pack);
   const { items: bookingItems, totalDocs: bookingsCount } = useSelector((state) => state.booking);
@@ -38,8 +38,10 @@ const DashboardHome = () => {
   const user = useSelector((state) => state.Auth);
 
   useEffect(() => {
-    // Fetch with larger limits to get accurate counts and recent items
-    dispatch(fetchUsers({ page: 1, limit: 100 }));
+    // Fetch user statistics from backend
+    dispatch(fetchUserStats());
+    // Fetch recent items for display
+    dispatch(fetchUsers({ page: 1, limit: 10 }));
     dispatch(fetchGuidePlaces({ page: 1, limit: 100 }));
     dispatch(fetchPacks({ page: 1, limit: 100 }));
     dispatch(fetchAllBookings({ page: 1, limit: 100 }));
@@ -50,14 +52,12 @@ const DashboardHome = () => {
   const activeBookings = bookingItems?.filter(b => !b.isCancelled && !b.isCompleted).length || 0;
   const completedBookings = bookingItems?.filter(b => b.isCompleted).length || 0;
   const cancelledBookings = bookingItems?.filter(b => b.isCancelled).length || 0;
-  const guidesCount = users?.filter(u => u.role === 'guide').length || 0;
-  const clientsCount = users?.filter(u => u.role === 'client').length || 0;
   
   // Use real counts from backend
   const totalActiveBookings = activeBookings;
-  const totalUsersCount = usersCount || 0;
-  const totalGuidesCount = guidesCount;
-  const totalClientsCount = clientsCount;
+  const totalGuidesCount = guidesCount || 0;
+  const totalClientsCount = clientsCount || 0;
+  const totalUsers = totalUsersCount || 0;
   const totalPlacesCount = placesCount || 0;
   const totalRatingsCount = ratingsCount || 0;
   const averageRating = ratingsCount > 0 
@@ -67,7 +67,7 @@ const DashboardHome = () => {
   const mainStats = [
     {
       title: "Total Users",
-      value: usersCount || 0,
+      value: totalUsers,
       icon: Users,
       iconBg: "bg-blue-50",
       iconColor: "text-blue-600",
@@ -147,7 +147,7 @@ const DashboardHome = () => {
       icon: Users,
       iconBg: "bg-blue-50",
       iconColor: "text-blue-600",
-      count: totalUsersCount
+      count: totalUsers
     },
     {
       title: "Manage Bookings",
@@ -237,16 +237,16 @@ const DashboardHome = () => {
               whileHover={{ y: -4, scale: 1.02 }}
               className="h-full"
             >
-              <Link to={stat.link} className="h-full block">
-                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#EB662B]/20 h-full flex flex-col">
+              <Link to={stat.link} className="h-full block group cursor-pointer">
+                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#EB662B]/30 h-full flex flex-col relative overflow-hidden">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <p className="text-sm text-gray-500 font-medium mb-2">{stat.title}</p>
                       <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stat.value}</h3>
                       <p className="text-xs text-gray-400 line-clamp-1">{stat.subtitle}</p>
                     </div>
-                    <div className={`${stat.iconBg} rounded-xl p-3 ring-4 ring-white shadow-sm`}>
-                      <Icon className={`h-6 w-6 ${stat.iconColor}`} />
+                    <div className={`${stat.iconBg} rounded-xl p-3 ring-4 ring-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                      <Icon className={`h-6 w-6 ${stat.iconColor} transition-all duration-300`} />
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs pt-3 border-t border-gray-100 mt-auto">
@@ -339,10 +339,10 @@ const DashboardHome = () => {
                 whileHover={{ y: -2 }}
                 className="h-full"
               >
-                <Link to={action.link} className="h-full block">
-                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group border border-gray-100 hover:border-[#EB662B]/30">
+                <Link to={action.link} className="h-full block group cursor-pointer">
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 h-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-[#EB662B]/30 relative overflow-hidden">
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`w-14 h-14 ${action.iconBg} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
+                      <div className={`w-14 h-14 ${action.iconBg} rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm`}>
                         <Icon className={`h-7 w-7 ${action.iconColor}`} />
                       </div>
                       <div className="text-right">
@@ -358,9 +358,9 @@ const DashboardHome = () => {
                       {action.description}
                     </p>
 
-                    <div className="flex items-center gap-2 text-[#EB662B] font-semibold text-sm mt-auto">
-                      <span>View Details</span>
-                      <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center gap-2 text-[#EB662B] font-semibold text-sm mt-auto group-hover:gap-3 transition-all duration-300">
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">View Details</span>
+                      <ChevronRight className="h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
                     </div>
                   </div>
                 </Link>
@@ -388,7 +388,7 @@ const DashboardHome = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="text-xs font-semibold border-[#EB662B] text-[#EB662B] hover:bg-orange-50"
+                  className="text-xs font-semibold border-2 border-[#EB662B] text-[#EB662B] hover:bg-[#EB662B] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
                 >
                   View All
                   <ChevronRight className="ml-1 h-3 w-3" />
@@ -464,7 +464,7 @@ const DashboardHome = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="text-xs font-semibold border-[#EB662B] text-[#EB662B] hover:bg-orange-50"
+                  className="text-xs font-semibold border-2 border-[#EB662B] text-[#EB662B] hover:bg-[#EB662B] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
                 >
                   View All
                   <ChevronRight className="ml-1 h-3 w-3" />

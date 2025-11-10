@@ -34,6 +34,26 @@ export const fetchUsers = createAsyncThunk(
   }
 );
 
+// Async thunk to fetch user statistics (guides and clients count)
+export const fetchUserStats = createAsyncThunk(
+  "users/fetchUserStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("http://localhost:3000/api/user/stats", {
+        withCredentials: true,
+      });
+      
+      return {
+        guidesCount: response.data.guidesCount,
+        clientsCount: response.data.clientsCount,
+        totalCount: response.data.totalCount
+      };
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to fetch user stats" });
+    }
+  }
+);
+
 // Async thunk to get user by ID
 export const getUserById = createAsyncThunk(
   "users/getUserById",
@@ -70,12 +90,17 @@ const usersSlice = createSlice({
     users: [],
     selectedUser: null,
     count: 0,
+    guidesCount: 0,
+    clientsCount: 0,
+    totalUsersCount: 0,
     page: 1,
     limit: 10,
     loading: false,
+    statsLoading: false,
     userLoading: false,
     deleteLoading: {},
     error: null,
+    statsError: null,
     userError: null,
     deleteError: null,
   },
@@ -135,6 +160,21 @@ const usersSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.deleteLoading[action.meta.arg] = false;
         state.deleteError = action.payload?.message || "Failed to delete user";
+      })
+      // Fetch user stats cases
+      .addCase(fetchUserStats.pending, (state) => {
+        state.statsLoading = true;
+        state.statsError = null;
+      })
+      .addCase(fetchUserStats.fulfilled, (state, action) => {
+        state.statsLoading = false;
+        state.guidesCount = action.payload.guidesCount;
+        state.clientsCount = action.payload.clientsCount;
+        state.totalUsersCount = action.payload.totalCount;
+      })
+      .addCase(fetchUserStats.rejected, (state, action) => {
+        state.statsLoading = false;
+        state.statsError = action.payload?.message || "Failed to fetch user statistics";
       });
   },
 });

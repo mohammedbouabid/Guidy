@@ -298,10 +298,10 @@ const PacksGuid = () => {
       cell: ({ row }) => (
         <div className="flex items-center gap-1 text-xs">
           <MapPin className="w-3 h-3 text-blue-600" />
-          <span className="truncate max-w-[80px]">{row.original.startLocation || "N/A"}</span>
+          <span className="truncate max-w-20">{row.original.startLocation || "N/A"}</span>
           <span>→</span>
           <MapPin className="w-3 h-3 text-red-600" />
-          <span className="truncate max-w-[80px] ">{row.original.endLocation || "N/A"}</span>
+          <span className="truncate max-w-20 ">{row.original.endLocation || "N/A"}</span>
         </div>
       ),
     },
@@ -312,7 +312,7 @@ const PacksGuid = () => {
         const date = row.original.startDate ? new Date(row.original.startDate) : null;
         return date ? (
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <Calendar className="w-4 h-4 text-gray-500 shrink-0" />
             <span className="text-sm">
               {date.toLocaleDateString("en-GB", {
                 day: "2-digit",
@@ -371,7 +371,7 @@ const PacksGuid = () => {
   ];
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto  ">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Packs</h1>

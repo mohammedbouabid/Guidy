@@ -489,6 +489,35 @@ const changePassword = async (req, res, next) => {
   }
 };
 
+// Get user statistics (count of guides and clients)
+const getUserStats = async (req, res, next) => {
+  try {
+    // Count guides
+    const guidesCount = await User.countDocuments({ 
+      role: "guide", 
+      isDeleted: false 
+    });
+    
+    // Count clients
+    const clientsCount = await User.countDocuments({ 
+      role: "client", 
+      isDeleted: false 
+    });
+    
+    // Total count
+    const totalCount = guidesCount + clientsCount;
+    
+    res.status(200).json({
+      success: true,
+      guidesCount,
+      clientsCount,
+      totalCount
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   addUser,
   updateUser,
@@ -498,4 +527,5 @@ export {
   getUserById,
   getUser,
   changePassword,
+  getUserStats,
 };

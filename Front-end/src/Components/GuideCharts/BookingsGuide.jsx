@@ -64,7 +64,7 @@ export function BookingGuide({ filterType, selectedYear, selectedMonth, selected
   const trend = firstHalf > 0 ? (((secondHalf - firstHalf) / firstHalf) * 100).toFixed(1) : 0;
 
   return (
-    <Card className="h-full">
+    <Card className="h-full py-4">
         <CardHeader>
           <CardTitle className="text-2xl">
             {filterType === 'year' && `Reservations Analytics ${selectedYear}`}
