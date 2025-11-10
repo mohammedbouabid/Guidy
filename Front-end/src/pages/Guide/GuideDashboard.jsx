@@ -111,7 +111,7 @@ const GuideDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen ">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -142,20 +142,21 @@ const GuideDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              className="h-full"
             >
-              <Link to={stat.link}>
-                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+              <Link to={stat.link} className="h-full block group cursor-pointer">
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#EB662B]/30 h-full flex flex-col relative overflow-hidden">
                   <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500 mb-2">{stat.title}</p>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500 mb-2 font-medium">{stat.title}</p>
                       <h3 className="text-3xl font-bold text-gray-900">{stat.value}</h3>
                     </div>
-                    <div className={`${stat.iconBg} rounded-full p-3`}>
-                      <Icon className={`h-6 w-6 ${stat.iconColor}`} />
+                    <div className={`${stat.iconBg} rounded-full p-3 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                      <Icon className={`h-6 w-6 ${stat.iconColor} transition-all duration-300`} />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-xs mt-auto pt-3 border-t border-gray-100">
                     <div className={`flex items-center gap-1 ${stat.trendUp ? 'text-emerald-600' : 'text-red-600'}`}>
                       <TrendIcon className="h-3 w-3" />
                       <span className="font-semibold">{stat.trend}</span>
@@ -189,23 +190,24 @@ const GuideDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + index * 0.1 }}
                 whileHover={{ y: -2 }}
+                className="h-full"
               >
-                <Link to={action.link}>
-                  <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
-                    <div className={`w-12 h-12 ${action.iconBg} rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                <Link to={action.link} className="h-full block group cursor-pointer">
+                  <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-[#EB662B]/30 h-full flex flex-col relative overflow-hidden">
+                    <div className={`w-12 h-12 ${action.iconBg} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm`}>
                       <Icon className={`h-6 w-6 ${action.iconColor}`} />
                     </div>
 
                     <h3 className="text-lg font-bold text-gray-900 mb-2">
                       {action.title}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <p className="text-sm text-gray-500 mb-4 flex-1">
                       {action.description}
                     </p>
 
-                    <div className="flex items-center gap-2 text-[#EB662B] font-semibold text-sm">
-                      <span>Get Started</span>
-                      <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center gap-2 text-[#EB662B] font-semibold text-sm mt-auto group-hover:gap-3 transition-all duration-300">
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">Get Started</span>
+                      <ChevronRight className="h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
                     </div>
                   </div>
                 </Link>
@@ -224,10 +226,10 @@ const GuideDashboard = () => {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Recent Bookings</h2>
-            <Link to="/guide/bookingsGuide">
+            <Link to="/guide/bookingsGuide" className="cursor-pointer">
               <Button 
                 variant="outline" 
-                className="text-sm cursor-pointer font-semibold border-[#EB662B] text-[#EB662B] hover:bg-orange-50"
+                className="text-sm cursor-pointer font-semibold border-2 border-[#EB662B] text-[#EB662B] hover:bg-[#EB662B] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 View All
                 <ChevronRight className="ml-1 h-4 w-4" />
@@ -273,7 +275,7 @@ const GuideDashboard = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.9 + index * 0.05 }}
                     >
-                      <Link to="/guide/bookingsGuide">
+                      <Link to="/guide/bookingsGuide" className="cursor-pointer">
                         <div className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer group">
                           <div className="flex items-center gap-4 flex-1">
                             {/* User Avatar */}

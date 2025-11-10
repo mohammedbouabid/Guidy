@@ -208,7 +208,7 @@ const CalenderPacks = () => {
         <div
           key={`week-${i}`}
           className={`min-h-[140px] bg-white p-2 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${
-            isToday ? 'ring-2 ring-[#EB662B] ring-inset' : ''
+            isToday ? 'ring-2 ring-primary ring-inset' : ''
           }`}
         >
           <div className="text-sm font-semibold text-gray-900 mb-2">
@@ -301,7 +301,7 @@ const CalenderPacks = () => {
         <div
           key={`current-${day}`}
           className={`min-h-[140px] bg-white p-2 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${
-            isToday ? 'ring-2 ring-[#EB662B] ring-inset' : ''
+            isToday ? 'ring-2 ring-primary ring-inset' : ''
           }`}
         >
           <div className="text-sm font-semibold text-gray-900 mb-2">
@@ -386,7 +386,7 @@ const CalenderPacks = () => {
   }
 
   return (
-    <div className="p-6 bg-white min-h-screen relative">
+    <div className=" bg-white min-h-screen relative">
       {/* Overlay blur */}
       {showPopup && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 z-30" onClick={closePopup} />
@@ -432,7 +432,7 @@ const CalenderPacks = () => {
               onClick={() => setView("week")}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                 view === "week"
-                  ? "bg-[#EB662B] text-white"
+                  ? "bg-primary text-white"
                   : "text-gray-700 bgwhite border border-gray-300 hover:bg-gray-50"
               }`}
             >
@@ -442,7 +442,7 @@ const CalenderPacks = () => {
               onClick={() => setView("month")}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                 view === "month"
-                  ? "bg-[#EB662B] text-white"
+                  ? "bg-primary text-white"
                   : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
               }`}
             >
