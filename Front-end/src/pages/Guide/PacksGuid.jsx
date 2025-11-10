@@ -204,16 +204,18 @@ const PacksGuid = () => {
   // Columns definition
   const columns = [
     {
-      accessorKey: "profileImg",
-      header: "Image",
+      id: "pack",
+      header: "Pack",
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
-          <img
-            src={row.original.profileImg || "https://via.placeholder.com/80"}
-            alt={row.original.title}
-            className="w-full h-full object-cover"
-          />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 border">
+            <img
+              src={row.original.profileImg || "https://via.placeholder.com/80"}
+              alt={row.original.title || "Pack"}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       ),
     },
@@ -221,35 +223,31 @@ const PacksGuid = () => {
       accessorKey: "title",
       header: "Title",
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <span className="font-medium text-gray-900 truncate max-w-[200px]">
-            {row.original.title || "N/A"}
-          </span>
-        </div>
+        <span className="font-semibold text-gray-900 truncate max-w-[220px]">
+          {row.original.title || "N/A"}
+        </span>
       ),
     },
     {
       accessorKey: "price",
       header: "Price",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <DollarSign className="w-4 h-4 text-green-600" />
-          <span className="font-semibold text-green-600">
-            {row.original.price || 0} MAD
-          </span>
-        </div>
+        <span className="font-semibold text-[#22c55e]">
+          ${" "}
+          {Number(row.original.price || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+          })}{" "}
+          MAD
+        </span>
       ),
     },
     {
       accessorKey: "maxClients",
       header: "Capacity",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-gray-700 font-semibold">
           <Users className="w-4 h-4 text-gray-500" />
-          <span className="font-semibold text-gray-700">
-            {row.original.maxClients || 0}
-          </span>
+          <span>{row.original.maxClients || 0}</span>
         </div>
       ),
     },
