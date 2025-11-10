@@ -78,7 +78,7 @@ export function PacksCharts({ selectedYear = new Date().getFullYear(), filterTyp
   const trend = avgPacks > 0 ? (((lastMonthPacks - avgPacks) / avgPacks) * 100).toFixed(1) : 0;
 
   return (
-    <Card className="w-full max-w-full min-w-0">
+    <Card className="w-full max-w-full py-4 min-w-0">
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           Packs Activity {selectedYear}
