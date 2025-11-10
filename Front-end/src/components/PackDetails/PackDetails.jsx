@@ -1,5 +1,5 @@
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 import React, { useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { CalendarIcon, ClockIcon, UsersIcon } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPackBookingStatus } from "@/store/slices/bookingSlice";

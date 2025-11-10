@@ -6,6 +6,8 @@ import {
   getBookingsByGuide,
   cancelBooking,
   getAllBookings,
+  getMonthlyBookingStats,
+  getBookingStatusStats,
   getPackBookingStatus
 } from '../Controllers/bookingController.js';
 import { verifyToken } from '../Middlewares/verifyJwtToken.js';
@@ -13,6 +15,8 @@ import { authorizeRoles } from '../Middlewares/authorizeRole.js';
 
 const router = express.Router();
 
+router.get('/stats/monthly', verifyToken, authorizeRoles(["guide","admin"]), getMonthlyBookingStats);
+router.get('/stats/status', verifyToken, authorizeRoles(["guide","admin"]), getBookingStatusStats);
 router.get('/guide', verifyToken, authorizeRoles(["guide","admin"]), getBookingsByGuide);
 router.get('/user', verifyToken, authorizeRoles(["client","admin"]), getBookingsByUser);
 router.get('/all', verifyToken , authorizeRoles(["admin"]), getAllBookings);

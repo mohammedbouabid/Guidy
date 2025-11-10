@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 const faqs = [

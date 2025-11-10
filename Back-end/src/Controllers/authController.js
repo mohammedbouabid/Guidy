@@ -134,7 +134,8 @@ const login = async (req, res, next) => {
     res.cookie("userInfo", JSON.stringify({
       name: user.name,
       email: user.email,
-      phone:user.phone,
+      phone: user.phone,
+      cin: user.cin,
       profileImage: user.profileImage || "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/profile-icon-vector_lxkuyo.jpg",
       role: user.role,
       id: user._id
@@ -222,10 +223,21 @@ const refreshAccessToken = async (req, res, next) => {
 // User Logout
 const logout = async (req, res, next) => {
   try {
-  
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
-    res.clearCookie("userInfo");
+    // Clear cookies with the same options they were set with
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      path: "/"
+    };
+
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+    res.clearCookie("userInfo", {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      path: "/"
+    });
 
     res.status(200).json({ success: true, message: "logged out successfully" });
   } catch (error) {

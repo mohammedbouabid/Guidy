@@ -1,8 +1,7 @@
 // src/pages/PackDetailsPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 
 // Components
 import ImageGallery from "@/components/PackDetails/ImageGallery";
@@ -13,6 +12,7 @@ import Destinations from "@/components/PackDetails/Destinations";
 import BookingCard from "@/components/PackDetails/BookingCard";
 import DestinationsMap from "@/components/PackDetails/DestinationsMap";
 import FaqSection from "@/components/PackDetails/FaqSection";
+import { Button } from "@/Components/ui/components/ui/button";
 import ReviewSection from "@/components/PackDetails/ReviewSection";
 
 export default function PackDetailsPage() {

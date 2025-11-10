@@ -4,13 +4,13 @@ import cloudinary from "../Config/CloudinaryConfig.js";
 
 // Configure Cloudinary storage
 const storage = new CloudinaryStorage({
-  cloudinary,
+  cloudinary,  
   params: async (req, file) => {
     return {
       folder: "GuidePlace",
       allowed_formats: ["jpg", "png", "jpeg", "webp"],
       public_id: `${Date.now()}_${file.originalname}`,
-      resource_type: "image",
+      resource_type: "image",   
       overwrite: true,
     };
   },

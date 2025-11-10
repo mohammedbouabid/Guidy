@@ -47,6 +47,46 @@ export const fetchGuideBookings = createAsyncThunk(
   }
 );
 
+// Fetch guide bookings with advanced filters
+export const fetchGuideBookingsAdvanced = createAsyncThunk(
+  "booking/fetchGuideAdvanced",
+  async ({ 
+    page = 1, 
+    limit = 10, 
+    search = "", 
+    sortField = "", 
+    sortOrder = "",
+    isVip = "",
+    statusFilter = "", // Combined status filter
+    dateFilter = ""
+  } = {}, { rejectWithValue }) => {
+    try {
+      const params = { page, limit };
+      if (search) params.search = search;
+      if (sortField) params.sortField = sortField;
+      if (sortOrder) params.sortOrder = sortOrder;
+      if (isVip !== "") params.isVip = isVip;
+      
+      // Convert statusFilter to isCancelled and isCompleted params
+      if (statusFilter === "cancelled") {
+        params.isCancelled = "true";
+      } else if (statusFilter === "completed") {
+        params.isCompleted = "true";
+      } else if (statusFilter === "active") {
+        params.isCancelled = "false";
+        params.isCompleted = "false";
+      }
+      
+      if (dateFilter) params.dateFilter = dateFilter;
+      
+      const res = await api.get("/bookings/guide", { params });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch guide bookings");
+    }
+  }
+);
+
 // Récupérer les bookings du client connecté
 export const fetchUserBookings = createAsyncThunk(
   "booking/fetchUserBookings",
@@ -99,7 +139,59 @@ export const cancelBooking = createAsyncThunk(
   }
 );
 
-// ========== NEW ACTIONS FOR ADMIN PAGE ==========
+// Récupérer les statistiques mensuelles avec filtres
+export const fetchMonthlyStats = createAsyncThunk(
+  "booking/fetchMonthlyStats",
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      
+      const res = await api.get("/bookings/stats/monthly", { params });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch monthly stats");
+    }
+  }
+);
+
+// Récupérer les statistiques de statut des réservations
+export const fetchStatusStats = createAsyncThunk(
+  "booking/fetchStatusStats",
+  async ({ year, filterType, month, week } = {}, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (filterType) params.filterType = filterType;
+      if (month) params.month = month;
+      if (week) params.week = week;
+      
+      console.log("🔄 Fetching booking status stats with params:", params);
+      const res = await api.get("/bookings/stats/status", { params });
+      console.log("✅ Booking status stats response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error fetching booking status stats:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to fetch status stats");
+    }
+  }
+);
+
+// Delete booking (admin only)
+export const deleteBooking = createAsyncThunk(
+  "booking/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/bookings/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to delete booking");
+    }
+  }
+);
 
 // Fetch bookings with advanced filters for admin
 export const fetchBookingsAdmin = createAsyncThunk(
@@ -141,23 +233,13 @@ export const fetchBookingsAdmin = createAsyncThunk(
   }
 );
 
-// Delete booking (admin only)
-export const deleteBooking = createAsyncThunk(
-  "booking/delete",
-  async (id, { rejectWithValue }) => {
-    try {
-      await api.delete(`/bookings/${id}`);
-      return id;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to delete booking");
-    }
-  }
-);
-
 const initialState = {
   items: [],
   current: null,
+  monthlyStats: [],
+  statusStats: [],
   loading: false,
+  statusLoading: false,
   error: null,
   success: false,
   page: 1,
@@ -290,6 +372,46 @@ const bookingSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Fetch Guide Bookings Advanced (with filters)
+      .addCase(fetchGuideBookingsAdvanced.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGuideBookingsAdvanced.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        
+        if (payload && payload.success) {
+          state.items = payload.data || [];
+          state.totalDocs = payload.count || 0;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (payload && payload.data && Array.isArray(payload.data)) {
+          state.items = payload.data;
+          state.totalDocs = payload.count || payload.data.length;
+          state.page = payload.page || 1;
+          state.limit = payload.limit || 10;
+          state.totalPages = payload.totalPages || 1;
+        } else if (Array.isArray(payload)) {
+          state.items = payload;
+          state.totalDocs = payload.length;
+          state.page = 1;
+          state.limit = 10;
+          state.totalPages = 1;
+        } else {
+          state.items = [];
+          state.totalDocs = 0;
+          state.page = 1;
+          state.totalPages = 1;
+        }
+      })
+      .addCase(fetchGuideBookingsAdvanced.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.items = [];
+      })
+
       // Fetch User Bookings
       .addCase(fetchUserBookings.pending, (state) => {
         state.loading = true;
@@ -377,6 +499,34 @@ const bookingSlice = createSlice({
       })
       .addCase(cancelBooking.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch Monthly Stats
+      .addCase(fetchMonthlyStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMonthlyStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.monthlyStats = action.payload.data || [];
+      })
+      .addCase(fetchMonthlyStats.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch Status Stats
+      .addCase(fetchStatusStats.pending, (state) => {
+        state.statusLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchStatusStats.fulfilled, (state, action) => {
+        state.statusLoading = false;
+        state.statusStats = action.payload.data || [];
+      })
+      .addCase(fetchStatusStats.rejected, (state, action) => {
+        state.statusLoading = false;
         state.error = action.payload;
       })
 

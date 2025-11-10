@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/components/ui/card";
 
 export default function Destinations({ places }) {
   if (!places || places.length === 0) return null;

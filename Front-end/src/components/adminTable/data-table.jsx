@@ -15,8 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+
 import {
   Trash2,
   ChevronDown,
@@ -35,6 +34,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "../ui/components/ui/button";
+import { Input } from "../ui/components/ui/input";
 
 export function DataTable({
   columns,
