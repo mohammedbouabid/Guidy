@@ -75,7 +75,7 @@ if (role === "admin") {
     { title: "Guides", url: "guides", icon: UsersRound },
     { title: "Clients", url: "clients", icon: UsersRound },
     { title: "Destinations", url: "destinations", icon: MapPinned },
-    { title: "Tours", url: "#", icon: Route },
+    { title: "Tours", url: "packs", icon: Route },
     { title: "Bookings", url: "bookings", icon: BookmarkCheck },
     { title: "Ratings", url: "ratings", icon: MessageSquareHeart },
   ];
