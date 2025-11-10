@@ -303,7 +303,7 @@ const PacksGuid = () => {
           <span className="truncate max-w-[80px]">{row.original.startLocation || "N/A"}</span>
           <span>→</span>
           <MapPin className="w-3 h-3 text-red-600" />
-          <span className="truncate max-w-[80px]">{row.original.endLocation || "N/A"}</span>
+          <span className="truncate max-w-[80px] ">{row.original.endLocation || "N/A"}</span>
         </div>
       ),
     },
