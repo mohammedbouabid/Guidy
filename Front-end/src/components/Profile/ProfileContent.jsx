@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { useSearchParams, useLocation, useNavigate } from "react-router-dom"
+import { useSearchParams, useNavigate } from "react-router-dom"
 import {
   Card,
   CardContent,
@@ -40,8 +40,6 @@ import { updateUserProfile } from "@/lib/updateUserProfile"
 import { hydrateUserFromCookie } from "@/store/slices/AuthSlice"
 import { toast } from "sonner"
 import { getUserFromCookie } from "@/lib/getUserFromCookie"
-import { fetchUserBookings, cancelBooking } from "@/store/slices/bookingSlice"
-import BookingDetailsModal from "@/components/Bookings/BookingDetailsModal"
 
 
 
@@ -49,9 +47,7 @@ import BookingDetailsModal from "@/components/Bookings/BookingDetailsModal"
 export default function ProfileContent() {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.Auth)
-  const { items: bookings, loading: bookingsLoading } = useSelector((state) => state.booking)
   const [searchParams] = useSearchParams()
-  const location = useLocation()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "personal")
   const [formData, setFormData] = useState({
@@ -81,27 +77,12 @@ export default function ProfileContent() {
     confirm: false,
   })
 
-  // Billing modal states
-  const [billingOpen, setBillingOpen] = useState(false)
-  const [detailsModal, setDetailsModal] = useState({ isOpen: false, booking: null })
-  const [cancelDialog, setCancelDialog] = useState({ isOpen: false, bookingId: null })
-
   useEffect(() => {
     const tab = searchParams.get("tab")
     if (tab) {
       setActiveTab(tab)
     }
   }, [searchParams])
-
-  // Open billing modal when visiting /profile/billing
-  useEffect(() => {
-    if (location.pathname === "/profile/billing") {
-      setBillingOpen(true)
-      dispatch(fetchUserBookings({}))
-    } else {
-      setBillingOpen(false)
-    }
-  }, [location.pathname, dispatch])
 
   useEffect(() => {
     if (user) {
@@ -135,30 +116,6 @@ export default function ProfileContent() {
     }
 
     setFormData((prev) => ({ ...prev, [id]: value }))
-  }
-
-  // Billing modal helpers
-  const openDetailsModal = (booking) => setDetailsModal({ isOpen: true, booking })
-  const closeDetailsModal = () => setDetailsModal({ isOpen: false, booking: null })
-  const openCancelDialog = (booking) => setCancelDialog({ isOpen: true, bookingId: booking._id })
-  const closeCancelDialog = () => setCancelDialog({ isOpen: false, bookingId: null })
-  const closeBilling = () => {
-    setBillingOpen(false)
-    navigate('/profile')
-  }
-
-  const handleCancelBooking = () => {
-    if (!cancelDialog.bookingId) return
-    dispatch(cancelBooking(cancelDialog.bookingId))
-      .unwrap()
-      .then(() => {
-        toast.success("Booking cancelled successfully")
-        dispatch(fetchUserBookings({}))
-      })
-      .catch((err) => {
-        toast.error(err?.message || "Error cancelling booking")
-      })
-      .finally(() => closeCancelDialog())
   }
 
   const hasChanges = user
@@ -745,102 +702,6 @@ export default function ProfileContent() {
           </CardContent>
         </Card>
       </TabsContent>
-      {/* Billing Modal Popout */}
-      {billingOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">My Bookings</h2>
-              <Button variant="outline" onClick={closeBilling}>Close</Button>
-            </div>
-            <div className="p-6">
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="text-left border-b">
-                      <th className="px-3 py-2">Trip</th>
-                      <th className="px-3 py-2">Type</th>
-                      <th className="px-3 py-2">Status</th>
-                      <th className="px-3 py-2">Booked On</th>
-                      <th className="px-3 py-2">Spots</th>
-                      <th className="px-3 py-2">Total</th>
-                      <th className="px-3 py-2 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookingsLoading ? (
-                      <tr>
-                        <td colSpan="7" className="px-3 py-4 text-center text-gray-500">Loading...</td>
-                      </tr>
-                    ) : bookings && bookings.length > 0 ? (
-                      bookings.map((booking) => (
-                        <tr key={booking._id} className={`border-b ${booking.isCancelled ? 'opacity-60' : ''}`}>
-                          <td className="px-3 py-3">
-                            <div className="font-medium text-gray-900">{booking.packID?.title || 'N/A'}</div>
-                            <div className="text-xs text-gray-500">
-                              {booking.packID?.startLocation || '-'} → {booking.packID?.endLocation || '-'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.isVip ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                              {booking.isVip ? 'VIP' : 'Normal'}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.isCancelled ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                              {booking.isCancelled ? 'Cancelled' : 'Active'}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 text-gray-600 text-xs">
-                            {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
-                          </td>
-                          <td className="px-3 py-3 text-gray-800 font-semibold">{booking.spotsBooked || 1}</td>
-                          <td className="px-3 py-3 text-gray-800 font-semibold">{(booking.packID?.price || 0) * (booking.spotsBooked || 1)}$</td>
-                          <td className="px-3 py-3">
-                            <div className="flex justify-center space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => openDetailsModal(booking)}>View</Button>
-                              {!booking.isCancelled && (
-                                <Button variant="destructive" size="sm" onClick={() => openCancelDialog(booking)}>Cancel</Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="px-3 py-4 text-center text-gray-500">No bookings found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Details Modal */}
-      {detailsModal.isOpen && (
-        <BookingDetailsModal
-          isOpen={detailsModal.isOpen}
-          booking={detailsModal.booking}
-          onClose={closeDetailsModal}
-        />
-      )}
-
-      {/* Simple Cancel Dialog */}
-      {cancelDialog.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[360px]">
-            <h3 className="text-lg font-semibold mb-2">Cancel booking?</h3>
-            <p className="text-sm text-gray-600 mb-4">This will mark the booking as cancelled.</p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={closeCancelDialog}>Close</Button>
-              <Button variant="destructive" onClick={handleCancelBooking}>Confirm</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </Tabs>
   )
 }
