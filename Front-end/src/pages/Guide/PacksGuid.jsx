@@ -9,7 +9,7 @@ import { fetchGuideBookings } from "@/store/slices/bookingSlice";
 import { DataTable } from "@/components/adminTable/data-table";
 import PackDetailsModal from "@/components/Packs/PackDetailsModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { toast } from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 
 const PacksGuid = () => {
   const navigate = useNavigate();
@@ -193,11 +193,11 @@ const PacksGuid = () => {
     dispatch(deletePack(deleteDialog.packId))
       .unwrap()
       .then(() => {
-        toast.success('Pack deleted successfully');
+        showSuccessToast('Pack deleted successfully');
         setDeleteDialog({ isOpen: false, packId: null, packTitle: '' });
       })
       .catch((err) => {
-        toast.error(err?.message || 'Error deleting pack');
+        showErrorToast(err?.message || 'Error deleting pack');
       });
   };
 

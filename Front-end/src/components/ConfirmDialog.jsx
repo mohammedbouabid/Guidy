@@ -38,7 +38,7 @@ const ConfirmDialog = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn p-6">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md transform transition-all animate-scaleIn">
         {/* Header moderne */}
-        <div className={`relative bg-gradient-to-r ${config.gradient} px-8 py-5 flex items-center justify-between`}>
+        <div className={`relative rounded-t-2xl bg-gradient-to-r ${config.gradient} px-8 py-5 flex items-center justify-between`}>
           <div className="flex items-center gap-3">
             <IconComponent size={24} className="text-white" strokeWidth={2.5} />
             <h2 className="text-xl font-bold text-white">{title}</h2>
@@ -52,7 +52,7 @@ const ConfirmDialog = ({
         </div>
 
         {/* Body */}
-        <div className="p-8 bg-gray-50">
+        <div className="p-8 ">
           <p className="text-gray-700 leading-relaxed text-center">{message}</p>
         </div>
 

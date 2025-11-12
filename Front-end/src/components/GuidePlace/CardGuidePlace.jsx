@@ -5,7 +5,6 @@ import {
   Eye,
   Edit,
   Image,
-  CheckCircle,
 } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
@@ -16,7 +15,7 @@ import GuideDetailsModal from "./GuideDetailsModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useDispatch } from "react-redux";
 import { deleteGuidePlace } from "../../store/slices/guidePlaceSlice";
-import { toast } from "sonner";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 import { useNavigate } from "react-router-dom";
 
 function CardGuidePlace({ place }) {
@@ -54,35 +53,9 @@ function CardGuidePlace({ place }) {
     try {
       await dispatch(deleteGuidePlace(deleteDialog.placeId)).unwrap();
 
-      // Show deletion toast with red theme
-      toast(
-        <div className="flex items-center w-full bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
-          <div className="p-2 bg-red-600/20 rounded-full mr-3">
-            <Trash2 className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold">Guide Place Deleted</p>
-            <p className="text-red-100 text-sm">
-              The place has been permanently removed
-            </p>
-          </div>
-        </div>,
-        {
-          duration: 3000,
-          position: "bottom-right",
-          style: {
-            background: "transparent",
-            border: "none",
-            padding: "0",
-            boxShadow: "none",
-          },
-        }
-      );
+      showSuccessToast("Guide Place Deleted", "The place has been permanently removed.");
     } catch (error) {
-      toast.error("Failed to delete place", {
-        duration: 4000,
-        position: "bottom-right",
-      });
+      showErrorToast("Failed to delete place", "Please try again later.");
     }
   };
 
