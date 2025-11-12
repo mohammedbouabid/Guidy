@@ -24,6 +24,7 @@ import UpdateGuidePlaceForm from "@/Components/GuidePlace/UpdateGuidePlaceForm";
 import AddPack from "@/pages/Guide/AddPack";
 import UpdatePack from "@/pages/Guide/UpdatePack";
 import ProfilePage from "@/pages/Home/ProfilePage";
+import ProfileBillingPage from "@/pages/Home/ProfileBillingPage";
 import PackDetails from "@/pages/Guide/PackDetails";
 import GuideBookings from "../pages/Guide/GuideBookings";
 import BookingDetailsModal from "@/Components/Bookings/BookingDetailsModal";
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
       {path:"/profile", element:<ProfilePage/>},
-      {path:"/profile/billing", element:<ProfilePage/>},
+      {path:"/profile/billing", element:<ProfileBillingPage/>},
       { path: "/packs/:id", element: <PackDetailsPage /> },
       {path:"/filter", element:<FilterPage/>},
        ],
