@@ -1,5 +1,5 @@
 import express from "express";
-import { addUser, updateUser, deleteUserById, deleteManyUsers, getAllUsers, getUserById, getUser , changePassword } from "../Controllers/userController.js";
+import { addUser, updateUser, deleteUserById, deleteManyUsers, getAllUsers, getUserById, getUser , changePassword, getUserStats } from "../Controllers/userController.js";
 import { createUserValidation, updateUserValidation, deleteManyUsersValidation } from "../Validations/userValidator.js";
 import { validate } from "../Middlewares/userValidate.js";
 import { verifyToken } from "../Middlewares/verifyJwtToken.js";
@@ -20,6 +20,7 @@ router.put("/change-password", verifyToken, authorizeRoles(["admin", "guide", "c
 router.delete("/user/:id", verifyToken, authorizeRoles(["admin", "client", "guide"]), deleteUserById, logout);
 router.delete("/user", verifyToken, authorizeRoles(["admin"]), deleteManyUsersValidation, validate, deleteManyUsers);
 
+router.get("/user/stats", verifyToken, authorizeRoles(["admin"]), getUserStats);
 router.get("/user", verifyToken, authorizeRoles(["admin"]), getAllUsers);
 router.get("/user/:id", verifyToken, authorizeRoles(["admin","guide", "client"]), getUserById);
 router.get("/user/", verifyToken, authorizeRoles(["admin","guide", "client"]), getUser);

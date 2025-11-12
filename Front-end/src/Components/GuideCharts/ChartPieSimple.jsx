@@ -88,7 +88,7 @@ export function ChartPieSimple({ filterType, selectedYear, selectedMonth, select
   })
 
   return (
-    <Card className="w-full max-w-full min-w-0">
+    <Card className="w-full max-w-full min-w-0 py-4">
       <CardHeader>
         <CardTitle className="text-xl font-semibold">Booking Status Distribution</CardTitle>
         <CardDescription>Total bookings: {totalBookings}</CardDescription>
