@@ -16,6 +16,7 @@ import { verifyToken } from "../Middlewares/verifyJwtToken.js";
 import upload, { handleUploadErrors } from "../Middlewares/uploadsMultiple.js";
 const router = express.Router();  
 
+router.delete("/:id", verifyToken, authorizeRoles(["guide","admin"]),deleteGuidePlace);
 
 router.post(
   "/",
@@ -44,6 +45,5 @@ verifyToken,
   validate(updateGuidePlaceSchema),
   updateGuidePlace
 );
-router.delete("/:id", verifyToken, authorizeRoles(["guide","admin"]),deleteGuidePlace);
 
 export default router;

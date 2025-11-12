@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSelector } from "react-redux";
 import { LogoutUser, hydrateUserFromCookie } from "@/store/slices/AuthSlice";
-import { toast } from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 
 // ---- Dynamic Menu ----
 
@@ -121,11 +121,11 @@ if (role === "admin") {
       // Clear Redux state
       dispatch(hydrateUserFromCookie(null));
       
-      toast.success('Déconnexion réussie');
+      showSuccessToast('Déconnexion réussie');
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
-      toast.error('Erreur lors de la déconnexion');
+      showErrorToast('Erreur lors de la déconnexion');
       
       // Even if API fails, clear local state and redirect
       document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";

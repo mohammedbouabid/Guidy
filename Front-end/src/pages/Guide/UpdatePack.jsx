@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Image as ImageIcon, Loader2, X, Search, MapPin, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchGuidePlacesForGuide } from '@/store/slices/guidePlaceSlice';
 import { fetchPackById, updatePack } from '@/store/slices/packSlice';
-import { toast } from 'react-hot-toast';
+import { showErrorToast, showSuccessToast } from '@/utils/toastNotifications.jsx';
 
 const inputStyles = (error) => `
   w-full px-4 py-3 rounded-lg bg-gray-50 
@@ -68,7 +68,7 @@ export default function UpdatePack() {
         setExistingImage(p.profileImg || '');
       })
       .catch((e) => {
-        toast.error(e?.message || 'Failed to load pack');
+        showErrorToast(e?.message || 'Failed to load pack');
       });
   }, [dispatch, id]);
 
@@ -164,7 +164,7 @@ export default function UpdatePack() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error('Please fix the form errors');
+      showErrorToast('Please fix the form errors');
       return;
     }
     const fd = new FormData();
@@ -182,10 +182,10 @@ export default function UpdatePack() {
 
     try {
       await dispatch(updatePack({ id, formData: fd })).unwrap();
-      toast.success('Pack mis à jour avec succès');
+      showSuccessToast('Pack mis à jour avec succès');
       navigate('/guide/PacksGuide');
     } catch (err) {
-      toast.error(err?.message || 'Échec de la mise à jour du pack');
+      showErrorToast(err?.message || 'Échec de la mise à jour du pack');
     }
   };
 

@@ -17,7 +17,7 @@ import {
   Package,
 } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 
 const PacksAdmin = () => {
   const dispatch = useDispatch();
@@ -177,11 +177,11 @@ const handleView = async (packId) => {
     setDeleteLoading((prev) => ({ ...prev, [pack._id]: true }));
     try {
       await dispatch(deletePack(pack._id)).unwrap();
-      toast.success(`Pack "${pack.title}" deleted`);
+      showSuccessToast("Pack deleted successfully", `"${pack.title}" has been removed.`);
       setDeleteDialog({ isOpen: false, pack: null });
       setShowDetailsModal(false);
     } catch (error) {
-      toast.error(error?.message || "Failed to delete pack");
+      showErrorToast(error?.message || "Failed to delete pack");
     } finally {
       setDeleteLoading((prev) => ({ ...prev, [pack._id]: false }));
     }

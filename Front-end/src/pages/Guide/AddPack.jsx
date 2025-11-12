@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Image as ImageIcon, Loader2, X, Search, MapPin, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchGuidePlacesForGuide } from '@/store/slices/guidePlaceSlice';
 import { createPack } from '@/store/slices/packSlice';
-import { toast } from 'react-hot-toast';
+import { showErrorToast, showSuccessToast } from '@/utils/toastNotifications.jsx';
 
 const inputStyles = (error) => `
   w-full px-4 py-3 rounded-lg bg-gray-50 
@@ -141,7 +141,7 @@ export default function AddPack() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error('Please fix the form errors');
+      showErrorToast('Please fix the form errors');
       return;
     }
     const fd = new FormData();
@@ -159,10 +159,10 @@ export default function AddPack() {
 
     try {
       await dispatch(createPack(fd)).unwrap();
-      toast.success('Pack créé avec succès');
+      showSuccessToast('Pack créé avec succès');
       navigate('/guide/PacksGuide');
     } catch (err) {
-      toast.error(err?.message || 'Échec de la création du pack');
+      showErrorToast(err?.message || 'Échec de la création du pack');
     }
   };
 
