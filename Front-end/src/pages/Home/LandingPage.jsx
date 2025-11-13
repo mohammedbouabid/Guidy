@@ -5,37 +5,74 @@ import PromoBanner from "@/components/LandingPage/PromoBanner"
 import FeaturedGuides from "@/components/LandingPage/FeaturedGuides"
 import CustomerReviewsSection from "@/components/LandingPage/CustomerReviewsSection"
 import LogosCarousel from "@/components/LandingPage/LogosCarousel"
+import StatsSection from "@/components/LandingPage/StatsSection"
+import PopularDestinations from "@/components/LandingPage/PopularDestinations"
+import HowItWorks from "@/components/LandingPage/HowItWorks"
+import NewsletterSection from "@/components/LandingPage/NewsletterSection"
+import TravelStatsSection from "@/components/LandingPage/TravelStatsSection"
 import FadeInSection from "@/components/FadeInSection"
 
 const Home = () => {
   return (
     <>
+      {/* Hero Section */}
       <FadeInSection>
         <HeroSection />
       </FadeInSection>
 
-      <FadeInSection delay={0.1}>
+      {/* Stats Section - NEW with real data */}
+      {/* <FadeInSection delay={0.1}>
+        <StatsSection />
+      </FadeInSection> */}
+
+      {/* Why Choose Us */}
+      <FadeInSection delay={0.2}>
         <WhyChooseUs />
       </FadeInSection>
 
+      {/* Popular Destinations - NEW with real data */}
+      <FadeInSection delay={0.2}>
+        <PopularDestinations />
+      </FadeInSection>
+
+      {/* Featured Packs Section */}
       <FadeInSection delay={0.2}>
         <FeaturedPacksSection />
       </FadeInSection>
 
+      {/* How It Works - NEW */}
+      <FadeInSection delay={0.2}>
+        <HowItWorks />
+      </FadeInSection>
+
+      {/* Travel Stats Section - NEW with real data */}
+      <FadeInSection delay={0.2}>
+        <TravelStatsSection />
+      </FadeInSection>
+
+      {/* Logos Carousel */}
       <FadeInSection delay={0.3}>
         <LogosCarousel />
       </FadeInSection>
 
-      <FadeInSection delay={0.3}>
+      {/* Promo Banner */}
+      <FadeInSection delay={0.4}>
         <PromoBanner/>
       </FadeInSection>
 
-      <FadeInSection delay={0.5}>
+      {/* Featured Guides */}
+      <FadeInSection delay={0.4}>
         <FeaturedGuides />
       </FadeInSection>
 
-      <FadeInSection delay={0.6}>
+      {/* Customer Reviews */}
+      <FadeInSection delay={0.4}>
         <CustomerReviewsSection />
+      </FadeInSection>
+
+      {/* Newsletter Section - NEW */}
+      <FadeInSection delay={0.3}>
+        <NewsletterSection />
       </FadeInSection>
     </>
   )

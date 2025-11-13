@@ -188,12 +188,7 @@ export const deleteGuidePlace = async (req, res) => {
     if (!place) {
       return res.status(404).json({ message: "Place not found" });
     }
-    // for (const imageUrl of place.images) {
-    //   // 🧩 Extraire le public_id de l’image à partir de son URL
-    //   const publicId = imageUrl.split("/").pop().split(".")[0];
-    //   await CloundinaryConfig.uploader.destroy(publicId);
-    // }
-    // Delete from database
+    
     await GuidePlace.findByIdAndDelete(req.params.id);
 
     // Supprimer les fichiers physiques
@@ -204,6 +199,28 @@ export const deleteGuidePlace = async (req, res) => {
     res.json({
       success: true, 
       message: "Place deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// Get popular destinations for landing page (no authentication required)
+export const getPopularDestinations = async (req, res) => {
+  try {
+    const places = await GuidePlace.find()
+      .populate("guideID", "name")
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .select("name location city country images description");
+
+    res.json({
+      success: true,
+      places,
     });
   } catch (error) {
     res.status(500).json({

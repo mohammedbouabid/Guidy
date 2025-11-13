@@ -49,7 +49,7 @@ export default function PackDetailsModal({ pack, loading, onClose, onEdit, onDel
         ) : pack ? (
           <div className="flex flex-col lg:flex-row h-full max-h-[90vh]">
             {/* Left Side - Image & Quick Info */}
-            <div className="lg:w-3/7 bg-gradient-to-br from-[#EB662B] to-[#ff8c5a] p-8 flex flex-col items-center justify-center text-white">
+            <div className="lg:w-3/7 bg-gradient-to-br from-parimary to-[#ff8c5a] p-8 flex flex-col items-center justify-center text-white">
               <div className="flex flex-col justify-between h-full w-full">
                 {/* Pack Image */}
                 <div className="flex justify-center mb-6">
