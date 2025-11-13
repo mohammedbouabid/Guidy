@@ -24,7 +24,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/components/ui/button"
 import { ChevronDownIcon } from "@radix-ui/react-icons"
-import { Home, Package, Users, Info, User, LayoutDashboard } from "lucide-react"
+import { Home, Package, Users, Info, User, LayoutDashboard,History } from "lucide-react"
 
 const Navbar = ({ onLogout }) => {
   const dispatch = useDispatch()
@@ -37,6 +37,7 @@ const Navbar = ({ onLogout }) => {
     { to: "/about", label: "À propos", shortLabel: "About", icon: Info },
     { to: "/filter", label: "Nos packs", shortLabel: "Packs", icon: Package },
     { to: "/guides", label: "Nos guides", shortLabel: "Guides", icon: Users },
+    { to: "/profile/billing", label: "Historic", shortLabel: "Guides", icon: History },
   ]
 
   useEffect(() => {

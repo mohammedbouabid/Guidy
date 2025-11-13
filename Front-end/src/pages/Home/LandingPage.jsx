@@ -4,8 +4,6 @@ import { FeaturedPacksSection } from "@/components/LandingPage/FeaturedToursSect
 import PromoBanner from "@/components/LandingPage/PromoBanner"
 import FeaturedGuides from "@/components/LandingPage/FeaturedGuides"
 import CustomerReviewsSection from "@/components/LandingPage/CustomerReviewsSection"
-import LogosCarousel from "@/components/LandingPage/LogosCarousel"
-import StatsSection from "@/components/LandingPage/StatsSection"
 import PopularDestinations from "@/components/LandingPage/PopularDestinations"
 import HowItWorks from "@/components/LandingPage/HowItWorks"
 import NewsletterSection from "@/components/LandingPage/NewsletterSection"
@@ -50,10 +48,6 @@ const Home = () => {
         <TravelStatsSection />
       </FadeInSection>
 
-      {/* Logos Carousel */}
-      <FadeInSection delay={0.3}>
-        <LogosCarousel />
-      </FadeInSection>
 
       {/* Promo Banner */}
       <FadeInSection delay={0.4}>
@@ -66,9 +60,9 @@ const Home = () => {
       </FadeInSection>
 
       {/* Customer Reviews */}
-      <FadeInSection delay={0.4}>
+      {/* <FadeInSection delay={0.4}>
         <CustomerReviewsSection />
-      </FadeInSection>
+      </FadeInSection> */}
 
       {/* Newsletter Section - NEW */}
       <FadeInSection delay={0.3}>

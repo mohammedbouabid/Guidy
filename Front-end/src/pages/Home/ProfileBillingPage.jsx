@@ -154,7 +154,7 @@ export default function ProfileBillingPage() {
             </div>
           </div>
 
-          <div className="w-full rounded-t-2xl bg-gradient-to-r from-[#fff8f4] to-white p-4 sm:p-5 shadow-sm border border-[#ffe2d6]">
+          <div className="w-full rounded-2xl b p-4 sm:p-5  shadow-sm border border-[#ffe2d6]">
   <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
 
     {/* Trip Name */}

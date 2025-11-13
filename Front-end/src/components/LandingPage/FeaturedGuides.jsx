@@ -17,9 +17,9 @@ const FeaturedGuides = () => {
     <section className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
       <div className="max-w-screen-2xl mx-auto">
         {/* Header */}
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#05073c] leading-tight mb-6">
-          Featured Guides
-        </h2>
+                  <h2 className="text-2xl text-center  sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8">
+            Featured <span className="text-[#EB662B]">Guides</span>
+          </h2>
 
         {/* Guides Grid */}
         {guidesLoading ? (
