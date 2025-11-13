@@ -45,6 +45,20 @@ export const fetchGuidePlacesForGuide = createAsyncThunk(
   }
 );
 
+// Fetch popular destinations for landing page (no auth required)
+export const fetchPopularDestinations = createAsyncThunk(
+  'guidePlace/fetchPopular',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/guide-places/popular');
+      return response.data;
+      
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Une erreur est survenue');
+    }   
+  }
+);
+
 export const createGuidePlace = createAsyncThunk(
   'guidePlace/create',
   async (formData, { rejectWithValue }) => {   
@@ -109,6 +123,7 @@ export const deleteGuidePlace = createAsyncThunk(
 const initialState = {
   places: [],
   placesForGuide: [],
+  popularPlaces: [], // Nouveau champ pour les destinations populaires
   currentPlace: null,
   selectedPlace: null,
   loading: false,
@@ -193,6 +208,20 @@ const guidePlaceSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Fetch popular destinations
+      .addCase(fetchPopularDestinations.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPopularDestinations.fulfilled, (state, action) => {
+        state.loading = false;
+        state.popularPlaces = action.payload.places; // Stockage dans popularPlaces
+      })
+      .addCase(fetchPopularDestinations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       // Get place by ID
       .addCase(getGuidePlaceById.pending, (state) => {
         state.placeLoading = true;
@@ -247,6 +276,7 @@ const guidePlaceSlice = createSlice({
       .addCase(deleteGuidePlace.fulfilled, (state, action) => {
         state.deleteLoading[action.payload] = false;
         state.places = state.places.filter(place => place._id !== action.payload);
+        state.placesForGuide = state.placesForGuide.filter(place => place._id !== action.payload);
         state.count = Math.max(0, state.count - 1);
         state.success = true;
       })

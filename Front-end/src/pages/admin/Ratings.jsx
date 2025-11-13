@@ -15,12 +15,21 @@ import {
   clearSelectedRating,
 } from "@/store/slices/ratingSlice";
 import { Star, User, Package, Calendar, Clock, Route } from "lucide-react";
-import Swal from "sweetalert2";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 import RatingDetailsModal from "@/components/adminHelpers/RatingDetailsModal";
+
+const initialDeleteDialog = {
+  isOpen: false,
+  ratingId: null,
+  reviewer: "",
+  source: "table",
+};
 
 export default function RatingsPage() {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(initialDeleteDialog);
 
   const {
     ratings,
@@ -88,40 +97,20 @@ export default function RatingsPage() {
     dispatch(setSortConfig({ field, order }));
   };
 
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You want to delete this rating",
-      icon: "warning",
-      iconColor: "red",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: {
-        confirmButton:
-          "border border-red-600 text-red-600 font-bold px-4 py-2 rounded-md mb-5 w-sm cursor-pointer",
-        cancelButton:
-          "bg-red-600 text-white font-bold px-4 py-2 rounded-md w-sm cursor-pointer",
-      },
-      buttonsStyling: false,
+  const openDeleteDialog = (id, source = "table") => {
+    const rating = ratings.find((r) => r._id === id);
+    setDeleteDialog({
+      isOpen: true,
+      ratingId: id,
+      reviewer: rating?.userID?.name || "",
+      source,
     });
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await dispatch(deleteRating(id)).unwrap();
-        Swal.fire({
-          title: "Deleted!",
-          text: "Rating deleted successfully.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error) {
-        Swal.fire("Error", "Failed to delete the rating.", "error");
-      }
-    }
+  const closeDeleteDialog = () => setDeleteDialog(initialDeleteDialog);
+
+  const handleDelete = (id) => {
+    openDeleteDialog(id, "table");
   };
 
   const handleView = async (id) => {
@@ -134,40 +123,23 @@ export default function RatingsPage() {
     dispatch(clearSelectedRating());
   };
 
-  const handleDeleteFromModal = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You want to delete this rating",
-      icon: "warning",
-      iconColor: "red",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: {
-        confirmButton:
-          "border border-red-600 text-red-600 font-bold px-4 py-2 rounded-md mb-5 w-sm cursor-pointer",
-        cancelButton:
-          "bg-red-600 text-white font-bold px-4 py-2 rounded-md w-sm cursor-pointer",
-      },
-      buttonsStyling: false,
-    });
+  const handleDeleteFromModal = (id) => {
+    openDeleteDialog(id, "modal");
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await dispatch(deleteRating(id)).unwrap();
+  const handleConfirmDelete = async () => {
+    const { ratingId, source } = deleteDialog;
+    if (!ratingId) return;
+
+    try {
+      await dispatch(deleteRating(ratingId)).unwrap();
+      showSuccessToast("Rating deleted successfully.");
+      if (source === "modal") {
         handleCloseModal();
-        Swal.fire({
-          title: "Deleted!",
-          text: "Rating deleted successfully.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error) {
-        Swal.fire("Error", "Failed to delete the rating.", "error");
       }
+      closeDeleteDialog();
+    } catch (error) {
+      showErrorToast(error?.message || "Failed to delete the rating.");
     }
   };
 
@@ -336,6 +308,21 @@ export default function RatingsPage() {
           deleteLoading={deleteLoading}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Rating"
+        message={
+          deleteDialog.reviewer
+            ? `Are you sure you want to delete the rating from "${deleteDialog.reviewer}"? This action cannot be undone.`
+            : "Are you sure you want to delete this rating? This action cannot be undone."
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

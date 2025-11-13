@@ -17,7 +17,7 @@ import {
   Package,
 } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 
 const PacksAdmin = () => {
   const dispatch = useDispatch();
@@ -177,11 +177,11 @@ const handleView = async (packId) => {
     setDeleteLoading((prev) => ({ ...prev, [pack._id]: true }));
     try {
       await dispatch(deletePack(pack._id)).unwrap();
-      toast.success(`Pack "${pack.title}" deleted`);
+      showSuccessToast("Pack deleted successfully", `"${pack.title}" has been removed.`);
       setDeleteDialog({ isOpen: false, pack: null });
       setShowDetailsModal(false);
     } catch (error) {
-      toast.error(error?.message || "Failed to delete pack");
+      showErrorToast(error?.message || "Failed to delete pack");
     } finally {
       setDeleteLoading((prev) => ({ ...prev, [pack._id]: false }));
     }
@@ -189,91 +189,75 @@ const handleView = async (packId) => {
 
   const columns = [
     {
-      accessorKey: "title",
+      id: "pack",
       header: "Pack",
       cell: ({ row }) => (
         <div className="flex items-center gap-3 min-w-0">
-          <img
-            src={
-              row.original.profileImg ||
-              "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/pack-placeholder_default.jpg"
-            }
-            alt={row.original.title}
-            className="w-10 h-10 rounded-lg object-cover"
-          />
-          <div className="min-w-0">
-            <p className="font-semibold text-gray-900 truncate">
-              {row.original.title}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {row.original.description || "No description"}
-            </p>
+          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 border">
+            <img
+              src={
+                row.original.profileImg ||
+                "https://res.cloudinary.com/dqbu98gev/image/upload/v1760193539/pack-placeholder_default.jpg"
+              }
+              alt={row.original.title || "Pack"}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       ),
     },
     {
-      accessorKey: "startLocation",
-      header: "Locations",
+      accessorKey: "title",
+      header: "Title",
       cell: ({ row }) => (
-        <div className="text-sm text-gray-700 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-[#EB662B]" />
-          <span>
-            {row.original.startLocation || "N/A"} →{" "}
-            {row.original.endLocation || "N/A"}
-          </span>
-        </div>
+        <span className="font-semibold text-gray-900 truncate max-w-[220px]">
+          {row.original.title || "N/A"}
+        </span>
       ),
     },
     {
       accessorKey: "price",
       header: "Price",
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-gray-900 font-semibold">
-          <DollarSign className="w-4 h-4 text-[#22C55E]" />
-          <span>{row.original.price?.toLocaleString()} MAD</span>
-        </div>
-      ),
-    },
-    {
-      id: "dates",
-      header: "Dates",
-      cell: ({ row }) => (
-        <div className="text-sm text-gray-700 flex flex-col gap-1">
-          <span className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#EB662B]" />
-            {row.original.startDate
-              ? format(new Date(row.original.startDate), "dd MMM yyyy")
-              : "N/A"}
-          </span>
-          <span className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            {row.original.endDate
-              ? format(new Date(row.original.endDate), "dd MMM yyyy")
-              : "N/A"}
-          </span>
-        </div>
+        <span className="font-semibold text-[#22c55e]">
+          ${" "}
+          {Number(row.original.price || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+          })}{" "}
+          MAD
+        </span>
       ),
     },
     {
       accessorKey: "maxClients",
       header: "Capacity",
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-sm">
-          <Users className="w-4 h-4 text-[#2563EB]" />
-          <span className="font-semibold">{row.original.maxClients ?? 0}</span>
+        <div className="flex items-center gap-1 text-gray-700 font-semibold">
+          <Users className="w-4 h-4 text-gray-500" />
+          <span>{row.original.maxClients || 0}</span>
         </div>
       ),
     },
     {
       accessorKey: "availableSpots",
       header: "Available",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-sm">
-          <Users className="w-4 h-4 text-[#16a34a]" />
-          <span className="font-semibold">{row.original.availableSpots}</span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const available = row.original.availableSpots || 0;
+        const isLow = available <= 3 && available > 0;
+        const isEmpty = available === 0;
+        const color = isEmpty
+          ? "text-red-600"
+          : isLow
+          ? "text-orange-600"
+          : "text-blue-600";
+
+        return (
+          <div className={`flex items-center gap-1 font-semibold ${color}`}>
+            <Users className={`w-4 h-4 ${color}`} />
+            <span>{available}</span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "availability",
@@ -292,6 +276,36 @@ const handleView = async (packId) => {
             <XCircle className="w-4 h-4" />
           )}
           {row.original.availability ? "Available" : "Unavailable"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "route",
+      header: "Route",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1 text-xs">
+          <MapPin className="w-3 h-3 text-blue-600" />
+          <span className="truncate max-w-[90px]">
+            {row.original.startLocation || "N/A"}
+          </span>
+          <span>&rarr;</span>
+          <MapPin className="w-3 h-3 text-red-600" />
+          <span className="truncate max-w-[90px]">
+            {row.original.endLocation || "N/A"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "startDate",
+      header: "Start Date",
+      cell: ({ row }) => (
+        <div className="text-sm text-gray-700 flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-[#6b7280]" />
+          {row.original.startDate
+            ? format(new Date(row.original.startDate), "dd MMM yyyy")
+            : "N/A"}
         </div>
       ),
     },

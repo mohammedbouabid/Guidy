@@ -28,7 +28,7 @@ export default function GuidePlaces() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-[#EB662B]" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -42,13 +42,13 @@ export default function GuidePlaces() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className=" min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-800">Guide Places</h1>
           <button
             onClick={() => navigate('/guide/places/add')}
-            className="bg-[#EB662B] cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-[#d55a26] transition-colors"
+            className="bg-primary cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-[#d55a26] transition-colors"
           >
             Add New Place
           </button>

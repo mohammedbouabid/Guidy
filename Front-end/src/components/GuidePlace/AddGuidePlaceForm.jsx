@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { createGuidePlace } from '../../store/slices/guidePlaceSlice';
-import { toast } from 'react-hot-toast';
+import { showSuccessToast, showErrorToast } from '@/utils/toastNotifications.jsx';
 
 const inputStyles = (error) => `
   w-full px-4 py-3 rounded-lg bg-gray-50 
@@ -80,7 +80,7 @@ export default function AddGuidePlaceForm() {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + images.length > 10) {
-      toast.error('Maximum 10 images allowed');
+      showErrorToast('Maximum 10 images allowed');
       return;
     }
     setImages(prev => [...prev, ...files]);
@@ -108,7 +108,7 @@ export default function AddGuidePlaceForm() {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error('Please check the form for errors');
+      showErrorToast('Please check the form for errors');
       return;
     }
 
@@ -125,10 +125,13 @@ export default function AddGuidePlaceForm() {
 
     try {
       await dispatch(createGuidePlace(formDataToSend)).unwrap();
-      toast.success('Place created successfully!');
+      showSuccessToast(
+        'Guide Place Created',
+        'Your new destination has been published successfully.'
+      );
       navigate('/guide/places');
     } catch (error) {
-      toast.error(error?.message || 'Failed to create place');
+      showErrorToast(error?.message || 'Failed to create place');
       setErrors(error?.errors || {});
     } finally {
       setIsSubmitting(false);
@@ -136,8 +139,8 @@ export default function AddGuidePlaceForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm p-8">
+    <div className="min-h-screen  p-2 ">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm p-8">
         <h1 className="text-2xl font-semibold text-gray-800 mb-8">Add New Place</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">

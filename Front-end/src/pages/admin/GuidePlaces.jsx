@@ -15,12 +15,21 @@ import {
   clearSelectedPlace,
 } from "@/store/slices/guidePlaceSlice";
 import { Globe, Building2, User, Calendar } from "lucide-react";
-import Swal from "sweetalert2";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 import GuidePlaceDetailsModal from "@/components/adminHelpers/GuidePlaceDetailsModal";
+
+const initialDeleteDialog = {
+  isOpen: false,
+  placeId: null,
+  placeName: "",
+  source: "table",
+};
 
 export default function GuidePlacesPage() {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(initialDeleteDialog);
 
   const {
     places,
@@ -89,40 +98,20 @@ export default function GuidePlacesPage() {
     dispatch(setSortConfig({ field, order }));
   };
 
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You want to delete this place",
-      icon: "warning",
-      iconColor: "red",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: {
-        confirmButton:
-          "border border-red-600 text-red-600 font-bold px-4 py-2 rounded-md mb-5 w-sm cursor-pointer",
-        cancelButton:
-          "bg-red-600 text-white font-bold px-4 py-2 rounded-md w-sm cursor-pointer",
-      },
-      buttonsStyling: false,
+  const openDeleteDialog = (id, source = "table") => {
+    const place = places.find((p) => p._id === id);
+    setDeleteDialog({
+      isOpen: true,
+      placeId: id,
+      placeName: place?.name || "",
+      source,
     });
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await dispatch(deleteGuidePlace(id)).unwrap();
-        Swal.fire({
-          title: "Deleted!",
-          text: "Place deleted successfully.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error) {
-        Swal.fire("Error", "Failed to delete the place.", "error");
-      }
-    }
+  const closeDeleteDialog = () => setDeleteDialog(initialDeleteDialog);
+
+  const handleDelete = (id) => {
+    openDeleteDialog(id, "table");
   };
 
   const handleView = async (id) => {
@@ -135,40 +124,23 @@ export default function GuidePlacesPage() {
     dispatch(clearSelectedPlace());
   };
 
-  const handleDeleteFromModal = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You want to delete this place",
-      icon: "warning",
-      iconColor: "red",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: {
-        confirmButton:
-          "border border-red-600 text-red-600 font-bold px-4 py-2 rounded-md mb-5 w-sm cursor-pointer",
-        cancelButton:
-          "bg-red-600 text-white font-bold px-4 py-2 rounded-md w-sm cursor-pointer",
-      },
-      buttonsStyling: false,
-    });
+  const handleDeleteFromModal = (id) => {
+    openDeleteDialog(id, "modal");
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await dispatch(deleteGuidePlace(id)).unwrap();
+  const handleConfirmDelete = async () => {
+    const { placeId, source } = deleteDialog;
+    if (!placeId) return;
+
+    try {
+      await dispatch(deleteGuidePlace(placeId)).unwrap();
+      showSuccessToast("Place deleted successfully.");
+      if (source === "modal") {
         handleCloseModal();
-        Swal.fire({
-          title: "Deleted!",
-          text: "Place deleted successfully.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error) {
-        Swal.fire("Error", "Failed to delete the place.", "error");
       }
+      closeDeleteDialog();
+    } catch (error) {
+      showErrorToast(error?.message || "Failed to delete the place.");
     }
   };
 
@@ -329,6 +301,21 @@ export default function GuidePlacesPage() {
           deleteLoading={deleteLoading}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Place"
+        message={
+          deleteDialog.placeName
+            ? `Are you sure you want to delete "${deleteDialog.placeName}"? This action cannot be undone.`
+            : "Are you sure you want to delete this place? This action cannot be undone."
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

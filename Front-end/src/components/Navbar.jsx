@@ -24,7 +24,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/components/ui/button"
 import { ChevronDownIcon } from "@radix-ui/react-icons"
-import { Home, Search, Store, ShoppingCart, User, LayoutDashboard } from "lucide-react"
+import { Home, Package, Users, Info, User, LayoutDashboard,History } from "lucide-react"
 
 const Navbar = ({ onLogout }) => {
   const dispatch = useDispatch()
@@ -32,12 +32,25 @@ const Navbar = ({ onLogout }) => {
   const user = useSelector((state) => state.Auth.user)
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
+  const navLinks = [
+    { to: "/", label: "Accueil", shortLabel: "Home", icon: Home },
+    { to: "/about", label: "À propos", shortLabel: "About", icon: Info },
+    { to: "/filter", label: "Nos packs", shortLabel: "Packs", icon: Package },
+    { to: "/guides", label: "Nos guides", shortLabel: "Guides", icon: Users },
+    { to: "/profile/billing", label: "Historic", shortLabel: "Guides", icon: History },
+  ]
+
   useEffect(() => {
     const userFromCookie = getUserFromCookie()
     if (userFromCookie) dispatch(hydrateUserFromCookie(userFromCookie))
   }, [])
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => {
+    if (path === "/") {
+      return location.pathname === "/"
+    }
+    return location.pathname.startsWith(path)
+  }
 
   const handleLogoutClick = () => {
     setShowLogoutDialog(true)
@@ -51,8 +64,8 @@ const Navbar = ({ onLogout }) => {
   return (
     <>
       {/* Desktop / Tablet Top Navbar */}
-      <nav className="hidden md:block w-full stinky top-0 left-0 right-0 z-[10000] bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-2">
+      <nav className="hidden md:block w-full sticky top-0 left-0 right-0 z-[10000] bg-white/90 backdrop-blur border-b border-orange-100/60 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/">
@@ -65,41 +78,53 @@ const Navbar = ({ onLogout }) => {
             </Link>
 
             {/* Right side */}
-            <div className="flex items-center space-x-5">
-              <Link to="/destinations" className="text-sm text-gray-700 hover:text-[#eb662b]">
-                Destinations
-              </Link>
-              <Link to="/activities" className="text-sm text-gray-700 hover:text-[#eb662b]">
-                Activities
-              </Link>
-              <span className="text-sm text-gray-700">USD</span>
+            <div className="flex flex-wrap items-center justify-end gap-4">
+              <div className="flex items-center gap-2 rounded-full border border-orange-100/80 bg-white/80 px-2 py-1 shadow-sm">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`group flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                      isActive(link.to)
+                        ? "bg-gradient-to-r from-[#eb662b] via-orange-500 to-amber-400 text-white shadow-lg"
+                        : "text-gray-600 hover:text-[#eb662b]"
+                    }`}
+                  >
+                    <link.icon className={`h-4 w-4 ${isActive(link.to) ? "text-white" : "text-[#eb662b]/70 group-hover:text-[#eb662b]"}`} />
+                    <span>{link.label}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="hidden xl:block h-6 w-px bg-gray-200" />
 
               {!user ? (
-                <>
-                  <Link to="/register">
-                    <span className="text-sm text-gray-700 hover:text-[#eb662b] cursor-pointer">
-                      Sign up
-                    </span>
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/register"
+                    className="text-sm font-medium text-gray-600 transition hover:text-[#eb662b]"
+                  >
+                    S'inscrire
                   </Link>
                   <Link to="/GuideRegister">
-                    <button className="text-white text-sm px-5 py-2 rounded-3xl font-medium bg-[#eb662b] hover:bg-[#d4551f] transition shadow-lg hover:shadow-orange-400/50 animate-pulse-slow cursor-pointer">
-                      Become a Guide
+                    <button className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#eb662b] shadow-[0_4px_18px_-6px_rgba(235,102,43,0.6)] transition hover:-translate-y-[1px] hover:bg-orange-50">
+                      Devenir guide
                     </button>
                   </Link>
                   <Link to="/login">
-                    <button className="text-white text-sm px-5 py-2 rounded-3xl font-medium bg-[#eb662b] hover:bg-[#d4551f] transition shadow-lg hover:shadow-orange-400/50 animate-pulse-slow cursor-pointer">
-                      Log in
+                    <button className="rounded-full bg-gradient-to-r from-[#eb662b] via-orange-500 to-amber-400 px-5 py-2 text-sm font-semibold text-white shadow-[0_8px_22px_-10px_rgba(235,102,43,0.9)] transition hover:-translate-y-[1px]">
+                      Se connecter
                     </button>
                   </Link>
-                </>
+                </div>
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-9 px-2 py-0 hover:bg-accent hover:text-accent-foreground flex items-center gap-2 cursor-pointer"
+                      className="h-10 rounded-full px-2 py-0 hover:bg-orange-50 hover:text-[#eb662b] flex items-center gap-2 cursor-pointer border border-transparent hover:border-orange-200"
                     >
-                      <Avatar className="h-7 w-7">
+                      <Avatar className="h-8 w-8">
                         <AvatarImage src={user.profileImage} alt={user.name} />
                         <AvatarFallback className="text-xs">
                           {user.name
@@ -168,44 +193,20 @@ const Navbar = ({ onLogout }) => {
 
       {/* Mobile Bottom Navbar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-md z-[10000]">
-        <div className="flex justify-around items-center h-16">
-          <Link
-            to="/"
-            className={`flex flex-col items-center text-xs ${
-              isActive("/") ? "text-[#eb662b]" : "text-gray-500"
-            }`}
-          >
-            <Home className="h-5 w-5" />
-            Home
-          </Link>
-          <Link
-            to="/search"
-            className={`flex flex-col items-center text-xs ${
-              isActive("/search") ? "text-[#eb662b]" : "text-gray-500"
-            }`}
-          >
-            <Search className="h-5 w-5" />
-            Search
-          </Link>
-          <Link
-            to="/store"
-            className={`flex flex-col items-center text-xs ${
-              isActive("/store") ? "text-[#eb662b]" : "text-gray-500"
-            }`}
-          >
-            <Store className="h-5 w-5" />
-            Store
-          </Link>
-          <Link
-            to="/cart"
-            className={`flex flex-col items-center text-xs ${
-              isActive("/cart") ? "text-[#eb662b]" : "text-gray-500"
-            }`}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            Cart
-          </Link>
-          
+        <div className="flex justify-around items-center h-16 px-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex flex-col items-center text-[11px] font-medium transition ${
+                isActive(link.to) ? "text-[#eb662b]" : "text-gray-500"
+              }`}
+            >
+              <link.icon className="h-5 w-5" />
+              {link.shortLabel}
+            </Link>
+          ))}
+
           {/* Profile Dropdown for Mobile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

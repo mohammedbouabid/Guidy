@@ -34,13 +34,85 @@ export const fetchUsers = createAsyncThunk(
   }
 );
 
+// Async thunk to fetch user statistics (guides and clients count)
+export const fetchUserStats = createAsyncThunk(
+  "users/fetchUserStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("user/stats", {
+        withCredentials: true,
+      });
+      
+      return {
+        guidesCount: response.data.guidesCount,
+        clientsCount: response.data.clientsCount,
+        totalCount: response.data.totalCount
+      };
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to fetch user stats" });
+    }
+  }
+);
+
+// Fetch featured guides for landing page (no auth)
+export const fetchFeaturedGuides = createAsyncThunk(
+  "users/fetchFeaturedGuides",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/guides/featured");
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to fetch featured guides" });
+    }
+  }
+);
+
+// Fetch all guides (no auth)
+export const fetchAllGuidesPublic = createAsyncThunk(
+  "users/fetchAllGuidesPublic",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/guides/all");
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to fetch guides" });
+    }
+  }
+);
+
+// Fetch guide profile with packs (no auth)
+export const fetchGuideProfile = createAsyncThunk(
+  "users/fetchGuideProfile",
+  async (guideId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`guides/${guideId}`);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to fetch guide profile" });
+    }
+  }
+);
+
+// Fetch public stats for landing page (no auth required)
+export const fetchPublicStats = createAsyncThunk(
+  "users/fetchPublicStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("stats/public");
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to fetch public stats" });
+    }
+  }
+);
+
 // Async thunk to get user by ID
 export const getUserById = createAsyncThunk(
   "users/getUserById",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await api.get(`http://localhost:3000/api/user/${userId}`, {
-        withCredentials: true,
+      const response = await api.get(`user/${userId}`, {
+        withCredentials: true,                                            
       });
       return response.data;
     } catch (err) {
@@ -69,13 +141,28 @@ const usersSlice = createSlice({
   initialState: {
     users: [],
     selectedUser: null,
+    guides: [],
+    featuredGuides: [],
+    selectedGuide: null,
+    guidePacks: [],
     count: 0,
+    guidesCount: 0,
+    clientsCount: 0,
+    totalUsersCount: 0,
+    packsCount: 0,
+    placesCount: 0,
     page: 1,
     limit: 10,
     loading: false,
+    statsLoading: false,
+    guidesLoading: false,
+    guideProfileLoading: false,
     userLoading: false,
     deleteLoading: {},
     error: null,
+    statsError: null,
+    guidesError: null,
+    guideProfileError: null,
     userError: null,
     deleteError: null,
   },
@@ -135,6 +222,76 @@ const usersSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.deleteLoading[action.meta.arg] = false;
         state.deleteError = action.payload?.message || "Failed to delete user";
+      })
+      // Fetch user stats cases
+      .addCase(fetchUserStats.pending, (state) => {
+        state.statsLoading = true;
+        state.statsError = null;
+      })
+      .addCase(fetchUserStats.fulfilled, (state, action) => {
+        state.statsLoading = false;
+        state.guidesCount = action.payload.guidesCount;
+        state.clientsCount = action.payload.clientsCount;
+        state.totalUsersCount = action.payload.totalCount;
+      })
+      .addCase(fetchUserStats.rejected, (state, action) => {
+        state.statsLoading = false;
+        state.statsError = action.payload?.message || "Failed to fetch user statistics";
+      })
+      // Fetch featured guides
+      .addCase(fetchFeaturedGuides.pending, (state) => {
+        state.guidesLoading = true;
+        state.guidesError = null;
+      })
+      .addCase(fetchFeaturedGuides.fulfilled, (state, action) => {
+        state.guidesLoading = false;
+        state.featuredGuides = action.payload.guides;
+      })
+      .addCase(fetchFeaturedGuides.rejected, (state, action) => {
+        state.guidesLoading = false;
+        state.guidesError = action.payload?.message || "Failed to fetch featured guides";
+      })
+      // Fetch all guides public
+      .addCase(fetchAllGuidesPublic.pending, (state) => {
+        state.guidesLoading = true;
+        state.guidesError = null;
+      })
+      .addCase(fetchAllGuidesPublic.fulfilled, (state, action) => {
+        state.guidesLoading = false;
+        state.guides = action.payload.guides;
+      })
+      .addCase(fetchAllGuidesPublic.rejected, (state, action) => {
+        state.guidesLoading = false;
+        state.guidesError = action.payload?.message || "Failed to fetch guides";
+      })
+      // Fetch guide profile
+      .addCase(fetchGuideProfile.pending, (state) => {
+        state.guideProfileLoading = true;
+        state.guideProfileError = null;
+      })
+      .addCase(fetchGuideProfile.fulfilled, (state, action) => {
+        state.guideProfileLoading = false;
+        state.selectedGuide = action.payload.guide;
+        state.guidePacks = action.payload.packs;
+      })
+      .addCase(fetchGuideProfile.rejected, (state, action) => {
+        state.guideProfileLoading = false;
+        state.guideProfileError = action.payload?.message || "Failed to fetch guide profile";
+      })
+      // Fetch public stats (no auth)
+      .addCase(fetchPublicStats.pending, (state) => {
+        state.statsLoading = true;
+        state.statsError = null;
+      })
+      .addCase(fetchPublicStats.fulfilled, (state, action) => {
+        state.statsLoading = false;
+        state.guidesCount = action.payload.guidesCount;
+        state.packsCount = action.payload.packsCount;
+        state.placesCount = action.payload.placesCount;
+      })
+      .addCase(fetchPublicStats.rejected, (state, action) => {
+        state.statsLoading = false;
+        state.statsError = action.payload?.message || "Failed to fetch public stats";
       });
   },
 });

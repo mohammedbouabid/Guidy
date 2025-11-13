@@ -9,7 +9,7 @@ import { fetchGuideBookings } from "@/store/slices/bookingSlice";
 import { DataTable } from "@/components/adminTable/data-table";
 import PackDetailsModal from "@/components/Packs/PackDetailsModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { toast } from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
 
 const PacksGuid = () => {
   const navigate = useNavigate();
@@ -193,27 +193,29 @@ const PacksGuid = () => {
     dispatch(deletePack(deleteDialog.packId))
       .unwrap()
       .then(() => {
-        toast.success('Pack deleted successfully');
+        showSuccessToast('Pack deleted successfully');
         setDeleteDialog({ isOpen: false, packId: null, packTitle: '' });
       })
       .catch((err) => {
-        toast.error(err?.message || 'Error deleting pack');
+        showErrorToast(err?.message || 'Error deleting pack');
       });
   };
 
   // Columns definition
   const columns = [
     {
-      accessorKey: "profileImg",
-      header: "Image",
+      id: "pack",
+      header: "Pack",
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
-          <img
-            src={row.original.profileImg || "https://via.placeholder.com/80"}
-            alt={row.original.title}
-            className="w-full h-full object-cover"
-          />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 border">
+            <img
+              src={row.original.profileImg || "https://via.placeholder.com/80"}
+              alt={row.original.title || "Pack"}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       ),
     },
@@ -221,35 +223,31 @@ const PacksGuid = () => {
       accessorKey: "title",
       header: "Title",
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <span className="font-medium text-gray-900 truncate max-w-[200px]">
-            {row.original.title || "N/A"}
-          </span>
-        </div>
+        <span className="font-semibold text-gray-900 truncate max-w-[220px]">
+          {row.original.title || "N/A"}
+        </span>
       ),
     },
     {
       accessorKey: "price",
       header: "Price",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <DollarSign className="w-4 h-4 text-green-600" />
-          <span className="font-semibold text-green-600">
-            {row.original.price || 0} MAD
-          </span>
-        </div>
+        <span className="font-semibold text-[#22c55e]">
+          ${" "}
+          {Number(row.original.price || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+          })}{" "}
+          MAD
+        </span>
       ),
     },
     {
       accessorKey: "maxClients",
       header: "Capacity",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-gray-700 font-semibold">
           <Users className="w-4 h-4 text-gray-500" />
-          <span className="font-semibold text-gray-700">
-            {row.original.maxClients || 0}
-          </span>
+          <span>{row.original.maxClients || 0}</span>
         </div>
       ),
     },
@@ -300,10 +298,10 @@ const PacksGuid = () => {
       cell: ({ row }) => (
         <div className="flex items-center gap-1 text-xs">
           <MapPin className="w-3 h-3 text-blue-600" />
-          <span className="truncate max-w-[80px]">{row.original.startLocation || "N/A"}</span>
+          <span className="truncate max-w-20">{row.original.startLocation || "N/A"}</span>
           <span>→</span>
           <MapPin className="w-3 h-3 text-red-600" />
-          <span className="truncate max-w-[80px] ">{row.original.endLocation || "N/A"}</span>
+          <span className="truncate max-w-20 ">{row.original.endLocation || "N/A"}</span>
         </div>
       ),
     },
@@ -314,7 +312,7 @@ const PacksGuid = () => {
         const date = row.original.startDate ? new Date(row.original.startDate) : null;
         return date ? (
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <Calendar className="w-4 h-4 text-gray-500 shrink-0" />
             <span className="text-sm">
               {date.toLocaleDateString("en-GB", {
                 day: "2-digit",
@@ -373,7 +371,7 @@ const PacksGuid = () => {
   ];
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto  ">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Packs</h1>

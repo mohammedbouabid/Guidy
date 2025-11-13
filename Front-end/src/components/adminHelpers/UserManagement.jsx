@@ -4,8 +4,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { DataTable } from "@/components/adminTable/data-table";
 import { fetchUsers, deleteUser, getUserById, clearSelectedUser } from "@/store/slices/usersSlice";
 import UserDetailsModal from "@/components/adminHelpers/UserDetailsModal";
-import Swal from "sweetalert2";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { Calendar, UserCheck } from "lucide-react";
+import { showSuccessToast, showErrorToast } from "@/utils/toastNotifications.jsx";
+
+const initialConfirmState = {
+  isOpen: false,
+  userId: null,
+  userName: "",
+  source: "table",
+};
 
 export default function UserManagement({ role = "guide", title = "Users", columnConfig = [] }) {
   const dispatch = useDispatch();
@@ -19,6 +27,7 @@ export default function UserManagement({ role = "guide", title = "Users", column
   const [dateFilter, setDateFilter] = useState("");
   const [profileCompletionFilter, setProfileCompletionFilter] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(initialConfirmState);
 
   // Calculate total pages
   const totalPages = Math.ceil(count / limit);
@@ -60,7 +69,7 @@ export default function UserManagement({ role = "guide", title = "Users", column
   // Handle delete error
   useEffect(() => {
     if (deleteError) {
-      Swal.fire("Error", deleteError, "error");
+      showErrorToast(deleteError);
     }
   }, [deleteError]);
 
@@ -121,78 +130,41 @@ export default function UserManagement({ role = "guide", title = "Users", column
     dispatch(clearSelectedUser());
   };
 
-  // Handle delete from modal
-  const handleDeleteFromModal = async (userId) => {
-    const userType = role === "guide" ? "guide" : "client";
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: `You want to delete this ${userType}`,
-      icon: "warning",
-      iconColor: "red",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: {
-        confirmButton: "border border-red-600 text-red-600 font-bold px-4 py-2 rounded-md mb-5 w-sm cursor-pointer",
-        cancelButton:
-          "bg-red-600 text-white font-bold px-4 py-2 rounded-md w-sm cursor-pointer",
-      },
-      buttonsStyling: false,
-    });
+  const userTypeLabel = role === "guide" ? "guide" : role === "client" ? "client" : "user";
 
-    if (result.isConfirmed) {
-      try {
-        await dispatch(deleteUser(userId)).unwrap();
-        handleCloseModal();
-        Swal.fire({
-          title: "Deleted!",
-          text: `${userType.charAt(0).toUpperCase() + userType.slice(1)} deleted successfully.`,
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error) {
-        Swal.fire("Error", `Failed to delete the ${userType}.`, "error");
-      }
-    }
+  const openConfirmDialog = (userId, source = "table") => {
+    const user = users.find((u) => u._id === userId);
+    setConfirmDialog({
+      isOpen: true,
+      userId,
+      userName: user?.name || "",
+      source,
+    });
   };
 
-  // SweetAlert2 delete confirmation
-  const handleDelete = async (userId) => {
-    const userType = role === "guide" ? "guide" : "client";
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: `You want to delete this ${userType}`,
-      icon: "warning",
-      iconColor: "red",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: {
-        confirmButton: "border border-red-600 text-red-600 font-bold px-4 py-2 rounded-md mb-5 w-sm cursor-pointer",
-        cancelButton:
-          "bg-red-600 text-white font-bold px-4 py-2 rounded-md w-sm cursor-pointer",
-      },
-      buttonsStyling: false,
-    });
+  const closeConfirmDialog = () => setConfirmDialog(initialConfirmState);
 
-    if (result.isConfirmed) {
-      try {
-        await dispatch(deleteUser(userId)).unwrap();
-        Swal.fire({
-          title: "Deleted!",
-          text: `${userType.charAt(0).toUpperCase() + userType.slice(1)} deleted successfully.`,
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error) {
-        Swal.fire("Error", `Failed to delete the ${userType}.`, "error");
+  const handleDeleteFromModal = (userId) => {
+    openConfirmDialog(userId, "modal");
+  };
+
+  const handleDelete = (userId) => {
+    openConfirmDialog(userId, "table");
+  };
+
+  const handleConfirmDelete = async () => {
+    const { userId, source } = confirmDialog;
+    if (!userId) return;
+
+    try {
+      await dispatch(deleteUser(userId)).unwrap();
+      const label = userTypeLabel.charAt(0).toUpperCase() + userTypeLabel.slice(1);
+      showSuccessToast(`${label} deleted successfully.`);
+      if (source === "modal") {
+        handleCloseModal();
       }
+    } catch (error) {
+      showErrorToast(error?.message || `Failed to delete the ${userTypeLabel}.`);
     }
   };
 
@@ -359,6 +331,21 @@ export default function UserManagement({ role = "guide", title = "Users", column
           deleteLoading={deleteLoading}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={closeConfirmDialog}
+        onConfirm={handleConfirmDelete}
+        title={`Delete ${userTypeLabel === "guide" ? "Guide" : userTypeLabel === "client" ? "Client" : "User"}`}
+        message={
+          confirmDialog.userName
+            ? `Are you sure you want to delete "${confirmDialog.userName}"? This action cannot be undone.`
+            : `Are you sure you want to delete this ${userTypeLabel}? This action cannot be undone.`
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }
