@@ -489,27 +489,37 @@ const updatePack = async (req, res) => {
 };
 
 
-// Delete a pack. Makes sure only guides have access to this controller
 const deletePack = async (req, res) => {
   try {
-    if (req.user.role.toLowerCase() !== "guide") {
-      return res
-        .status(403)
-        .json({
-          message:
-            "You don't seem to have the right permissions to perform this action",
-        });
+    const role = req.user?.role?.toLowerCase();
+    if (!role) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-    const pack = await Pack.findOneAndDelete({
-      _id: req.params.id,
-      guideId: req.user.id,
-    });
+
+    let pack = null;
+
+    if (role === "admin") {
+      pack = await Pack.findByIdAndDelete(req.params.id);
+    } else if (role === "guide") {
+      pack = await Pack.findOneAndDelete({
+        _id: req.params.id,
+        guideId: req.user.id,
+      });
+    } else {
+      return res.status(403).json({
+        message: "You don't seem to have the right permissions to perform this action",
+      });
+    }
 
     if (!pack) {
       return res.status(404).json({ message: "Pack not found" });
     }
 
-    res.status(202).json(pack);
+    res.status(200).json({
+      success: true,
+      message: "Pack deleted successfully",
+      data: pack,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error deleting pack", error: error.message });
   }

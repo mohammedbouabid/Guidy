@@ -8,7 +8,7 @@ import {
   Edit,
   MapPin
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { showErrorToast } from '@/utils/toastNotifications.jsx';
 
 const PackDetails = () => {
   const { id } = useParams();
@@ -20,7 +20,7 @@ const PackDetails = () => {
     dispatch(fetchPackById(id))
       .unwrap()
       .catch((err) => {
-        toast.error(err?.message || 'Erreur lors du chargement du pack');
+        showErrorToast(err?.message || 'Erreur lors du chargement du pack');
         navigate('/guide/PacksGuide');
       });
   }, [dispatch, id, navigate]);

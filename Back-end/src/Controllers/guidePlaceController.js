@@ -191,11 +191,6 @@ export const deleteGuidePlace = async (req, res) => {
     
     await GuidePlace.findByIdAndDelete(req.params.id);
 
-    // Supprimer les fichiers physiques
-    deleted.images.forEach((img) => {
-      const filePath = path.resolve("uploads", img);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      })
     res.json({
       success: true, 
       message: "Place deleted successfully",

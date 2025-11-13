@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { updateGuidePlace } from '../../store/slices/guidePlaceSlice';
-import { toast } from 'sonner';
+import { showSuccessToast, showErrorToast } from '@/utils/toastNotifications.jsx';
 
 const inputStyles = (error) => `
   w-full px-4 py-3 rounded-lg bg-gray-50 
@@ -93,7 +93,7 @@ export default function UpdateGuidePlaceForm() {
   const handleNewImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + newImages.length + existingImages.length > 10) {
-      toast.error('Maximum 10 images allowed');
+      showErrorToast('Maximum 10 images allowed');
       return;
     }
     setNewImages(prev => [...prev, ...files]);
@@ -143,10 +143,10 @@ export default function UpdateGuidePlaceForm() {
 
   try {
     await dispatch(updateGuidePlace({ id, formData: formDataToSend })).unwrap();
-    toast.success('Place updated successfully!');
+    showSuccessToast('Place updated successfully!');
     navigate('/guide/places');
   } catch (error) {
-    toast.error(error?.message || 'Failed to update place');
+    showErrorToast(error?.message || 'Failed to update place');
     setErrors(error?.errors || {});
   } finally {
     setIsSubmitting(false);

@@ -276,6 +276,7 @@ const guidePlaceSlice = createSlice({
       .addCase(deleteGuidePlace.fulfilled, (state, action) => {
         state.deleteLoading[action.payload] = false;
         state.places = state.places.filter(place => place._id !== action.payload);
+        state.placesForGuide = state.placesForGuide.filter(place => place._id !== action.payload);
         state.count = Math.max(0, state.count - 1);
         state.success = true;
       })
