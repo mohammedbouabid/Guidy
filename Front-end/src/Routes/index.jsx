@@ -6,15 +6,18 @@ import AdminLayout from "../Layouts/AdminLayout";
 import ProtectedRoutes from "./ProtectedRoutes";
 import NotFoundPage from "../pages/NotFoundPage";
 import LandingPage from "../pages/Home/LandingPage";
+import About from "@/pages/About";
 import FilterPage from "@/pages/Home/FilterPage";
 import Login from "@/pages/Home/Login";
 import SignUpPage from "@/pages/Home/RegisterPage";
 import { GuideRegister } from "@/components/AuthPages/GuideRegister";
 
 //import TestRoute from "../pages/testRoute";
-import AllPacks from "../pages/Home/AllPacks";
-import PacksGuid from "../pages/Guide/PacksGuid";
-import AllGuides from "../pages/admin/AllGuides";
+import AllPacks from "@/pages/Home/AllPacks";
+import PacksGuid from "@/pages/Guide/PacksGuid";
+import AllGuides from "@/pages/admin/AllGuides";
+import AllGuidesPublic from "@/pages/Guides/AllGuides";
+import GuideProfile from "@/pages/Guides/GuideProfile";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
 import AllClients from "@/pages/admin/AllClients";
 import GuidePlacesPage from "@/pages/admin/GuidePlaces";
@@ -48,10 +51,13 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/register", element: <SignUpPage /> },
       {path:"/guideregister", element:<GuideRegister/>},
+      { path: "/about", element: <About /> },
       {path:"/profile", element:<ProfilePage/>},
       {path:"/profile/billing", element:<ProfileBillingPage/>},
       { path: "/packs/:id", element: <PackDetailsPage /> },
       {path:"/filter", element:<FilterPage/>},
+      {path:"/guides", element:<AllGuidesPublic/>},
+      {path:"/guide/:id", element:<GuideProfile/>},
        ],
   },
   {

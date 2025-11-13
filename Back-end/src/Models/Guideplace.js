@@ -22,6 +22,7 @@ const guidePlaceSchema = new mongoose.Schema(
   
 );
 
-const GuidePlace = mongoose.model("GuidePlace", guidePlaceSchema);
+const GuidePlace =
+  mongoose.models.GuidePlace || mongoose.model("GuidePlace", guidePlaceSchema);
 
 export default GuidePlace;

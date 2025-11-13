@@ -4,12 +4,18 @@ import Navbar from "@/components/Navbar"
 import { LogoutUser } from "@/store/slices/AuthSlice"
 import { useNavigate } from "react-router-dom"
 import Footer from "@/components/Footer"
+import ScrollToTop from "@/components/ScrollToTop"
+import ScrollToTopButton from "@/components/ScrollToTopButton"
+import { useScrollToTop } from "@/hooks/useScrollToTop"
 
 const GuestLayout = () => {
   const dispatch = useDispatch() 
   const { user } = useSelector((state) => state.Auth)
 
   const navigate = useNavigate()
+  
+  // Utiliser le hook pour gérer le scroll
+  useScrollToTop()
 
   const handleLogout = async () => {
   try {
@@ -22,11 +28,13 @@ const GuestLayout = () => {
 
   return (
     <div className="min-h-screen">
+      <ScrollToTop />
       <div className="bg-white">
         <Navbar user={user} onLogout={handleLogout} />
       </div>
       <Outlet />
       <div><Footer/></div>
+      <ScrollToTopButton />
     </div>
   )
 }

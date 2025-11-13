@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import User from "../Models/User.js";
+import Pack from "../Models/Pack.js";
+import GuidePlace from "../Models/Guideplace.js";
 
 // Add New User
 const addUser = async (req, res, next) => {
@@ -518,6 +520,193 @@ const getUserStats = async (req, res, next) => {
   }
 };
 
+// Get public statistics for landing page (no auth required)
+const getPublicStats = async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({
+        success: false,
+        message: "Database connection error",
+        dbState: mongoose.connection.readyState,
+      });
+    }
+
+    const [guidesResult, packsResult, placesResult] = await Promise.allSettled([
+      User.countDocuments({ role: "guide", isDeleted: false }),
+      Pack.countDocuments(),
+      GuidePlace.countDocuments(),
+    ]);
+
+    const responseBody = {
+      success: true,
+      guidesCount: guidesResult.status === "fulfilled" ? guidesResult.value : 0,
+      packsCount: packsResult.status === "fulfilled" ? packsResult.value : 0,
+      placesCount: placesResult.status === "fulfilled" ? placesResult.value : 0,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (guidesResult.status === "rejected") {
+      console.error("Error counting guides:", guidesResult.reason);
+    }
+    if (packsResult.status === "rejected") {
+      console.error("Error counting packs:", packsResult.reason);
+    }
+    if (placesResult.status === "rejected") {
+      console.error("Error counting places:", placesResult.reason);
+    }
+
+    res.status(200).json(responseBody);
+  } catch (err) {
+    console.error("Error in getPublicStats:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
+// Get featured guides for landing page (public)
+const getFeaturedGuides = async (req, res, next) => {
+  try {
+    const Pack = (await import("../Models/Pack.js")).default;
+    
+    // Use aggregation to get guides with pack count
+    const guidesWithStats = await User.aggregate([
+      {
+        $match: {
+          role: "guide",
+          isDeleted: false
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $limit: 6
+      },
+      {
+        $lookup: {
+          from: "packs", // collection name in MongoDB (lowercase and plural)
+          localField: "_id",
+          foreignField: "guideId",
+          as: "packs"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          profileImage: 1,
+          packsCount: { $size: "$packs" }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      guides: guidesWithStats
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get all guides with stats (public)
+const getAllGuidesPublic = async (req, res, next) => {
+  try {
+    const Pack = (await import("../Models/Pack.js")).default;
+    
+    // Use aggregation to get guides with pack count
+    const guidesWithStats = await User.aggregate([
+      {
+        $match: {
+          role: "guide",
+          isDeleted: false
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $lookup: {
+          from: "packs", // collection name in MongoDB (lowercase and plural)
+          localField: "_id",
+          foreignField: "guideId",
+          as: "packs"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          profileImage: 1,
+          createdAt: 1,
+          packsCount: { $size: "$packs" }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      guides: guidesWithStats,
+      count: guidesWithStats.length
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get guide profile with packs (public)
+const getGuideProfile = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const Pack = (await import("../Models/Pack.js")).default;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error = new Error("Invalid guide ID");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const guide = await User.findOne({
+      _id: id,
+      role: "guide",
+      isDeleted: false
+    }).select("name email profileImage createdAt phone");
+
+    if (!guide) {
+      const error = new Error("Guide not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Get all packs for this guide
+    const packs = await Pack.find({ guideId: id })
+      .populate('guidesPlacesId', 'name city country location')
+      .select('title description price startDate endDate maxPeople profileImg')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      guide: {
+        _id: guide._id,
+        name: guide.name,
+        email: guide.email,
+        profileImage: guide.profileImage,
+        createdAt: guide.createdAt,
+        phone: guide.phone,
+        packsCount: packs.length
+      },
+      packs
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   addUser,
   updateUser,
@@ -528,4 +717,8 @@ export {
   getUser,
   changePassword,
   getUserStats,
+  getPublicStats,
+  getFeaturedGuides,
+  getAllGuidesPublic,
+  getGuideProfile,
 };
